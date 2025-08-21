@@ -1,0 +1,483 @@
+/* Onboarding Container */
+.onboarding-container {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background: #FFFFFF;
+  display: flex;
+}
+
+/* Progress Sidebar */
+.progress-sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  width: 262px;
+  position: fixed;
+  left: 32px;
+  top: 148px;
+  height: 496px;
+}
+
+/* Progress Step */
+.progress-step {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 16px;
+  width: 262px;
+  min-height: 84px;
+  transition: opacity 0.3s ease;
+}
+
+.progress-step.inactive {
+  opacity: 0.6;
+}
+
+/* Connector Wrap */
+.connector-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0px 0px 8px;
+  gap: 8px;
+  isolation: isolate;
+  width: 32px;
+  min-height: 84px;
+  position: relative;
+}
+
+/* Step Icon */
+.step-icon {
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  background: #FFFFFF;
+  border: 1px solid #E9EAEB;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.step-icon.active {
+  background: #2D3648;
+  border-color: #2D3648;
+}
+
+.step-icon.completed {
+  background: #079455;
+  border-color: #079455;
+}
+
+.step-icon span {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  color: #414651;
+}
+
+.step-icon.active span {
+  color: #FFFFFF;
+}
+
+.step-icon.completed span {
+  display: none;
+}
+
+/* Checkmark for completed steps */
+.step-icon.completed::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 6px;
+  border-left: 2.5px solid #FFFFFF;
+  border-bottom: 2.5px solid #FFFFFF;
+  transform: rotate(-45deg);
+  top: 50%;
+  left: 50%;
+  margin-left: -6px;
+  margin-top: -4px;
+}
+
+/* Connector Line */
+.connector-line {
+  width: 2px;
+  flex: 1;
+  border-left: 2px dashed #D5D7DA;
+  margin-left: 15px;
+  min-height: 36px;
+}
+
+.connector-line.last {
+  display: none;
+}
+
+/* Step Content */
+.step-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 4px 0px 32px;
+  flex: 1;
+}
+
+.step-title {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  color: #414651;
+  margin-bottom: 4px;
+}
+
+.step-description {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #535862;
+}
+
+/* Main Content Area */
+.onboarding-main {
+  margin-left: 326px;
+  flex: 1;
+  padding: 88px 40px;
+  position: relative;
+}
+
+/* Vertical Divider */
+.vertical-divider {
+  position: fixed;
+  width: 1px;
+  height: 100vh;
+  left: 326px;
+  top: 0;
+  background: #D5D7DA;
+}
+
+/* Logo */
+.onboarding-logo {
+  position: absolute;
+  left: 20px;
+  top: 60px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 40px;
+  gap: 10px;
+  width: 119px;
+  height: 48px;
+  background: #2D3648;
+  border-radius: 4px;
+}
+
+.onboarding-logo span {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  color: #FFFFFF;
+}
+
+/* Navigation */
+.onboarding-nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.back-button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.back-button svg {
+  width: 20px;
+  height: 20px;
+  color: #A4A7AE;
+}
+
+.back-button span {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  color: #535862;
+}
+
+.back-button:hover span {
+  color: #414651;
+}
+
+.back-button:hover svg {
+  color: #717680;
+}
+
+/* Content Section */
+.onboarding-content {
+  max-width: 797px;
+}
+
+.content-header {
+  margin-bottom: 32px;
+}
+
+.content-title {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 39px;
+  color: #000000;
+  margin-bottom: 16px;
+}
+
+.content-subtitle {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 19px;
+  color: #000000;
+}
+
+/* Form Elements */
+.onboarding-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.form-label {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.form-label span {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: #414651;
+}
+
+.form-label .required {
+  color: #7F56D9;
+}
+
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.form-input {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10px 14px;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  background: #FFFFFF;
+  border: 1px solid #D5D7DA;
+  box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05);
+  border-radius: 8px;
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #2D3648;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #7F56D9;
+}
+
+.form-input::placeholder {
+  color: #717680;
+}
+
+.form-input.error {
+  border-color: #F04438;
+}
+
+.error-message {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: #F04438;
+  margin-top: 4px;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.primary-button,
+.secondary-button {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 4px;
+  height: 36px;
+  border-radius: 8px;
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.primary-button {
+  background: #404040;
+  box-shadow: 0px 1px 2px rgba(10, 13, 18, 0.05), inset 0px 0px 0px 1px rgba(10, 13, 18, 0.18), inset 0px -2px 0px rgba(10, 13, 18, 0.05);
+  color: #FFFFFF;
+}
+
+.primary-button:hover:not(:disabled) {
+  background: #2D3648;
+}
+
+.primary-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  background: #FFFFFF;
+  border: 1px solid #D5D7DA;
+  color: #414651;
+}
+
+.secondary-button:hover {
+  background: #F8F9FA;
+}
+
+/* Template Grid */
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.template-card {
+  position: relative;
+  border: 2px solid #E9EAEB;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #FFFFFF;
+}
+
+.template-card:hover {
+  border-color: #7F56D9;
+  transform: translateY(-2px);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.template-card.selected {
+  border-color: #7F56D9;
+  background: #F9F5FF;
+}
+
+.template-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background: #F2F4F7;
+}
+
+.template-info {
+  padding: 16px;
+}
+
+.template-name {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  color: #101828;
+  margin-bottom: 4px;
+}
+
+.template-description {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: #535862;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .progress-sidebar {
+    display: none;
+  }
+  
+  .vertical-divider {
+    display: none;
+  }
+  
+  .onboarding-main {
+    margin-left: 0;
+    padding: 40px 20px;
+  }
+  
+  .onboarding-logo {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+  }
+}
