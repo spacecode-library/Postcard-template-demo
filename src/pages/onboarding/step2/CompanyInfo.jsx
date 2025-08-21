@@ -95,7 +95,7 @@ const CompanyInfo = ({ currentStep, onboardingData, updateOnboardingData, onNext
   return (
     <div className="onboarding-container">
       <div className="onboarding-logo">
-        <span>Logo</span>
+        <span>Postcard</span>
       </div>
 
       <ProgressSidebar currentStep={currentStep} />
