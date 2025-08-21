@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
+import templateService from '../../../services/template.service'
+import LoadingSpinner from '../../../components/LoadingSpinner'
 import ProgressSidebar from '../components/ProgressSidebar'
 import '../onboarding.css'
 
-// Mock template data - in production this would come from an API
+// Mock template data - fallback if API fails
 const mockTemplates = [
   {
     id: '1',
@@ -38,7 +41,22 @@ const mockTemplates = [
 
 const TemplateSelection = ({ currentStep, onboardingData, updateOnboardingData, onNext, onBack }) => {
   const [selectedTemplate, setSelectedTemplate] = useState(onboardingData.template?.id || null)
-  const [isLoading, setIsLoading] = useState(false)
+  
+  // Fetch templates from API
+  const { data: templatesData, isLoading, error } = useQuery({
+    queryKey: ['templates'],
+    queryFn: async () => {
+      try {
+        const response = await templateService.getTemplates({ limit: 20 })
+        return response.data.templates
+      } catch (error) {
+        console.error('Failed to load templates:', error)
+        return mockTemplates // Fallback to mock templates
+      }
+    },
+  })
+  
+  const templates = templatesData || mockTemplates
 
   const handleSelectTemplate = (template) => {
     setSelectedTemplate(template.id)
@@ -56,7 +74,7 @@ const TemplateSelection = ({ currentStep, onboardingData, updateOnboardingData, 
   return (
     <div className="onboarding-container">
       <div className="onboarding-logo">
-        <span>Logo</span>
+        <span>Postcard</span>
       </div>
 
       <ProgressSidebar currentStep={currentStep} />
@@ -79,8 +97,14 @@ const TemplateSelection = ({ currentStep, onboardingData, updateOnboardingData, 
             </p>
           </div>
 
-          <div className="template-grid">
-            {mockTemplates.map((template) => (
+          {isLoading ? (
+            <div style={{ textAlign: 'center', padding: '60px 0' }}>
+              <LoadingSpinner size="large" />
+              <p style={{ marginTop: '16px', color: '#667085' }}>Loading templates...</p>
+            </div>
+          ) : (
+            <div className="template-grid">
+              {templates.map((template) => (
               <div
                 key={template.id}
                 className={`template-card ${selectedTemplate === template.id ? 'selected' : ''}`}
@@ -96,8 +120,9 @@ const TemplateSelection = ({ currentStep, onboardingData, updateOnboardingData, 
                   <p className="template-description">{template.description}</p>
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <div className="action-buttons">
             <button

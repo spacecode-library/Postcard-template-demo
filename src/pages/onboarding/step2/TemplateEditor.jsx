@@ -18,7 +18,7 @@ const TemplateEditor = ({ currentStep, onboardingData, updateOnboardingData, onN
   return (
     <div className="onboarding-container">
       <div className="onboarding-logo">
-        <span>Logo</span>
+        <span>Postcard</span>
       </div>
 
       <ProgressSidebar currentStep={currentStep} />

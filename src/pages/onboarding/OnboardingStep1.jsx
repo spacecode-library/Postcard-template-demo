@@ -74,7 +74,7 @@ const OnboardingStep1 = () => {
   return (
     <div className="onboarding-container">
       <div className="onboarding-logo">
-        <span>Logo</span>
+        <span>Postcard</span>
       </div>
 
       <ProgressSidebar currentStep={1} />

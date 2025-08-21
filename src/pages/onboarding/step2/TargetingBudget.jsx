@@ -24,7 +24,7 @@ const TargetingBudget = ({ currentStep, onboardingData, updateOnboardingData, on
   return (
     <div className="onboarding-container">
       <div className="onboarding-logo">
-        <span>Logo</span>
+        <span>Postcard</span>
       </div>
 
       <ProgressSidebar currentStep={currentStep} />

@@ -29,7 +29,7 @@ const Review = ({ currentStep, onboardingData, updateOnboardingData, onNext, onB
   return (
     <div className="onboarding-container">
       <div className="onboarding-logo">
-        <span>Logo</span>
+        <span>Postcard</span>
       </div>
 
       <ProgressSidebar currentStep={currentStep} />
