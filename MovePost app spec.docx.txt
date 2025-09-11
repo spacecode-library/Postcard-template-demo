@@ -1,0 +1,687 @@
+﻿New Mover Postcard Marketing Platform – Functional Specification
+Overview: This document defines the functional requirements and design specifications for a Progressive Web App (PWA) that enables small business owners to create and send promotional postcards to new residents in their area. The platform’s key value is to automate “new mover” marketing – a strategy where businesses reach out to people who recently moved in, offering welcome deals to earn their patronage . By leveraging AI for postcard design and data integration for new mover addresses, the system aims to make direct mail campaigns as simple as sending an email, but with the high engagement of physical mail. This specification covers all major screens, user flows, and acceptance criteria, as well as recommendations for technology stack, third-party integrations, and UI/UX design guidelines.
+Illustration: New movers arriving at their new home. Small businesses can capitalize on this life transition by sending timely welcome postcards with special offers, as new residents are highly receptive to finding local services . Targeting households right after move-in allows businesses to make a strong first impression, fostering loyalty at a pivotal moment in the customer’s journey .
+Platform Goals & Approach
+* Self-Service & Speed: Provide a self-service onboarding that lets a small business owner go from sign-up to launching a postcard campaign in under 30 seconds. The process should be extremely streamlined, requiring minimal manual input. This addresses the need for speed and simplicity for busy entrepreneurs.
+
+* AI-Generated Postcards: Leverage AI to auto-generate postcard designs and content. Users can simply enter their company’s website, and the platform will pull brand information (logo, colors, tagline, etc.) automatically . The system will generate a selection of postcard templates (e.g. ~30 options) pre-filled with the business’s branding and a suggested promotional offer.
+
+* Effective Offers & Coupons: Ensure postcard templates include a spot for a coupon or special offer (e.g. “50% off a pizza” for a pizzeria). The platform’s AI should analyze the business type (industry) and possibly its customer reviews to suggest compelling offers (the “value proposition”) and a tagline. Including an attractive coupon is critical, as 80% of new movers redeem coupons from local merchants when they move .
+
+* Targeted New-Mover Campaigns: Integrate with a “new movers” data source (via API) to automatically target people who have just moved into specified neighborhoods or ZIP codes. New residents are a prime market: they tend to seek new local providers and are 4–8× more likely to respond to relevant offers compared to established residents . The platform will allow business users to select geographic areas (by ZIP code and/or radius distance) and then automatically send postcards to new movers in those areas on an ongoing basis.
+
+* Cost Transparency & Control: Provide clear estimates of how many new movers will be reached per month in the selected area, what the cost per postcard is (with volume-based discounts), and the expected monthly budget. We will also display an estimated conversion rate or new customer yield for the campaign, based on historical data for that industry. (For example, direct mail response rates typically range around 2.7%–4.4% , though new mover campaigns can exceed this; some industries like auto repair have seen ~12% response with targeted offers . The UI might present a conservative range, e.g. “Estimate ~2–5 new customers per 100 postcards”.)
+
+* Flexible Postcard Options: Support multiple postcard formats/qualities. Users can choose from 3 tiers of mailer: e.g. Standard Card (small 4″x6″ postcard, basic paper), Premium Card (large 6″x9″ or 6″x11″ postcard, glossy finish), or Deluxe Mailer (e.g. an even larger tri-fold or envelope mailer). Each tier will have different cost per piece (e.g. starting ~$3 for standard up to ~$10 for the deluxe in high-end areas, as configured in our pricing model).
+
+* Campaign Management: Allow users to manage one or multiple campaigns in a dashboard – each campaign corresponding to a postcard design + target area. Users should be able to edit, pause/resume, or cancel campaigns easily. Changes to a campaign’s design or targeting should require an explicit save action and confirmation to avoid accidental modifications. Only campaigns that are “published” (active) will actually send postcards; others can be saved as drafts until ready.
+
+* Analytics & Records: Provide transparency by showing the user a mailing history – a list of addresses that have been mailed, with dates, campaign info, and costs. Users should be able to mark which recipients converted to customers (for their own tracking) and add notes about those customers (e.g. “Became a regular client in July”). This effectively serves as a lightweight CRM for tracking postcard campaign outcomes.
+
+* User Account & Billing: Include typical SaaS account management features: user authentication (with simple options like Google OAuth to speed sign-up), account settings (profile info, password management if applicable), and a Billing section where users can see their current balance or monthly spend, past invoices, and update payment methods. Billing will be handled via integration with Stripe; customers will be billed monthly in arrears for the postcards sent (with an invoice or auto-charge at end of month). We’ll support a Stripe customer portal for self-service updating of credit card info, etc.
+
+* Referrals & Growth: Plan for a referral program (likely a Phase 2 feature) where users can refer other business owners and earn credits or commissions (e.g. a percentage of each postcard those referrals send). The system should be built with this in mind (e.g. have a referral code or link mechanism ready), and the UI in account settings can show a referral code and basic info (even if full tracking isn’t implemented until later).
+
+* Support: Provide an in-app Support contact form so users can easily reach out for help. The form will gather the user’s name, email, website (pre-filled if possible), and their issue/question, and submit it to our support email or ticketing system. This ensures users have a quick way to get assistance without leaving the app.
+
+* Additional Ideas (New Features Added): In designing this platform, we identified a few extra features that would enhance the user experience and effectiveness:
+
+   * (PHASE 2 feature) “Blast” One-off Mailings: In addition to ongoing campaigns, the platform will offer a one-time “New Mover Blast” feature. This lets the user send a single batch of postcards to all people who moved into their area in a recent period (e.g. in the last 1, 3, or 6 months). This is useful for a new user who wants to immediately reach recent movers (who may have been missed if their campaign wasn’t running yet). The system will ensure that any address already contacted via an ongoing campaign is excluded from the blast by default (to avoid duplicate mailings), and we’ll inform the user of how many addresses are being skipped for this reason.
+
+   * Multi-Location Support: If a business operates multiple outlets, allow them to create separate campaigns for different store locations, each with its own targeting radius and postcard design. This helps franchises or multi-location businesses manage all their marketing from one account. (This is essentially an extension of our multi-campaign support with an emphasis on possibly storing multiple business addresses.)
+
+   * Offer Code Tracking: Encourage use of promo codes on postcards (e.g. a unique discount code) so that conversion can be tracked. In future, we might integrate with point-of-sale or e-commerce systems to automatically detect when a code is redeemed, marking that address as converted. For now, we simply allow the user to mark conversions manually, but laying groundwork for more automated ROI tracking is a forward-looking consideration (rationale: measuring actual ROI will prove the platform’s value).
+
+   * Address Suppression Lists: Provide an exclusion list (beyond just “already mailed” logic) where the user can upload or input addresses that should never be mailed. This could include competitors, problematic addresses, or any contacts who requested not to be mailed. This ensures compliance with any individual opt-out requests and prevents wasted mail.
+
+   * Premium ZIP Code Explanation: Because we plan variable pricing by ZIP code (charging more for certain high-value or remote areas as “premium” zones), include a “Why is this ZIP premium?” help tooltip. This will explain factors like high average home value or scarce data making the lead more costly. Providing transparency builds trust and helps the user understand pricing nuances.
+
+Technology Stack Recommendation: To meet these goals with minimal technical debt and maximum development speed, we propose a modern JavaScript-based stack with heavy use of AI-assisted development (“vibe coding”). The platform will be built as a single-page application (SPA) with PWA capabilities for offline access and easy desktop installation. Key components of the stack:
+      * Front-End: React.js (using either Next.js or a similar framework for ease of development and SSR as needed). React is widely adopted and will make it easy for any future developers to understand and extend the code. Next.js is a good choice for its PWA support, routing, and the ability to easily deploy serverless API routes if needed. The UI will be built with a component library or design system for consistency – possibly something like Material-UI or Chakra UI to speed up development of forms, modals, toggles, etc.
+
+      * Back-End: We favor a serverless and scalable approach. Supabase (an open-source Firebase alternative) is an excellent choice, as it provides an integrated Postgres database, authentication, file storage, and RESTful or GraphQL APIs out-of-the-box. Supabase allows quick setup of tables (e.g., for user profiles, campaign configs, mailing history) and has built-in support for row-level security and OAuth login (including Google) . Using Supabase means much of the basic backend (auth, db) is pre-built, reducing custom code and enabling rapid prototyping. It also pairs well with AI development workflows – “unlike previous no-code platforms, tools like Cursor (AI dev environment) and Supabase genuinely empower non-engineers to create database-driven apps swiftly” . For the parts of the backend that involve calling external APIs (AI design generation, new mover data, mailing service, Stripe), we can implement those as serverless functions (either via Next.js API routes, Supabase Edge Functions, or a lightweight Node/Express server on a platform like Vercel). This keeps our architecture simple and avoids maintaining a heavy server.
+
+      * AI and “Vibe Coding” Tools: To accelerate development, we plan to use AI pair-programming and code generation services. For example, Replit’s Ghostwriter/Agent can be used to scaffold the app by describing features in natural language and letting it generate code . The idea is to “describe the app to an AI agent, refine with its assistance, and launch with one-click deployment”, which significantly reduces development time for a solo builder . We will take advantage of AI coding assistants for boilerplate and use prompt-driven development (a.k.a. vibe coding) to iterate quickly. This approach is now viable because advanced AI tools (GPT-4, etc.) can produce working UI components, database schemas, and integration code with minimal human input, as long as we provide precise instructions and test iteratively. By structuring development as AI builds first, then we refine, we harness speed while ensuring a human review for quality and security.
+
+      * External Integrations: The core unique functionality relies on third-party APIs:
+
+         * Brand Data API: To fetch branding info from the user’s website URL, we can use something like Brandfetch. Brandfetch’s API takes a domain and returns the company’s logos, color palette, fonts, and other brand assets . This will greatly help automatically theming the postcard templates to match the business (e.g., applying their logo and brand colors without manual upload). It may also provide a tagline or description if available, which the AI can incorporate. Alternatively, we could do a quick scrape of the website home page for meta tags or use a headless browser to capture the primary color, but an API like Brandfetch is more robust and instantaneous.
+
+         * AI Design Generation: For generating postcard images dynamically with custom text, we will use an API such as DynaPictures (as suggested) or BannerBear. These services allow us to create template layouts (with placeholders for text, images, colors) and then populate them via API calls to produce a final image. DynaPictures, for example, is an API-first image generation platform where we can set up a postcard template and then fill in variables like {BusinessName}, {Offer}, {LogoURL}, {BrandColor}, etc., to get back a ready-to-print postcard image . We can generate both front and back of the postcard – front side might be an image with the marketing message, back side contains the mailing address and return address (which might just be a standard layout with the business address and the customer address from our mailing list). Templates will include a clear area for postage and addressing, following USPS guidelines (the design tool or our integration must ensure not to place text in the mailing address area). The system should allow the user to edit the text content before finalizing, so our integration will likely generate a draft image that can refresh as the user updates text fields (e.g., regenerate on demand to preview the changes).
+
+         * Direct Mail API: To actually send postcards, we’ll integrate with a printing and mailing service. A likely choice is LettrLabs or Lob – these provide APIs where we submit the postcard design (PDF or image for front/back) and a mailing address, and they handle printing, stamping, and mailing via USPS. LettrLabs, specifically, offers features tailored to automation: for instance, it has “Mover Automation” and “Radius Mail” capabilities , implying they can source new mover addresses and send postcards on triggers. If we use LettrLabs’s audience identification tools, we might offload some logic: possibly we provide the ZIP codes or radius, and LettrLabs can automatically handle sending to new movers in those areas (with their data feeds) . Alternatively, we use a separate New Mover Data API (like from Focus USA, Melissa, or Porch’s dataset) to retrieve new mover addresses ourselves and then pass them to the mailing API. The architecture choice may depend on cost and reliability. For MVP, using LettrLabs end-to-end could simplify things: we schedule a campaign with them via API, and they pull new addresses and mail out postcards as new people move in (they have features for scheduled or trigger-based sends). This would minimize how much we manage data. However, to maintain flexibility and possibly switch providers, we might choose to get the data ourselves:
+
+            * If using an independent New Movers API (e.g., Focus USA’s API), our backend would daily (or in real-time via webhook if available) fetch the list of new movers in each subscribed ZIP code. Then for each new address, call the mailing API to send the postcard. This requires a background scheduler or event triggers. Supabase could trigger a function daily, or we use a small cron job service. We must also record each send in our database (for history and billing).
+
+            * If LettrLabs or similar supports a direct “campaign” concept (where you upload a design and specify target area and it handles the rest), we can use that to simplify operations and just retrieve reports of sent pieces for our records. We will evaluate vendors on cost and API features before implementation. (The choice will be based on who offers the best price per postcard and robust API – e.g., LettrLabs advertises postcards starting around $0.71 each for basic sizes with volume discounts, whereas some competitors like Lob or PostGrid might be around $0.80–$1.00 each base. Considering the platform may mark up to $3+, we have margin to accommodate these costs.)
+
+               * Stripe Payments: We will integrate with Stripe for billing. Each user will have to put a credit card on file (likely during onboarding or before their first cards are sent). Using Stripe’s APIs and customer portal, we will handle monthly billing automatically. Our system will calculate the number of postcards sent each month for each user and charge them accordingly (plus any subscription fee if we introduce plans). We plan to use Stripe’s metered billing or usage-based billing features: e.g., log the count of postcards as usage each month, so Stripe can invoice it. Alternatively, simpler: charge the card on file at month-end via the API for the amount due and send a receipt. The Stripe integration will also allow the user to view billing history and update payment info securely, likely by embedding Stripe’s hosted billing portal in the app for convenience.
+
+                  * Security & Architecture: The platform will be built with security and scalability in mind:
+
+                     * All user data and API interactions will be over HTTPS. We’ll enforce secure connections for the PWA and use HSTS.
+
+                     * Authentication & Authorization: By using established auth providers (Google OAuth and Supabase Auth for email/password as a backup), we delegate security of password handling. We will implement role-based access (though primarily only one role: the business user, since this is a single-tenant per account application). Sensitive operations (like modifying campaigns, viewing billing) will require the user to be logged in; our APIs will check the user’s token and only operate on their own data.
+
+                     * Data Security: Customer data (e.g., list of addresses sent to, user profile, etc.) is stored in our database (hosted by Supabase or similar). Supabase’s default posture is secure, requiring a valid JWT and row-level security policies to access data . We will ensure that each record (campaign, address, etc.) is tagged with the user’s ID and that RLS policies prevent any user from seeing others’ data. For extra protection, we might encrypt particularly sensitive fields (though addresses aren’t highly sensitive PII, we still treat them with care).
+
+                     * API Keys & Secrets: All integration API keys (for the design generator, mailing API, Stripe, etc.) will be stored securely on the server side. They will never be exposed in client-side code. Serverless functions will handle any operation that requires these keys. We will also follow best practices like not embedding secrets in code (use environment variables or secure secret storage). Access to these keys will be limited to the minimal scope (e.g., using restricted API tokens if available).
+
+                     * Preventing Abuse: Since the app uses external APIs, we will implement basic rate limiting on any public endpoints to avoid misuse (for example, someone scripting against our new mover API through our system). We’ll also include validation on inputs (like the website URL parser, to avoid malicious URLs). Using known libraries or APIs to fetch site data helps here, as they are hardened against injection.
+
+                     * Cybersecurity Considerations: We will follow OWASP recommendations for web apps – input sanitization (particularly if we ever display the user’s website content or allow custom text, we’ll neutralize any HTML/JS), proper CORS settings (the PWA will likely be served from a single domain so not many cross-site issues), and use Content Security Policy to restrict what external scripts can run (mostly none except our trusted APIs). We’ll keep our dependencies updated and monitor for vulnerabilities. If the user uploads any images (e.g., a logo manually), we will scan them or use transformations to ensure they are not infected files.
+
+                     * Postcard Content Safety: Since we automatically generate content, we’ll include a step for the user to review and edit it. This ensures no inappropriate or incorrect message goes out. It’s the user’s responsibility ultimately, but we want to reduce the risk of AI hallucination or off-brand messaging. The templates will be fairly constrained to prevent any harmful content.
+
+                     * Scalability: The choice of serverless and third-party services means we can scale easily with demand. The heavy tasks (image generation, mail sending, data fetching) are handled by external providers built to scale. Our app mainly orchestrates these calls and stores state. As the user base grows, we can add caching for frequently accessed data (like if many campaigns query the count of new movers in a zip, we can cache daily results).
+
+                     * Offline & PWA: The app being a PWA means users can install it on their desktop (or mobile) and potentially use certain features offline. We will implement a service worker to cache static assets and perhaps allow “draft” editing offline. For example, a user could open the app and still view their saved postcard designs without internet, or edit text on a postcard draft offline. Of course, actions like generating previews or saving changes would queue until connectivity is restored. This is a nice-to-have that comes with PWA support, offering resilience if the user has spotty internet.
+
+Development Timeline & Strategy: Given this will likely be built by a solo developer or a very small team, using the above stack means we can get a functional prototype quickly. The developer can utilize AI-assisted coding (vibe coding) to generate boilerplate and iterate. For instance, using Replit or Cursor IDE to describe “create a sign-up form with Google OAuth” can produce a chunk of code in minutes . By dividing work into small prompt tasks (UI components, API integration, etc.), the developer can dramatically speed up development while maintaining control. The stack (Next.js + Supabase + third-party APIs) is chosen to minimize the amount of custom code needed (Supabase handles auth and DB, Stripe handles billing logic, etc.), so focus can be on the unique logic of postcard generation and campaign orchestration. This also makes it easier for future developers to pick up the project – the code will largely be standard React front-end and some cloud function code, with well-documented API usage rather than a lot of custom backend architecture.
+With the high-level approach covered, the following sections break down the requirements screen-by-screen. Each section will list the functionality, the intended user experience flow, UI design guidelines, and user acceptance test (UAT) criteria to ensure the feature works as intended.
+Authentication (Login/Signup) & Onboarding
+Description: This is the entry point for users. The platform will support quick account creation with Google login to reduce friction. New users will immediately proceed into an onboarding wizard to set up their first postcard campaign. Existing users can log in and be taken to their Dashboard.
+Key Features:
+                        * Google One-Tap Sign-In: Allow users to sign up or log in using their Google account in one click. This is the recommended path to minimize onboarding time (Google OAuth provides verified email and eliminates the need for password setup).
+
+                        * Email Sign-Up (Alternate): Also support a traditional email & password sign-up in case users prefer it or don’t have Google. If email sign-up is used, keep the form minimal (name, email, password) and consider email verification later. The priority, however, is Google auth for speed.
+
+                        * Fast Onboarding Wizard: After initial sign-in, new users are guided through a quick wizard to configure their first campaign (steps detailed below). This wizard should take under a minute. It will gather their business info (via website URL) and walk them through selecting and customizing a postcard template, and possibly selecting target area and providing payment info.
+
+                        * Onboarding Progress Save: The wizard should allow a user to save a draft if they cannot complete all steps in one go, or go back to previous steps easily. However, given the target of 30-second signup, we expect most users to complete it straight through. If they abandon midway, we’ll save whatever info we have (e.g., account created, maybe draft design) so they can continue later from the Dashboard.
+
+User Flow (Sign-Up & Onboarding Wizard):
+                           1. Landing/Sign-Up Page: The user is presented with a welcome page or modal with options: “Continue with Google” button (prominent) and a smaller “Sign up with email” link. If they have an account, there’s a “Log in” link that can also allow Google or email login.
+
+                              * UAT: Clicking “Continue with Google” initiates OAuth and, on success, creates a new user record in the system (if not existing) and logs the user in. This should happen seamlessly – no additional forms if Google provides name/email . If the email is already registered, it should just log them into that account.
+
+                              * UAT: The email sign-up form (if used) requires entering name, email, password. Submitting it creates an account, possibly sending a verification email (optional for MVP), and then proceeds into onboarding. Validation: cannot sign up with an email already in use; password meets complexity rules (e.g. at least 8 chars).
+
+                                 2. Step 1 – Business Website Input: Immediately after sign-up, the user is asked to “Enter your business website (URL) to get started.” There will be a single URL input field with a prompt like “We’ll use your site to build your postcard automatically.” The user enters their company’s homepage URL (e.g. www.examplebusiness.com).
+
+                                    * When the user hits “Next”, the system triggers the Brandfetch API (or our scraper) in the background to fetch brand details: company name, logo, brand color palette, possibly tagline or description . It may also initiate a search for recent reviews (this could be a background task that doesn’t block the UI, if it takes time – perhaps using Google Places API or scraping Yelp/Google for the business name to find a couple of recent 5-star reviews). Reviews could be used later on the postcard as testimonials if desired.
+
+                                    * If the website is not reachable or the API fails to find info, we should allow the user to skip or enter details manually (e.g., ask them to input their business name and maybe primary color or industry). But in most cases, Brandfetch should succeed for known businesses.
+
+                                    * UI Design: Show a loading indicator or progress (“Analyzing your website…”) for a couple of seconds after clicking Next. Possibly show a preview of extracted info (like “Found your logo and colors!”) to build confidence.
+
+                                    * UAT: Entering a valid URL and clicking Next should result in the system retrieving at least the company name or website title. If no data is found, the user should be prompted to confirm the name and industry manually (fallback flow). If the URL is invalid or unreachable, display an error (“Could not fetch site info, please check the URL or enter details manually”).
+
+                                       3. Step 2 – Select Postcard Template: The user is now presented with a gallery of postcard design templates generated by the AI using their brand info. This screen will likely display thumbnail previews of about 30 postcard designs. Each template will have the business’s name/logo, brand colors applied, and a dummy or AI-suggested offer text.
+
+                                          * The templates will vary in layout and style (some image-centric, some text-forward, different font choices corresponding to the industry if possible). They will all include a clear placeholder for a coupon/offer and maybe a call-to-action (“Visit us” or “Call today” etc.).
+
+                                          * The user can click on any template thumbnail to see a larger preview. They can scroll through the options.
+
+                                          * UI Design: Use a grid layout of image cards for the templates. Highlight that these are AI-generated and customizable. Possibly categorize or filter: e.g., “classic”, “modern”, “playful”, etc., or by format if we have multiple sizes (but initially, likely stick to one format here to not overwhelm). Each card should show front design; hovering could flip to show back (address side) if that’s relevant, or we show back in the editor step instead.
+
+                                          * User Action: The user selects one template that they like best and clicks “Next” or “Customize This Postcard.”
+
+                                          * UAT: After website analysis, the gallery should load at least e.g. 20–30 templates within a few seconds. Verify that the business name or logo appears correctly on the templates (e.g., brand colors applied). Selecting a template and proceeding should carry that choice into the next step (the editor) for customization.
+
+                                             4. Step 3 – Customize Postcard Text: After choosing a template, the user is taken to a postcard editing screen. Here they see a larger preview of the postcard (front side). There will be input fields to edit the text elements, such as:
+
+                                                * Business Name/Logo – If the logo was pulled, it’s already placed. If not, the business name text is there. We can allow them to upload a logo file at this point if the automated fetch missed it (optional).
+
+                                                * Headline – e.g., “Welcome to the Neighborhood!” (could be pre-filled generically).
+
+                                                * Offer Text – e.g., “50% off your first pizza” (the AI might have suggested something based on industry; user can tweak it).
+
+                                                * Call-to-Action – e.g., “Bring this postcard in to redeem” or “Order online with code NEWMOVE”.
+
+                                                * Business details – like address, phone, or website – we can pre-fill from the website’s contact info if we scraped it, otherwise ask the user to enter their business address (needed for the return address and so that locals know where to find them). We should display how their address will appear on the mailing side.
+
+                                                * Possibly a spot for a short testimonial or tagline. If we found a review snippet, we could insert one like “Rated 5★ on Google – ‘Best pizza in town!’” as a text element, which the user can keep or remove.
+
+                                                * The user can edit any of these texts in form fields and see the preview update in real-time (or on clicking a refresh button to regenerate the image via the design API).
+
+                                                * UI Design: The editor should have a clear preview (image) on one side and a sidebar or form on the other with labeled fields for each editable text. Changes in the form should reflect on the image. Because live rendering via API might be slightly slow, we might use a dummy HTML/CSS preview for instant feedback on text changes, and allow a “Generate final preview” button that calls DynaPictures API to render a high-fidelity image. For MVP, even a 1–2 second delay on each keystroke might be acceptable if the templates aren’t too complex. But better is to only regenerate on demand or after a pause in typing.
+
+                                                * Provide controls to switch view between Front and Back of the postcard. The back will show the mailing address layout. On the back side, the user doesn’t have much to edit except maybe a return address or a message next to the address. Ensure there’s an indicator of where the stamp and address go (perhaps a semi-transparent overlay in the editor to show the non-editable area).
+
+                                                * “Save Postcard” action: The user must click a Save button to finalize their design changes. This will store the postcard template (the chosen base + their edited text and any uploaded logo) in the database, and generate final image files (we’ll likely save the front and back image to cloud storage for later use).
+
+                                                * UAT: Editing each field and clicking “Generate Preview” should update the postcard image to reflect changes. Verify that brand colors are applied (e.g., background or accent elements match one of their brand colors – user can possibly change the color scheme if multiple options were fetched; we might present alternate color swatches). Verify that if user uploads a logo, it appears correctly on the card.
+
+                                                * UAT: Saving the postcard stores all necessary info. If the user tries to navigate away without saving, a warning should prompt “You have unsaved changes. Save your postcard before continuing.” Once saved, the user can proceed. Ensure that at this step, the postcard can be saved as a draft (not yet active campaign, unless they continue and launch it).
+
+                                                   5. Step 4 – Targeting & Budget: Now the user has a postcard design ready. The next onboarding step is to choose where to send it and understand the costs.
+
+                                                      * Select Target Area: The user can choose either by entering one or more ZIP codes, or by entering their business’s address (or ZIP) and a radius (e.g., 5 miles, 10 miles). We’ll provide both options:
+
+                                                         * Option A: By Radius – If the user’s business address was identified, we show “Find new movers within [ ___ ] miles of [Business ZIP]”. They can adjust the radius number. We will on-the-fly convert that to the approximate set of ZIP codes that fall in that radius (using a geolocation lookup).
+
+                                                         * Option B: By ZIP Codes – The user can enter multiple ZIP codes manually (comma-separated or one by one). For convenience, if they provided a radius, we might pre-populate the list of ZIPs that radius covers (and allow fine-tuning).
+
+                                                            * Estimate Audience: When the user selects the area (via either method), the system will display an estimate of how many new movers per month are in that area. This data comes from historical averages via our new mover API. For example, “Estimated new movers per month in selected area: 150”. Alongside, show “Estimated Postcards per month: 150” (assuming we send one per new mover).
+
+                                                            * Pricing Calculation: Based on the count above and the chosen postcard type, calculate the estimated monthly cost. E.g., “Estimated Monthly Cost: 150 x $3.00 = $450.” If the platform charges a subscription or any base fee, include that too (for now, assume pay-per-postcard only).
+
+                                                            * Volume Discount Info: If the user changes the area (adds more ZIPs or increases radius), recalc the estimate. Provide a visual or text indication if they cross a volume threshold that reduces the per-card price. For instance: “You’re sending >200 postcards/month, your rate is now $2.80 each (7% volume discount). Send 50 more to reach the next discount tier of $2.50 each.” This gives an incentive to broaden the campaign. The tiers could be predefined (we’ll define, say: 0–199 cards: $3.00 ea; 200–499: $2.80 ea; 500–1000: $2.50 ea; etc., or possibly tying into LettrLabs pricing plans).
+
+                                                            * Premium ZIP Warnings: If any entered ZIP is flagged as premium (we maintain a list of such ZIP codes known for high market value or remote delivery costs), mark it with a special icon. For example: if the user entered 90210, we might show a “diamond” icon next to it and a tooltip: “90210 is a premium area – high property value area. Postcards here cost $1 extra each due to increased acquisition cost.” This explains the pricing so the user isn’t surprised. (Our pricing model as per requirements: $3 base up to $10 premium – presumably premium areas or certain industries pay more. This will be handled by a combination of zip and industry factors on the backend. In the UI we just communicate when costs are higher.)
+
+                                                            * Expected Conversions: Show an Estimated New Customers per Month figure. This can be a range (e.g., “~5–10 new customers/month expected”). We derive this from the estimated postcards * an expected conversion rate for the user’s industry. If we identified the industry (either user selected or via website category), we use a lookup table: e.g., restaurants might expect ~4% conversion, home services maybe 2%, etc. If we lack specific data, default to ~3%. We can say “Based on similar businesses’ campaigns, expected response rate ~3%, which would be ~5 new customers if 150 postcards are sent.”
+
+                                                            * Budget Approval: The user needs to confirm they’re okay with the estimated monthly budget. We’ll include a note: “You will be billed at the end of each month for the actual number of postcards sent (approximately this amount).” There could be a checkbox “I agree to the estimated budget and recurring billing” before proceeding.
+
+                                                            * UI Design: Use a clean, perhaps step-by-step form: first ask them to choose targeting method (radio: “Around my business” vs “Specific ZIP codes”). If radius: show a slider or input for miles. If ZIP: show an input with an “Add” button and a list of added ZIPs below. As soon as there’s a selection, display the estimate panel (maybe as a sidebar or below) with the metrics (new movers, cost, etc.) clearly formatted. Use colors or icons to illustrate cost changes (e.g., green arrow when price per card drops due to volume).
+
+                                                            * UAT: If the user enters a radius or some zip codes, the system should display a non-zero estimate (assuming those areas have population; if it’s zero (unlikely), warn if a zip is invalid or area has no data). Adjusting the selection updates the numbers within a second or two (after API fetch). Test a scenario: user chooses one small zip code, sees maybe 10 movers, cost $30; then adds a big zip code, sees total 200 movers and per-card price drop for crossing tier. Ensure the tier logic matches what’s defined in pricing.
+
+                                                            * UAT: Marking premium zips: enter a known premium zip, verify the UI flags it and the cost per card reflects the premium (e.g., base $3 + $2 premium = $5 each for that zip, if our model does that). The calculation for mixed zip campaigns might be weighted or we might simplify by averaging – but for accuracy, we might just apply the highest rate to all for that calculation. (We’ll clarify to the user if that’s the case. Alternatively, show a breakdown: “100 postcards to regular zips @ $3, 50 postcards to premium zips @ $5, blended cost ~$3.67ea”. But to keep it simple, maybe discourage mixing drastically different zips in one campaign.)
+
+                                                            * UAT: The user must explicitly agree/continue with the displayed plan. If they try to continue without selecting area or without acknowledging the cost, the UI should prompt them.
+
+                                                               6. Step 5 – Payment Setup: (If not already done) Before launching the campaign, if the user has not provided payment info, we must collect it. This step might be skipped if we opted to get payment during sign-up (some flow might require card up front, but to reduce friction we likely didn’t ask until now).
+
+                                                                  * Show a secure form to enter credit card details (integrated via Stripe Elements or redirect to Stripe’s hosted form). Emphasize security (“Your payment is securely handled by Stripe. We do not store your card details.”).
+
+                                                                  * Alternatively, if we have a free trial or starter credits (some services give first X postcards free), mention that but still have them put a card on file to auto-charge later.
+
+                                                                  * UAT: Entering valid card info creates a Stripe customer and attaches the payment method. If card is declined, display error from Stripe. Only on successful addition should they be allowed to finalize the campaign.
+
+                                                                  * If using Google sign-in, we might also leverage Google Pay as an option (nice-to-have).
+
+                                                                     7. Final Step – Launch Campaign: Everything is set – design is saved, targeting chosen, payment on file. The user sees a summary: “Campaign Ready to Launch: You’ve chosen to send [postcard name] to new movers in [area description] (~X per month).” There will be a Toggle or Button to Activate the campaign.
+
+                                                                        * They can choose to leave it as Draft for now or Activate immediately. By default, perhaps we consider it active once they finish the wizard, since that’s presumably the goal. But to be safe, we might ask: “Start sending postcards immediately as new people move in? (Yes, start now) or (No, keep campaign paused for now).”
+
+                                                                        * If they activate, set the campaign status to Active and trigger the first mailing if there are any people already moved in since maybe beginning of the month (depending on how our system works; but likely it will just start listening for new triggers going forward).
+
+                                                                        * Show a confirmation message: “Your campaign is active! New residents in your target area will start receiving [BusinessName] postcards. You can manage your campaign in the dashboard.”
+
+                                                                        * Possibly offer to do a one-time blast to recent movers at this point: “Do you also want to send to movers from the past 3 months in your area? [Send Now]” – this could lead to the blast feature, but this might be advanced for initial onboarding. We can introduce that later in the dashboard.
+
+                                                                        * After completion, take the user to the Dashboard, which will show their campaign details and any results (initially none).
+
+                                                                        * UAT: Completing the wizard with all steps should result in a campaign record in the database with correct fields (design, target zips, active status, etc.), a Stripe customer with valid payment, and if activated, perhaps an entry in a scheduler that will handle new mover events. The user should land on their dashboard and see their campaign listed.
+
+                                                                        * UAT: If user chose to keep it paused (draft), the dashboard should show it as “Paused” and not send out anything until they toggle it on manually.
+
+UI Design Notes: The onboarding should feel like a guided tour with minimal friction. Use a multi-step progress indicator (e.g., “Step 1 of 5”) at top so users know how many steps remain. The design should be clean and uncluttered, with one primary action per step (e.g., a clear Next/Continue button). Given the target is under 1 minute, we avoid any lengthy forms – it’s mostly selection and confirmation. Visual elements like the template thumbnails should be attractive and relevant (the AI designs should incorporate imagery related to the business if possible; e.g., if it’s a pizzeria, use pizza images in templates – our template library might categorize by industry). Use the business’s brand color in the UI accents as soon as we fetch it (for a personalized feel – e.g., the Next button or progress bar could adopt their color scheme).
+The tone of the UI copy should be encouraging and helpful, e.g., “Looking great! Now, where should we send your postcards?” etc., to keep the user engaged. Where AI is used (template generation), possibly display a small label “AI-powered suggestion” to build trust that these are tailored suggestions, not generic.
+On mobile (if used), the wizard should still work (one column layout). But since it’s primarily desktop usage (per PWA on desktop), we design for a typical desktop screen, possibly around 1200px width, but responsive down to tablet.
+UAT Criteria (Sign-Up & Onboarding):
+                                                                           * ✅ Sign-Up Simplicity: A new user can create an account using Google in under 3 clicks (Open app → “Sign in with Google” → Choose Google account → account is created and logged in). Verify that the user’s name and email are stored and that they are directed into the onboarding flow immediately.
+
+                                                                           * ✅ Website Data Fetch: After entering a valid business URL (e.g., a known site), the system successfully retrieves at least the business name or logo. Confirm the logo image is stored or accessible, and brand colors are identified (Brandfetch typically returns a palette of hex colors ). In test, if the website is “https://www.starlightbakery.com”, the platform should capture “Starlight Bakery” as name, possibly their pink and navy brand colors, and maybe their star logo.
+
+                                                                           * ✅ Template Generation: The user is shown a selection of at least 20 postcard designs that incorporate the fetched brand elements. For instance, if the brand color is pink #FFAAA5 and the name “Starlight Bakery”, most templates should include that name and pink color in some way. Confirm that clicking through different templates indeed shows variations (not all identical layout). Also, ensure no template is broken (e.g., missing text where it should have something).
+
+                                                                           * ✅ Template Selection & Editing: After choosing a template, the user can modify the text fields. Test that each field updates correctly on the preview. For example, change the offer from “50% off cupcakes” to “Buy 1 Get 1 Free Cupcake” and regenerate – the preview should reflect the new phrasing. If a user deletes a field text, check how the template handles it (maybe show nothing or a placeholder).
+
+                                                                           * ✅ Logo Upload: If the user’s logo wasn’t auto-fetched or if they want to change it, test uploading an image file (e.g., PNG of their logo). The logo should appear on the postcard preview in the designated area and scale properly. If no logo, the business name text should be styled in a nice font as a fallback.
+
+                                                                           * ✅ Save Draft Postcard: Without completing targeting, ensure that clicking “Save” on the editor step stores the design. If the user refreshes or logs out/in at this point, the draft postcard should still be accessible (perhaps on their dashboard as a draft campaign or in a “Designs” library). In onboarding, we likely don’t have a separate library page, but we ensure no data loss.
+
+                                                                           * ✅ Target Selection: Input a radius (say 5 miles) around a known area and verify the platform translates it to the correct set of ZIP codes (perhaps for test we know that radius covers 3 zips). Conversely, input a set of ZIP codes (like 10001, 10002) and verify the platform calculates an estimated mover count. If using a stubbed dataset for testing, ensure a non-zero estimate appears. The cost calculation should multiply correctly.
+
+                                                                           * ✅ Volume Pricing: Simulate adding enough area to cross a tier. For example, if tier1 is 0–199 cards at $3, tier2 is 200–499 at $2.80, test selecting an area that yields 180 movers: price shown $3 each. Then add one more medium ZIP that pushes total to 210 movers: now price per card should drop (or an alert “Volume discount reached”). Verify the new total cost reflects the discounted rate.
+
+                                                                           * ✅ Premium ZIP Handling: Mark a specific ZIP in our test data as premium. When that ZIP is selected, the UI should either show an adjusted price or a notice like “+ $X premium charge for ZIP ______”. Ensure the tooltip or help text explains it. E.g., “ZIP 90210 is considered a premium market due to high property values; higher mailing costs apply.”
+
+                                                                           * ✅ Conversion Estimate: For a given industry, ensure an estimated conversion range is shown. If the test business is a “Bakery”, and our internal table says bakeries ~3-5%, and we plan to send 100 cards, the UI might say “Estimated 3–5 new customers/month”. Check that this appears and seems reasonable. Also check that it updates if the user changes industry (if we let them pick/confirm industry, or perhaps auto-detected – if not, maybe use an average ~3%).
+
+                                                                           * ✅ Onboarding Completion: After going through all steps and clicking “Launch Campaign,” verify that:
+
+                                                                              * The campaign record is created with status Active (if launched) or Draft (if paused).
+
+                                                                              * The user’s postcard design is saved (images stored or template data saved).
+
+                                                                              * The targeting (list of ZIPs or radius) and budget info is saved.
+
+                                                                              * Stripe customer is created and card on file (Stripe test webhooks can confirm).
+
+                                                                              * Perhaps even simulate a “new mover event” after launch (this would be a separate test) to ensure the pipeline triggers a send – though that’s more on backend integration testing.
+
+                                                                                 * Time-to-onboard: As a general acceptance, a new user starting with Google sign-in and having a simple business (like a website available) should be able to get to the Dashboard with an active campaign in ~1 minute of interaction (not counting any waiting for image generation). This is more a UX acceptance: the flow should be that smooth. We can have a dummy stopwatch test where a user tries it. If it consistently takes much longer due to lag or too many steps, we need to streamline (e.g., maybe skip payment until later if that’s a bottleneck – but probably not, we likely want payment before sending anything).
+
+Dashboard & Campaign Management
+Description: The Dashboard is the main logged-in view where users manage their postcard campaigns and see an overview of activity. It should answer the questions: “What campaigns do I have running? How are they performing? What’s going out soon? How much am I spending?” The dashboard will list all campaigns (each campaign typically corresponds to one postcard design + one target area combination, which the user set up either in onboarding or later). From here, the user can create new campaigns, edit or pause existing ones, and navigate to other sections like the mailing history, billing, etc.
+Key Features:
+                                                                                    * Campaign Cards/List: Display each campaign the user has as a card or row. Key info to show:
+
+                                                                                       * Campaign name (we might default name to the postcard’s main offer or the area, e.g., “Welcome Offer – 5mi around 90210”). Let users rename campaigns if they want for clarity.
+
+                                                                                       * Status: Active (green indicator), Paused (gray), or Draft (if created but not launched).
+
+                                                                                       * Target area summary: e.g., “Serving: 3 ZIPs (90210, 90211, 90212)” or “Radius: 5mi around Beverly Hills”.
+
+                                                                                       * Postcard thumbnail: a small image of the design used.
+
+                                                                                       * Key metrics: perhaps “Sent this month: X postcards” and “New Customers marked: Y” (if they’re marking conversions, or we have tracking).
+
+                                                                                       * Cost this month so far: $X (so they can see ongoing spend).
+
+                                                                                          * Campaign Toggle (Active/Pause): Each campaign can be quickly toggled on or off. If a campaign is Active (sending), clicking the toggle to “off” will Pause it – meaning no new mover triggers will send postcards until reactivated. Conversely, turning it on resumes it. Toggling should prompt for confirmation:
+
+                                                                                             * If turning off: “Pause this campaign? No postcards will be sent to new movers until you resume. You can resume at any time.”
+
+                                                                                             * If turning on: If it was a draft not launched yet, confirmation like “Launch this campaign now? All new movers in your target area will start receiving your postcards.” If it was paused and now resuming, confirmation: “Resume sending postcards immediately to new movers from now on?”.
+
+                                                                                             * After confirmation, update status and ensure backend updates accordingly.
+
+                                                                                                * Campaign Actions (Edit/Delete): Each campaign card will have options to Edit and Delete (or Archive).
+
+                                                                                                   * Edit opens the campaign editor – which likely is the same interface as onboarding steps 2–4: user can modify the postcard design (text, maybe swap template), or change the target area, or change the postcard type. After editing, they must Save changes. We will require a confirmation on save like “Your changes will apply to all future postcard sends. (Already scheduled/sent postcards won’t be affected.) Continue?”.
+
+                                                                                                   * If a campaign is Active while editing, we might automatically pause it or warn that edits will only affect future sends. It might be simpler to have them pause -> edit -> resume, but that could be too strict. Perhaps not necessary if changes propagate seamlessly (e.g., if they change design, new movers get the new design, old ones got the old – that’s fine).
+
+                                                                                                   * Delete allows them to permanently remove a campaign. If active, we force a pause and stop all future sends, and optionally remove its data. However, we probably want to keep historical data for billing and records, so “delete” might just mark it archived/inactive and hide from main view. Confirm with “Are you sure you want to delete this campaign? This will cancel any future postcards. [Cancel] [Delete].”
+
+                                                                                                      * Add New Campaign: A prominent button “Create New Campaign” for users who want to start additional campaigns. Clicking this triggers the same flow as onboarding from Step 1 (perhaps reusing the wizard but starting at template selection since we already know their business info now). We will let them generate or pick a new postcard design, set targeting, etc., just like initial setup. This allows use cases: maybe a business wants to test two different offers (two campaigns in same area), or they have different service lines to promote, or multiple locations.
+
+                                                                                                         * If we find the user’s brand info is already stored, we skip asking for website again – instead maybe directly show templates (still branded). Possibly ask “What’s this campaign for?” to guide template choice (optional).
+
+                                                                                                            * Overview Stats: The top of the dashboard might have an overview panel: e.g., “This Month: X postcards sent, Y new movers reached, Z new customers (as marked), $ABC spent”. We can pull from all campaigns aggregate. This gives the user a quick performance summary. We can also display lifetime or last month data.
+
+                                                                                                            * Announcements/Tips: Optionally, a sidebar or section for tips (“Tip: Add a referral code to track conversions better!”) or platform announcements (like new features). This is secondary; main focus is campaigns.
+
+UI Design: The dashboard should be clean and dashboard-like without overwhelming analytics. Each campaign card should be easily distinguishable. We might use a card grid if user has few campaigns, or a list/table if many. Given most small businesses might run 1-3 campaigns, a card layout with visual thumbnail will look nice.
+                                                                                                               * Use the business’s brand elements subtly (maybe their logo at top of dashboard or on campaign cards to remind this is their stuff).
+
+                                                                                                               * The Active/Paused status can be shown with a toggle switch component on each card, colored when on. Also text label “Active” or “Paused” for clarity.
+
+                                                                                                               * The metrics on a card can be small badges or text: e.g., an icon of a paper (📬) with number sent, a dollar icon with cost, etc.
+
+                                                                                                               * The “Create New Campaign” button should be obvious (maybe top-right or a big plus card as the last card).
+
+                                                                                                               * For editing experience, we might reuse the modal or page that we built for onboarding’s edit step. Perhaps when you click “Edit” on a campaign, it takes you to a dedicated Campaign Editor screen (which we detail in the next section).
+
+User Acceptance Criteria (Dashboard):
+                                                                                                                  * ✅ Campaign Display: After completing onboarding (which created one campaign), the Dashboard should show that campaign in a list or card. Verify that the info matches what was set: correct target area, correct current month count (initially 0 sent if brand new), correct status Active or Draft.
+
+                                                                                                                  * ✅ Toggle Pause: With a campaign Active, clicking its toggle to Off should prompt confirmation. Confirming should update the UI (status label changes to Paused, perhaps card grays out). In the backend, the campaign’s active flag is false so no new triggers will be processed. If possible, simulate a new mover event after pausing to ensure no postcard is sent (if a test harness available).
+
+                                                                                                                  * ✅ Toggle Resume: If a campaign is Paused, clicking to Active should prompt confirmation and then set status Active (green). Verify that subsequent new mover events would be processed again.
+
+                                                                                                                  * ✅ Edit Campaign: Clicking “Edit” opens the campaign editor. For a test, change some text in the postcard, save changes. Back on dashboard, maybe the thumbnail updates to reflect new design (if we refresh it). Also test changing the radius or adding a ZIP in edit targeting, saving, and confirm that the dashboard now shows updated target description and the cost estimate reflects it.
+
+                                                                                                                  * ✅ Add Campaign: Use the “Create New Campaign” button. Go through creating a second campaign (could be similar process, maybe choose a different template or area). After saving/launching, the dashboard should now list two campaigns. They should each have their own controls. Ensure they don’t conflict (e.g., each toggles independently, each edit goes to correct data).
+
+                                                                                                                  * ✅ Delete Campaign: For test, delete one of the campaigns (perhaps create a dummy one for this purpose). Confirm UI removes it from list (or marks it clearly as deleted/inactive). Check that in database it’s marked inactive (so billing stops). Also ensure historical record of sends remains in the history section (address log) with campaign name, even if deleted (so reporting isn’t lost). If the user had only one campaign and deletes it, the dashboard might show a “You have no active campaigns. Click ‘New Campaign’ to start” message – check for that empty state.
+
+                                                                                                                  * ✅ Overview Stats: If the user has some sends, ensure the dashboard aggregates them. For testing, one can manually insert some data: e.g., mark that 10 postcards were sent in current month (simulate after a while). The dashboard should then show “10 postcards sent this month” in an overview section. If we mark 2 as converted, it should show “2 new customers” if we include that metric.
+
+                                                                                                                  * ✅ Responsiveness: Resize the window or use a mobile emulator to see that the campaign cards stack vertically nicely, and nothing is cut off. The UI should degrade gracefully.
+
+                                                                                                                  * ✅ Navigation: Ensure that from the dashboard, the user can navigate to other sections (like a menu or tabs for “Recipients”, “Billing”, “Support”, “Settings”). Typically, a sidebar or top nav can be present. Test that those links go to the correct screen (these screens are detailed later).
+
+Postcard Design Editor (Campaign Detail)
+Description: The Postcard Design Editor is essentially the same interface used in onboarding to customize a postcard, but accessible later for editing an existing campaign or creating a new one. It allows full control over the postcard’s appearance and content. For an existing campaign, the editor will load the current design and allow changes which will apply to future mailings.
+When Accessed:
+                                                                                                                     * In Edit mode from the dashboard (for a campaign).
+
+                                                                                                                     * In New campaign creation flow (after selecting a template).
+
+                                                                                                                     * Possibly in a dedicated “Designs” library if we allow users to manage saved postcard templates separately (this could be a future feature: a library of postcard templates that are not yet tied to campaigns).
+
+Features:
+                                                                                                                        * Live Preview: A central (or large) preview of the postcard. If front/back sides are available, allow toggling the view.
+
+                                                                                                                        * Editable Fields: Form inputs for each text element (headline, offer, CTA, disclaimer, etc.). If the design has multiple text areas, list them clearly. We might label them or highlight on preview which part corresponds to which field (e.g., hovering or focusing a field could outline the text on the preview).
+
+                                                                                                                        * Media Editing: If the user wants to change background image or add a product image on the postcard, we should allow it if the template supports it. Many templates might have a background image (like a generic stock photo related to the business). We can allow uploading a new background or choosing from a small stock gallery relevant to their industry. (Though not explicitly in requirements, this would be a nice addition: e.g., a restaurant could choose a different food image on the card.)
+
+                                                                                                                        * Brand Colors & Style: Possibly allow the user to tweak the color scheme of the template. For example, if their brand color is pink but the text is hard to read on that, they might choose a secondary color or adjust. We can present a couple of color theme options (extracted from the image or brand palette). Also allow font changes if desired (maybe too granular for MVP, but at least ensure the user likes the typography).
+
+                                                                                                                        * Coupon Code Field: If the business wants a specific coupon code printed (like “Use code NEWMOVE23”), we should let them enter it. Alternatively, if not, the card might just say “Present this card for the offer” or a generic code. We should clarify in the template whether a code is included or not.
+
+                                                                                                                        * Back Side Editor: On the back, main elements are:
+
+                                                                                                                           * The recipient address area (not editable by user; that will be dynamically filled by our mailing process with each person’s address).
+
+                                                                                                                           * The return address (sender’s address, which should be the business address – we likely got this from them or ask here if not). Ensure user has provided a return address; if not, prompt “Enter the address you want postcards to be sent from (this usually is your business address)”. This gets printed on each postcard as the sender and is also where undeliverable mail returns.
+
+                                                                                                                           * A message area or additional note – some postcard backs allow a short note next to the address area. The user could use that for a personal touch like “Can’t wait to meet you! – [Business Owner name]” or leave it blank. Provide a field for it if templates include it.
+
+                                                                                                                           * Postage and barcode space – not editable, just show as grey areas so the user knows nothing should be there.
+
+                                                                                                                              * Save and Versioning: When the user hits “Save”, we create a new version of the postcard image to use henceforth. We might want to store the previous version for records (especially if some were already sent with old design, we might keep it for reference in history). But the current campaign will now reference the updated design.
+
+                                                                                                                              * Draft vs Publish: If creating a new campaign, saving the design might keep it in draft until they finish targeting and activate. If editing an active campaign, saving immediately updates the active design (we may or may not require them to pause first; ideally we don’t force a pause, just say “Saved. New movers will get this updated design.”).
+
+                                                                                                                              * Cancel/Revert: If a user opens edit but decides not to change, they should be able to cancel out without altering anything. If they made changes and try to cancel, warn unsaved changes.
+
+UI Design: Similar to earlier description: split view with form controls and preview. Possibly use a modal dialog for quick edits or a full page. For consistency, likely a full page (or route) like /campaigns/123/edit that shows the editor UI. The design should minimize the chance of user error by clearly labeling fields. For example: instead of just generic field names, use friendly names like “Headline (big text at top)”, “Offer Details (main offer description)”, “Call to Action (what you want them to do)”, “Expiration or Disclaimer (small print, if any)”.
+If multiple template layouts are available and the user wants to change the entire layout, we might allow “Change Template” button. That could open the template gallery again. If they switch template, we try to carry over the text to new layout where possible. This could be advanced, but if easy to implement with the design API, it’s nice (rationale: user might realize a different design suits better after all).
+We should also maintain consistency: the editing page for an existing campaign should look and behave just like when they first customized it in onboarding.
+UAT Criteria (Postcard Editor):
+                                                                                                                                 * ✅ Load Existing Design: When editing a campaign, the editor loads with the exact content currently in use. Verify that all text fields are populated with the campaign’s saved values (not default template lorem ipsum). The preview should match what was last sent out.
+
+                                                                                                                                 * ✅ Edit Text: Change each text field one at a time and regenerate preview, ensuring the changes reflect correctly in the image. Check for any character limit or overflow issues (if user types a very long headline, does it either truncate or shrink font? Ideally, template should have defined behavior for too much text – perhaps we set a char limit in the field to avoid design breakage).
+
+                                                                                                                                 * ✅ Add/Change Image: If the template has a changeable image (say a product photo), test uploading a new image. After upload, the preview should update to show the new image. Also ensure the image is stored properly in backend (maybe on Supabase storage or directly on DynaPictures via a URL).
+
+                                                                                                                                 * ✅ Color Scheme Switch: If available, try selecting an alternate color theme (for example, if brand primary was dark, maybe template had an option for light background). Confirm preview changes colors accordingly.
+
+                                                                                                                                 * ✅ Back Side Note: Enter a custom back message (like “We’re located 2 blocks away on Main Street, drop in anytime!”). Flip preview to back, confirm the message appears in the correct spot and not overlapping address. If the user leaves it blank, ensure nothing extraneous prints.
+
+                                                                                                                                 * ✅ Return Address: If the business address wasn’t set, attempt to save without one – the system should prompt “Please enter a return address” and not allow save until provided. Once provided, it should remember it for future (likely stored in user profile or campaign settings).
+
+                                                                                                                                 * ✅ Save Changes: After making a few edits, click Save. The system should respond (maybe a toast “Saved!”). Then navigate back to Dashboard and confirm the campaign’s thumbnail and details reflect the updates where applicable (the thumbnail might update if we refresh it from stored image).
+
+                                                                                                                                 * ✅ Effect on New Sends: This is harder to test in UI, but conceptually: after edit, new addresses that trigger should use the new design. We might simulate adding a new address and ensure the mailing API is called with the new design asset. (This is more an integration test).
+
+                                                                                                                                 * ✅ Draft Save: If in new campaign flow (not yet active), ensure that saving the design doesn’t inadvertently start sending anything until user explicitly activates campaign in later step.
+
+                                                                                                                                 * ✅ Template Change (if supported): Try using the “Change Template” function. Select a different template design. Verify that the text you already entered maps into it (if possible). Or if not automated, at least the UI warns that text might reset. If the user confirms, the new template loads with either blank or best-effort text. Then user can adjust and save. This should effectively update the campaign’s template reference. Check that the old design is not used anymore.
+
+                                                                                                                                 * ✅ Cancel Edit: Modify something but instead of saving, click Cancel/back. Confirm it asks “Discard changes?” If yes, the campaign remains unchanged. If no prompt (because no changes), it should just exit. Ensure no partial changes apply if not saved.
+
+Campaign Targeting & Mailing Settings
+Description: This component involves selecting the geographic targeting for a campaign and configuring mailing-related options. It was part of onboarding (Step 4), but also should be accessible for editing existing campaigns. We separate it here to detail additional options not covered in onboarding, such as frequency and scheduling and possibly advanced targeting filters.
+Features:
+                                                                                                                                    * Geographic Selection UI: (As described in onboarding) – user can add/remove ZIP codes or set a radius. In edit mode, it should show their current selection and allow changes. Perhaps display a small map with a shaded radius or pins for ZIPs for a visual aid (nice-to-have for clarity).
+
+                                                                                                                                    * Advanced Filtering (Future): While not in initial requirements, we foresee possibly filtering new movers by demographics or home value if data allows. (E.g., only send to single-family home addresses, or only to movers who bought a house vs renters, etc., if our data has those fields). For now, we’ll not implement, but we design the UI such that adding a filter dropdown later is feasible.
+
+                                                                                                                                    * Frequency/Scheduling: New mover campaigns are essentially event-driven (send when someone moves in). We might allow an option like “Send postcards immediately when someone moves (default)” vs “accumulate and send in batch once a week or month”. However, immediate (or next-day) is likely best to “welcome” quickly. We will stick to continuous mode, but we should note that postcards triggered will typically be mailed the next business day via the API. We may mention in UI something like “Postcards are mailed within 1-2 days of a new mover’s move-in date.”
+
+                                                                                                                                    * Start/End Dates: Possibly allow specifying a start or end date for the campaign. For instance, maybe a user wants to run it only during spring season. For MVP, all campaigns start immediately (or when toggled on) and run indefinitely until paused. But including an “End date” or duration is a nice addition: we can add fields “Stop campaign after [3] months” or a specific date. We’ll note this for future.
+
+                                                                                                                                    * Mailing Options: The user can choose the postcard format/quality here if not already. Actually, we asked in onboarding after template selection the type (Standard, Premium, Deluxe). If not, we should incorporate it. Perhaps after design, we ask “Choose Postcard Size/Quality” with a brief description and cost difference:
+
+                                                                                                                                       * Standard 4x6 – cheapest, glossy front.
+
+                                                                                                                                       * Premium 6x9 – larger impact, moderate cost.
+
+                                                                                                                                       * Deluxe 6x11 or Tri-fold – maximum impact, highest cost.
+
+                                                                                                                                       * (The user picks one; this factor goes into cost calculation).
+
+                                                                                                                                       * If this was done in onboarding, editing campaign should allow changing format too (maybe not if already in progress, but possibly yes, future mailings can switch size).
+
+                                                                                                                                          * Price & Volume Feedback: Same as onboarding, show estimated volumes and pricing after any targeting or format changes. Always keep the user informed how a change affects cost.
+
+                                                                                                                                          * Multiple Areas per Campaign: The requirement said “select multiple codes for each section (tab by zip code so can run different campaigns)” – it’s a bit confusing, but I interpret it as: the user can have multiple campaigns, not that one campaign has separately managed sub-zips. Possibly they imagined a UI with tabs per zip, but that seems like multiple campaigns. We’ll assume each campaign can have multiple zip codes. If they wanted separate content per zip, that’s just separate campaigns. So we’re fine.
+
+                                                                                                                                          * Exclusion List Application: When a campaign runs, it should automatically exclude addresses the user has put in their global block list. So from a UI perspective, perhaps in the targeting settings we show a note: “Your account’s block list will be applied (X addresses will be skipped). Manage block list in Settings.” This assures them we won’t mail blocked addresses in that area.
+
+                                                                                                                                          * Phase 2: One-off Blast Integration: If a user wants to do a one-time blast within a campaign interface, they might expect to find it here. More likely, we’ll implement one-off sends as a separate tab (detailed in next section). However, we can cross-link: e.g., on the campaign card or detail: “Send now to all movers from last [x] days” which essentially triggers the new mover blast for that area. But we’ll cover that under Recipients/History.
+
+UI Design: For editing targeting, it could either be part of the main editor flow or a separate modal. Perhaps simpler: combine design and targeting in one “Edit Campaign” view with two tabs: “Postcard Design” and “Audience & Budget”. The user can switch between them and save both together. But to keep it step-by-step, we might separate.
+However, if done separately:
+                                                                                                                                             * On campaign card, we could have an “Edit Design” button and an “Edit Targeting” button.
+
+                                                                                                                                             * Or single Edit that encompasses both with sections.
+
+To avoid confusion, a sequential approach (like a mini-wizard just for that campaign) could be used. But given our time, we might allow editing targeting inline on the dashboard via a modal as well. But better to reuse onboarding UI.
+So design wise, show their current selection (list of zip codes or radius) with an “Edit” link. Clicking opens the same form as onboarding target step.
+UAT Criteria (Targeting Settings):
+                                                                                                                                                * ✅ Load Current Target: For an existing campaign with certain ZIPs selected, the edit interface should list those ZIP codes visibly (e.g., chips or list items). If radius was used, show “Within X miles of [address]”. Ensure this is accurate to what was originally set.
+
+                                                                                                                                                * ✅ Modify ZIPs: Remove a ZIP from the list and add a new one. Save changes. Then verify that the campaign’s stored targeting now reflects the new set, and the dashboard update (e.g., “Serving 4 ZIPs” changes to “Serving 4 ZIPs” if number same or updates count).
+
+                                                                                                                                                * ✅ Switch to Radius: If user originally used ZIPs but now wants radius, test switching mode (maybe we provide a toggle). Input a radius and a center. Save, and verify it saved as radius type (maybe in DB we store either zip list or a center+radius). The UI on dashboard should perhaps say “Radius X mi from Y (covering N ZIPs)”.
+
+                                                                                                                                                * ✅ Change Postcard Format: If available, change from Standard to Premium. The cost estimate should update (say from $3 to $5 each) and monthly cost recalculated. After saving, ensure the campaign’s cost logic updated. (We might also trigger a re-render of postcard if size differs dimension, but likely not changing design content except size).
+
+                                                                                                                                                * ✅ No Duplicate Mail: Ensure that if a user adds an area that overlaps with another campaign of theirs, the system warns them or handles it. (We might not have built a check, but it’s something to consider: If one user runs two campaigns targeting the same address, they might accidentally double mail. Maybe out of scope to auto-prevent, but we could warn “Campaign X also covers ZIP 12345 – you may send duplicates.” For now, we won’t implement cross-campaign checks, but test in case same zip in two campaigns doesn’t break anything).
+
+                                                                                                                                                * ✅ Saving Without Confirmation: Test that significant targeting changes prompt user confirmation about cost impact: e.g., “You increased your radius; your estimated monthly cost will increase from $300 to $600. Proceed?” – if implemented. If not implemented, then at least ensure the new cost is shown clearly before they hit save.
+
+                                                                                                                                                * ✅ Stop Campaign (End Date): If we allow an end date, test setting one (e.g., two months from now). The system should automatically mark campaign as ended after that date (this might require a scheduled job). Not likely in MVP, so skip if not present.
+
+                                                                                                                                                * ✅ Block List Awareness: If the user has blocked certain addresses that are in the target area, ensure those will not be mailed. We can’t easily UI test this except by verifying that if an address on block list appears as a new mover, the system doesn’t create a mail for it. We might test by adding an address to block, simulate that address moving, and see that nothing is sent. UI-wise, perhaps ensure the note “block list applied” is present.
+
+Recipient History & One-off Mailing (New Mover Blast - BLAST IS PHASE 2)
+Description: This section focuses on the list of individual recipients (addresses) that have been or will be mailed, and provides tools for one-off mailings and exclusions. It’s a combination of a mailing history log and a targeted mailing tool for recent movers.
+Recipient/Mailing History:
+                                                                                                                                                   * Display a table of all mailings sent (or at least all unique recipients). Columns:
+
+                                                                                                                                                      * Name/Address: The recipient’s name (if available) and full mailing address. (New mover data might sometimes include a name; if not, we might address to “New Neighbor” or “Current Resident” at that address).
+
+                                                                                                                                                      * Campaign: Which campaign/postcard was sent to them (could be by campaign name).
+
+                                                                                                                                                      * Date Sent: When the postcard was triggered/sent.
+
+                                                                                                                                                      * Cost: Cost for that send (e.g., $3.00).
+
+                                                                                                                                                      * Converted?: A checkbox or toggle the user can mark if that individual became a customer. This is manual tracking for their reference. If checked, maybe allow them to input a note or the date of conversion.
+
+                                                                                                                                                      * Notes: A text field or icon to open a note. The user could write something like “Came in on 2025-08-01 and redeemed coupon. Very happy!”.
+
+                                                                                                                                                         * Allow filtering/searching this list:
+
+                                                                                                                                                            * Filter by campaign, by date range, by whether converted.
+
+                                                                                                                                                            * Sorting by any column (e.g., latest sent, or address alphabetically, or show all unconverted).
+
+                                                                                                                                                               * This functions as a basic CRM/report to analyze who responded. For instance, the user might export this list (CSV download) to follow up or analyze conversion rate themselves. We can include an Export CSV button.
+
+One-off “Blast” Mailings:
+                                                                                                                                                                  * A feature for sending a postcard to all movers in a certain past period. Perhaps accessed via a tab or button “Send a one-time batch”.
+
+                                                                                                                                                                  * UI: The user chooses which campaign design to use (if they have multiple campaigns, or if we allow using a campaign or a specific postcard template for the blast). Likely they’ll choose one of their existing postcard designs (or perhaps we allow them to create a special one just for the blast, but better to reuse).
+
+                                                                                                                                                                  * Then choose the geography (could reuse their campaign’s area or pick a new area).
+
+                                                                                                                                                                  * Choose the timeframe: e.g., “Movers in the last 1 month / 3 months / 6 months” or a custom date range.
+
+                                                                                                                                                                  * The system will then compute how many addresses that would be, minus those already sent to. We must cross-check against the mailing history:
+
+                                                                                                                                                                     * If the user has had an active campaign for the past 2 months, and now chooses last 3 months, a portion of those movers (from last 2 months) have already gotten a card. We exclude them to avoid duplication. We should show: “Total movers in period: 500. Already contacted by your campaigns: 300. Will send now to remaining 200.”
+
+                                                                                                                                                                        * Show the cost estimate: 200 * $X = $Y.
+
+                                                                                                                                                                        * Confirmation: “Send X postcards now at total cost $Y? This will be added to your end-of-month bill.”
+
+                                                                                                                                                                        * Once confirmed, trigger the mailing API for those addresses in bulk (or loop calls).
+
+                                                                                                                                                                        * After sending, those addresses are added to the history log (with date = today’s blast date, campaign maybe labeled “Blast – [CampaignName or custom]”).
+
+Note: We should ensure blasts respect block list as well, and mark those addresses as mailed so future campaigns don’t mail them twice if overlap. Actually, if an address got a blast now and then moves appear (they already moved though), future triggers might not include them because they are outside the new move timeframe by then. It’s okay.
+UI Design: The Recipients/History can be a separate page or a tab in dashboard. It’s data heavy (table). Ensure it’s paginated if large. Possibly use a sticky header for filters.
+For conversions marking, maybe an interactive checkbox in each row, or an “Mark as converted” action that sets a flag and maybe highlights the row.
+Perhaps use color coding: e.g., highlight converted rows in green or with a star icon, to visually separate who became customers.
+For blast UI, if it’s a separate tab, perhaps call it “New Move Blast”. Could even present it as a wizard: Step1 select area, Step2 timeframe, Step3 confirm & send.
+Alternatively, integrate into history page as a filter “show last X months new movers not mailed” and a send button. But that might be less clear.
+Better to separate: a distinct interface for blasts to avoid confusion with the log.
+UAT Criteria (History & Blast):
+                                                                                                                                                                           * ✅ History Log Completeness: After some postcards have been sent (simulate maybe 5 addresses across two campaigns), the history page should list those 5 with correct details. Check that each address is listed only once if only mailed once. If an address got mailed twice by different campaigns (shouldn’t normally happen unless user had overlapping campaigns; if so, we might list both mailings as separate entries or combine? We likely log each send as separate entry with same address duplicated row). So likely each send = one row. That means an address can appear multiple times on different dates.
+
+                                                                                                                                                                           * ✅ Sorting/Filtering: Test the controls. E.g., filter by campaign = “Welcome Offer”, and see only rows for that. Filter by converted = Yes, see only ones you marked converted.
+
+                                                                                                                                                                           * ✅ Mark Converted: Pick a row (address) and mark as converted. The UI might just have a checkbox – tick it. We should then allow a note or at least store the state. Ensure that state persists (e.g., refresh page, still marked). Also, check that marking converted might update campaign stats somewhere (maybe on dashboard we could show aggregate conversion count – not required, but possible). We won’t implement dynamic link to dashboard metric in MVP, but maybe display conversion count per campaign on dashboard which uses these flags.
+
+                                                                                                                                                                           * ✅ Add Note: Click to add a note on a recipient. Save it. The note should be retrievable (maybe as a tooltip or expand row). We must confirm the note saves properly (likely stored in the DB attached to that address record).
+
+                                                                                                                                                                           * ✅ Export: Click export CSV. Ensure the file downloads with appropriate columns and matches what’s shown.
+
+                                                                                                                                                                           * ✅ Blast Calculation: For blasting, let’s simulate:
+
+                                                                                                                                                                              * Suppose ZIP 12345 had 100 movers in last 3 months. The user’s ongoing campaign already mailed 60 of them (because campaign running for last 2 months). Now in blast UI, select that zip and 3 months. It should show “100 total, 60 already contacted, 40 will be sent.”
+
+                                                                                                                                                                              * If user selects a campaign design that’s same as was used, fine. If they pick a different design (maybe they have a special “We Missed You” design), they can send that. Make sure the design selection in blast UI works (if we provide that).
+
+                                                                                                                                                                              * If user tries to send to 0 (e.g., all already contacted), the UI should say “All movers in this period have already been reached by your campaigns. No postcards will be sent.” and probably disable send.
+
+                                                                                                                                                                                 * ✅ Blast Execution: Approve a blast for, say, 2 addresses (small test). After confirming, the system should add those 2 addresses to mailing history with current date and the chosen campaign (or mark as one-off if needed). Verify they appear in history as sent. Also verify they won’t be sent again by ongoing campaign if they happen to also come through as triggers (though if we properly mark them as sent, our system should skip).
+
+                                                                                                                                                                                 * ✅ Block List Integration: Add an address to block list that is known to be a new mover in the chosen area/time. Perform a blast. Ensure that blocked address is not counted in the “will send” list. For instance, 100 total, 5 on your block list, then maybe 95 shown (assuming those 5 were not mailed and won’t be).
+
+                                                                                                                                                                                 * ✅ UI Ease: Check that the table is scrollable, not too slow with many rows (simulate hundreds of entries). Pagination works (if implemented).
+
+                                                                                                                                                                                 * ✅ Mobile view: The table might be tricky on mobile – ensure at least it’s scrollable or we provide a responsive stack (maybe hide some columns on narrow screens). It’s okay if detailed use is mainly desktop.
+
+Block List Management (Exclusions)
+Description: In Settings (or a dedicated page), the user can maintain a list of addresses that should never be mailed. This is the Block List feature. They may have various reasons: personal addresses, folks who opted out, certain buildings, etc.
+Features:
+                                                                                                                                                                                    * Add Address: Provide a way to add an address to the block list. Ideally, by entering a street address, city, state, ZIP (or just copy-paste a full address). We might integrate an address autocomplete (Google Places API) to standardize formatting, but not necessary for MVP – manual input is fine.
+
+                                                                                                                                                                                    * Bulk Import: Allow uploading a CSV file of addresses to block (for example, if the business has an existing customer list they don’t want to send “new mover” offers to, they could import that to avoid mailing existing customers).
+
+                                                                                                                                                                                    * List Display: Show all blocked addresses in a list with option to remove (unblock). The list might just be simple text addresses sorted alphabetically or by date added.
+
+                                                                                                                                                                                    * Effect: When the system prepares to send a postcard, it will check if the address is in this block list, and if so, skip it. We already are handling that logically, but this UI is how the user controls it.
+
+                                                                                                                                                                                    * Possibly a count or indicator on how many addresses are blocked (maybe irrelevant, but could show “You have X addresses on your block list”).
+
+                                                                                                                                                                                    * We should also note that our platform might automatically block addresses after sending if needed (like if a user marked converted, do we want to prevent sending them another “new mover” card? Probably yes – maybe if an address is marked converted, we could auto-add it to block list to avoid wasting mail on someone who is already a customer. We can mention this as a suggestion: “Consider blocking addresses once they become customers to focus on new leads.”)
+
+UI Design: Likely in Settings page:
+                                                                                                                                                                                       * A section titled “Blocked Addresses”.
+
+                                                                                                                                                                                       * A multi-line text area or small form to input addresses:
+
+                                                                                                                                                                                          * For single entry: text fields for Street, City, State, ZIP might be more precise. But a freeform might lead to inconsistent data. Perhaps use a third-party address normalization or at least instruct format.
+
+                                                                                                                                                                                             * A button “Import CSV” – clicking opens file picker. We parse CSV for addresses (assuming either one per line or columns like name,address,… – we’ll have to document expected format).
+
+                                                                                                                                                                                             * The list of addresses could be just text, each with a “Remove” [X] button.
+
+                                                                                                                                                                                             * Possibly show date added as a smaller note, in case they wonder how old an entry is.
+
+UAT Criteria (Block List):
+                                                                                                                                                                                                * ✅ Add Single Address: Type in “123 Maple St, Springfield, IL 62704” (for example) and add to block list. After saving, the address should appear in the list. Then if we simulate a new mover at that exact address, confirm that no mailing is triggered. We may test by checking the internal logic rather than UI, but at least ensure the address string matches whatever format the new mover data uses (we might need to normalize to match, but assume exact match for now).
+
+                                                                                                                                                                                                * ✅ Remove Address: For an address on the list, click remove. It should disappear from list and no longer block in future. If possible, test that if a mover at that address comes in afterwards, it now would be mailed (to ensure removal took effect).
+
+                                                                                                                                                                                                * ✅ Import CSV: Create a CSV file with multiple addresses and upload it. Verify that all addresses get added. If duplicates or bad lines exist, see how we handle (maybe skip invalid lines, show an error if none could be read).
+
+                                                                                                                                                                                                * ✅ UI Validation: If user enters something not obviously an address, maybe we accept it anyway (garbage in, garbage out). It’s mainly user’s responsibility. But ideally, if missing ZIP or something, we could warn “Please include a ZIP code for accuracy” – up to our design. For test, enter an incomplete address like “456 Oak Ave, Seattle” – if we allow it, ensure it saves exactly as typed. Just note that it might not catch the actual new mover if formatting differs.
+
+                                                                                                                                                                                                * ✅ Large List Performance: If they import a large list (say 1000 addresses), ensure the UI can handle showing them (maybe paginate or just scroll).
+
+                                                                                                                                                                                                * ✅ Integration with Campaigns: Confirm that block list is indeed being applied by trying to cause a mail send to a blocked address. For example, add an address, then temporarily create a campaign specifically targeting that address’s ZIP and perhaps fudge the new mover feed to include that address. The system should skip creating a mailing for it. This might be more backend test, but it’s critical to verify integration.
+
+Account Settings & Referral Program
+Description: The Settings page houses various user account settings and info, including profile, referral program details, and possibly general preferences.
+Profile Info:
+                                                                                                                                                                                                   * Display the user’s name, email (especially if signed in via Google, this would be filled).
+
+                                                                                                                                                                                                   * Allow them to update their name or contact email if needed (could restrict email change if it’s tied to login, but maybe allow it if using password auth).
+
+                                                                                                                                                                                                   * If password account, allow password reset/change.
+
+                                                                                                                                                                                                   * If Google account, maybe offer an option to set a password too for direct login if they want (optional).
+
+                                                                                                                                                                                                   * Possibly an option to link other login methods (like link a Google account to an email account, etc., but not necessary for MVP).
+
+Business Info:
+                                                                                                                                                                                                      * Some info might have been fetched (business name, address, phone). Let the user edit these if needed (especially the address, since it’s used as return address on postcards, must be correct).
+
+                                                                                                                                                                                                      * Industry category – if we guessed, let them adjust from a dropdown for accuracy (affects conversion estimates maybe).
+
+                                                                                                                                                                                                      * Perhaps an option to upload a logo (if not done already) or change it, which we store for reuse in new campaigns.
+
+Referral Program:
+                                                                                                                                                                                                         * Explain the referral program: e.g., “Invite a fellow business owner and earn 10¢ for every postcard they send, for the first year.” (Details to be decided by business).
+
+                                                                                                                                                                                                         * Show the user’s unique referral link or code (e.g., joinpostcards.com?ref=USER123 or a code they can enter at sign-up).
+
+                                                                                                                                                                                                         * Possibly show any current referral credits or status (though if not implemented yet, we might just say “Coming soon: you’ll see your referral earnings here!”).
+
+                                                                                                                                                                                                         * Provide an easy way to share, e.g., a “Copy Link” button, maybe “Share via email” button that opens mail client.
+
+                                                                                                                                                                                                         * This section is forward-looking (V2) as mentioned, but we include it to signal the feature and maybe start tracking referrals.
+
+Notification Preferences:
+                                                                                                                                                                                                            * Let user opt-in/out of certain emails: e.g., “Email me monthly summary”, “Email me when a new campaign feature is available” etc. Not crucial, but we can put placeholders.
+
+Support & Help (if not separate): Some settings pages include a link to support or FAQ. We have a separate support form though.
+Danger Zone:
+                                                                                                                                                                                                               * Option to delete account entirely. Good to offer for compliance (if a user wants out). This would cancel all campaigns and remove data. We’d implement that carefully (maybe after billing settled). But at least a button that says “Delete my account” with a confirmation workflow/email. For now, maybe not focus, but mention if needed.
+
+UI Design: A tabbed or sectioned Settings page:
+                                                                                                                                                                                                                  * Use subheadings like “Profile”, “Business Info”, “Referral Program”, “Preferences”, etc., in one page or separate tabs.
+
+                                                                                                                                                                                                                  * It’s mostly forms. Make it clean and not too overwhelming:
+
+                                                                                                                                                                                                                     * Profile: show name/email and an Edit button or inline editable fields.
+
+                                                                                                                                                                                                                     * Business: fields for business name, address, phone, etc.
+
+                                                                                                                                                                                                                     * Referral: perhaps styled with some icon or illustration to highlight potential earnings, with the referral code in a textbox that can be copied.
+
+                                                                                                                                                                                                                        * Save buttons where needed; although for some fields (like name) we could auto-save on blur or have one master Save for all.
+
+UAT Criteria (Settings & Referrals):
+                                                                                                                                                                                                                           * ✅ View Profile Info: Upon navigating to Settings, the user sees their correct name and email pre-filled. If they signed up with Google, the email is not editable (or is, but if they change it might require setting a password, etc. For MVP, likely leave it read-only or require contacting support to change login email).
+
+                                                                                                                                                                                                                           * ✅ Change Name: Edit the name field and save. The new name should reflect on the UI (maybe on dashboard greetings or so) next time. And if they log out/in, it persists.
+
+                                                                                                                                                                                                                           * ✅ Update Business Address: Change the business address here and save. Then check if new postcards use the updated return address (simulate by editing a campaign after, its return address should pull from updated info).
+
+                                                                                                                                                                                                                           * ✅ Referral Code Display: A referral code/link is shown. Test copying it (if a button, ensure it copies to clipboard).
+
+                                                                                                                                                                                                                           * ✅ (If tracking) Simulate a referral signup: perhaps append the code to the registration of another test user (this is beyond UI test, but we’d confirm the system would attribute it). Not needed if not fully implemented; we could skip actual tracking in MVP.
+
+                                                                                                                                                                                                                           * ✅ Referral Explanation: Ensure that the text clearly states what the reward is (even if just “coming soon”). The user should not be confused. If not implemented, maybe label as “(coming soon)” to avoid false expectations.
+
+                                                                                                                                                                                                                           * ✅ Notification Prefs: Toggle a sample preference and save. Check in database that it updated (or in UI that state persists).
+
+                                                                                                                                                                                                                           * ✅ Delete Account: If present, click it. Likely we’ll double-confirm via modal “Type DELETE to confirm account deletion”. If confirmed, ensure:
+
+                                                                                                                                                                                                                              * All campaigns are halted.
+
+                                                                                                                                                                                                                              * Their data is (soft) deleted.
+
+                                                                                                                                                                                                                              * They are logged out and taken to a goodbye screen.
+
+                                                                                                                                                                                                                              * Try logging in again – should not work (account gone).
+
+                                                                                                                                                                                                                              * This is heavy to test, but we should ensure no orphan processes remain sending mail.
+
+                                                                                                                                                                                                                                 * ✅ Security: Ensure that things like changing email or password require appropriate verification. E.g., to change password, user must enter current password or via a reset link. For test, attempt a password change (if we allow it): put wrong current password, ensure it errors; correct current password + new one, ensure it updates (then test login with new password).
+
+                                                                                                                                                                                                                                 * ✅ Responsiveness: The form layout should be responsive. On mobile, fields stack nicely.
+
+Billing & Invoices
+Description: The Billing section allows the user to manage payment methods and view charges. It’s closely tied to Stripe’s portal.
+Features:
+                                                                                                                                                                                                                                    * Current Plan/Payment Method: Show what plan they’re on (if we have tiers, e.g., “Pay-as-you-go” or a subscription plan name). If we introduced a monthly base fee (like LettrLabs has Core/Premium tiers ), show that. If not, just state “No monthly fee, you pay per postcard.”
+
+                                                                                                                                                                                                                                    * Show the credit card on file (masked, last 4 digits, expiry).
+
+                                                                                                                                                                                                                                    * A button “Update Payment Method” which either opens Stripe’s hosted update page or opens a form to enter new card.
+
+                                                                                                                                                                                                                                    * Billing History: A list of past invoices or statements:
+
+                                                                                                                                                                                                                                       * For each month, an entry showing date (or period), amount billed, status (paid, or if failed, outstanding).
+
+                                                                                                                                                                                                                                       * Possibly allow downloading a PDF invoice or viewing details (Stripe can provide a URL to an invoice).
+
+                                                                                                                                                                                                                                          * Current Balance: If we do accumulate charges and bill at month-end, mid-cycle there might be an “estimated current charges $X” or an unused credit if any. We can show “Not yet billed: $Y for postcards sent this month so far.”, so user isn’t surprised.
+
+                                                                                                                                                                                                                                          * Billing Portal Link: Optionally, a “Go to Billing Portal” which uses Stripe’s customer portal feature to let them manage everything (plans, payment methods, etc.) in one place outside our app. This is the easiest integration: we just redirect them to that secure portal.
+
+                                                                                                                                                                                                                                          * Possibly support promo codes or credits (not in initial requirements, but if we grant referral credits, show them here as credit balance).
+
+UI Design: Likely a straightforward list and a summary:
+                                                                                                                                                                                                                                             * Payment method section at top with card info and an edit button.
+
+                                                                                                                                                                                                                                             * Then a table or list of invoices: e.g., “July 2025 – $500 – Paid ✅ (View Invoice)”.
+
+                                                                                                                                                                                                                                             * If an invoice failed (card declined), highlight in red and say “Payment failed – please update card.” Possibly also pop-up a persistent banner in app until resolved.
+
+                                                                                                                                                                                                                                             * Keep it very clear and trust-building: mention that we use Stripe (maybe Stripe logo or text “Securely processed by Stripe”) to reassure.
+
+                                                                                                                                                                                                                                             * If user is in free trial or hasn’t been billed yet, mention that (“Your first billing cycle will end on Aug 31, 2025. Your card will be charged then.” etc.)
+
+UAT Criteria (Billing):
+                                                                                                                                                                                                                                                * ✅ Display Card: If a card is on file, verify the last4 and brand are shown. If multiple payment methods (we likely allow only one default in MVP), it should show the default.
+
+                                                                                                                                                                                                                                                * ✅ Update Card: Click update, enter a new test card. Ensure that Stripe accepts it and the display updates to new last4. If using Stripe portal, that might open a new page – test that it works and upon returning (if webhooks or redirect back) the new info is present.
+
+                                                                                                                                                                                                                                                * ✅ View Invoice: For a past billed month, click “View Invoice”. Ideally it opens the PDF or Stripe invoice page. If PDF, check it downloads and looks correct (with itemization or at least total).
+
+                                                                                                                                                                                                                                                * ✅ Invoice History: If the user had two months of usage, there should be two entries. Check that amounts match what was calculated (if we can simulate sending X postcards, expect $X*price).
+
+                                                                                                                                                                                                                                                * ✅ Unpaid Scenario: Simulate an unpaid invoice (like card failed). The UI should indicate clearly e.g. “August 2025 – $300 – Payment failed ❌”. Possibly an alert advising them to update payment. After updating card, we should ideally allow them to retry or will auto-retry. (Stripe auto-retries usually, but user might need to hit a “Retry charge now” button). Not sure if we implement that; if not, at least updating card should trigger our system to try again or user contacting support.
+
+                                                                                                                                                                                                                                                * ✅ No card scenario: If for some reason they skipped adding payment (maybe we allowed some postcards free), the billing page should warn “No payment method on file – add one to continue campaigns.” and provide the add card form.
+
+                                                                                                                                                                                                                                                * ✅ Cancel Subscription: If we had subscription plans, test if user can cancel from portal. Since not in requirements, skip.
+
+                                                                                                                                                                                                                                                * ✅ Charges correctness: This is more backend: verify that the number of postcards in history matches the number billed in invoice. If we said monthly total 100 postcards at $3 => $300, ensure invoice shows $300. If the user had two campaigns, it should still be one combined invoice (assuming one customer account).
+
+                                                                                                                                                                                                                                                * ✅ Security: The billing page should only be accessible by the logged-in user; ensure that we don’t expose any sensitive info beyond last4 of card. Also ensure compliance (likely okay since Stripe handles actual card details; we never see full number).
+
+                                                                                                                                                                                                                                                * ✅ UI clarity: Even if not a functional test, ensure the text explains charges. For example, if user is in the middle of month, do they know how much they owe so far? Might show “Current month usage: $X (not yet billed)”. If we include that, verify it’s updating as postcards send (maybe test by simulating sends and refreshing page to see number go up).
+
+Conclusion: This specification aims to cover an end-to-end description of the platform’s functionality, screens, and technical approach. By following these requirements, we ensure a smooth user experience where a small business owner can effortlessly design a professional postcard and launch a hyper-targeted direct mail campaign to new movers in their area – all within minutes. The integration of AI for design and data for targeting is what gives this platform its unique power, and careful attention to UX details (like quick onboarding, clear cost estimates, and campaign control) will make it accessible and valuable to busy entrepreneurs.
+All features were considered with scalability and future enhancements in mind (e.g., adding referral tracking, advanced targeting filters, automated ROI tracking), so the platform can evolve with user needs. By delivering this MVP with the core features solid and intuitive, we can later iterate based on feedback – for example, adding more AI personalization options or expanding the analytics dashboard to show conversion rates directly.
+Ultimately, the goal is that a local business owner can say: “I just moved my business marketing into the 21st century – I logged in, AI created a postcard with my branding, and now every time someone new moves nearby, they automatically get my postcard welcoming them. I can see those new faces coming in with the postcard in hand, and it took me almost no time to set it up!” That success scenario is what these requirements are designed to achieve.

@@ -1,0 +1,44 @@
+.tabs-container {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid #E5E7EB;
+  margin-bottom: 2rem;
+}
+
+.tab-button {
+  padding: 0.75rem 1rem;
+  background-color: transparent;
+  border: none;
+  color: #6B7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.tab-button:hover {
+  color: #374151;
+}
+
+.tab-button.active {
+  color: #20B2AA;
+  border-bottom-color: #20B2AA;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tabs-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -1rem 2rem;
+    padding: 0 1rem;
+  }
+  
+  .tab-button {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}

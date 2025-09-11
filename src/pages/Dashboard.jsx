@@ -1,229 +1,138 @@
-import { useState, useEffect } from 'react'
-import { useAuth } from '../contexts/AuthContext'
-import { useQuery } from '@tanstack/react-query'
-import analyticsService from '../services/analytics.service'
-import campaignService from '../services/campaign.service'
-import LoadingSpinner from '../components/LoadingSpinner'
-import { 
-  LogOut, 
-  Mail, 
-  Target, 
-  TrendingUp, 
-  DollarSign,
-  Plus,
-  ChevronRight,
-  Calendar
-} from 'lucide-react'
-import './Dashboard.css'
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import DashboardLayout from '../components/layout/DashboardLayout';
+import EmptyState from '../components/dashboard/EmptyState';
+import CampaignCard from '../components/dashboard/CampaignCard';
+import AnalyticsChart from '../components/dashboard/AnalyticsChart';
+import './Dashboard.css';
 
 const Dashboard = () => {
-  const { user, logout } = useAuth()
-  const [timeRange, setTimeRange] = useState('30d')
-
-  // Fetch analytics data
-  const { data: analytics, isLoading: analyticsLoading } = useQuery({
-    queryKey: ['analytics', timeRange],
-    queryFn: async () => {
-      const response = await analyticsService.getDashboardAnalytics(timeRange)
-      return response.data
+  const navigate = useNavigate();
+  const [selectedPeriod, setSelectedPeriod] = useState('12 months');
+  const [campaigns, setCampaigns] = useState([
+    {
+      id: 1,
+      name: 'Campaign Name',
+      status: 'Active',
+      isActive: true,
+      targetArea: 'ZIP',
+      postcardsSent: 200,
+      image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop'
     },
-  })
+    {
+      id: 2,
+      name: 'Campaign Name',
+      status: 'Drafted',
+      isActive: false,
+      targetArea: 'Radius',
+      postcardsSent: 200,
+      image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop'
+    }
+  ]);
 
-  // Fetch recent campaigns
-  const { data: campaigns, isLoading: campaignsLoading } = useQuery({
-    queryKey: ['campaigns'],
-    queryFn: async () => {
-      const response = await campaignService.getCampaigns({ limit: 5 })
-      return response.data.campaigns
-    },
-  })
+  const periods = ['12 months', '30 days', '7 days', '24 hours'];
 
-  if (analyticsLoading || campaignsLoading) {
-    return <LoadingSpinner fullScreen />
+  const handleCreateCampaign = () => {
+    navigate('/create-campaign');
+  };
+
+  const handleNavigateToHistory = () => {
+    navigate('/history');
+  };
+
+  const handleEditCampaign = (campaignId) => {
+    console.log('Edit campaign:', campaignId);
+  };
+
+  const handleDeleteCampaign = (campaignId) => {
+    console.log('Delete campaign:', campaignId);
+  };
+
+  const handleDuplicateCampaign = (campaignId) => {
+    console.log('Duplicate campaign:', campaignId);
+  };
+
+  const toggleCampaignStatus = (campaignId) => {
+    setCampaigns(campaigns.map(campaign => 
+      campaign.id === campaignId 
+        ? { ...campaign, isActive: !campaign.isActive, status: campaign.isActive ? 'Paused' : 'Active' }
+        : campaign
+    ));
+  };
+
+  // Empty state when no campaigns
+  if (campaigns.length === 0) {
+    return (
+      <DashboardLayout>
+        <EmptyState onCreateCampaign={handleCreateCampaign} />
+      </DashboardLayout>
+    );
   }
 
-  const stats = [
-    {
-      label: 'Total Campaigns',
-      value: analytics?.overview?.totalCampaigns || 0,
-      icon: Mail,
-      color: '#7F56D9',
-    },
-    {
-      label: 'Postcards Sent',
-      value: analytics?.overview?.totalPostcardsSent || 0,
-      icon: Target,
-      color: '#12B76A',
-    },
-    {
-      label: 'Delivery Rate',
-      value: `${analytics?.overview?.deliveryRate || 0}%`,
-      icon: TrendingUp,
-      color: '#1570EF',
-    },
-    {
-      label: 'Total Spent',
-      value: `$${analytics?.overview?.totalSpent || 0}`,
-      icon: DollarSign,
-      color: '#F79009',
-    },
-  ]
-
+  // Dashboard with campaigns
   return (
-    <div className="dashboard-container">
-      {/* Header */}
-      <header className="dashboard-header">
-        <div className="header-content">
-          <div className="header-left">
-            <div className="logo">
-              <span>Postcard</span>
-            </div>
-            <h1>Dashboard</h1>
-          </div>
-          <div className="header-right">
-            <div className="user-info">
-              <span className="user-name">{user?.firstName} {user?.lastName}</span>
-              <span className="user-email">{user?.email}</span>
-            </div>
-            <button className="logout-button" onClick={logout}>
-              <LogOut size={20} />
-              <span>Logout</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="dashboard-main">
-        {/* Welcome Section */}
-        <section className="welcome-section">
-          <h2>Welcome back, {user?.firstName}!</h2>
-          <p>Here's what's happening with your postcard campaigns.</p>
-        </section>
-
-        {/* Time Range Selector */}
-        <div className="time-range-selector">
-          <button 
-            className={timeRange === '7d' ? 'active' : ''}
-            onClick={() => setTimeRange('7d')}
-          >
-            Last 7 days
-          </button>
-          <button 
-            className={timeRange === '30d' ? 'active' : ''}
-            onClick={() => setTimeRange('30d')}
-          >
-            Last 30 days
-          </button>
-          <button 
-            className={timeRange === '90d' ? 'active' : ''}
-            onClick={() => setTimeRange('90d')}
-          >
-            Last 90 days
-          </button>
-          <button 
-            className={timeRange === '1y' ? 'active' : ''}
-            onClick={() => setTimeRange('1y')}
-          >
-            Last year
-          </button>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="stats-grid">
-          {stats.map((stat, index) => (
-            <div key={index} className="stat-card">
-              <div className="stat-icon" style={{ backgroundColor: `${stat.color}15` }}>
-                <stat.icon size={24} style={{ color: stat.color }} />
-              </div>
-              <div className="stat-content">
-                <p className="stat-label">{stat.label}</p>
-                <h3 className="stat-value">{stat.value}</h3>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Campaign Section */}
-        <section className="campaigns-section">
-          <div className="section-header">
-            <h3>Recent Campaigns</h3>
-            <button className="new-campaign-button">
-              <Plus size={20} />
-              <span>New Campaign</span>
+    <DashboardLayout>
+      <div className="dashboard-page">
+          {/* Header */}
+          <div className="dashboard-header">
+            <h1 className="dashboard-title">Dashboard</h1>
+            <button className="create-campaign-button" onClick={handleCreateCampaign}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 1V15M1 8H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              Create Campaign
             </button>
           </div>
 
-          {campaigns && campaigns.length > 0 ? (
-            <div className="campaigns-list">
-              {campaigns.map((campaign) => (
-                <div key={campaign.id} className="campaign-card">
-                  <div className="campaign-info">
-                    <h4>{campaign.name}</h4>
-                    <div className="campaign-meta">
-                      <span className={`campaign-status ${campaign.status}`}>
-                        {campaign.status}
-                      </span>
-                      <span className="campaign-date">
-                        <Calendar size={16} />
-                        {new Date(campaign.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="campaign-stats">
-                    <div className="campaign-stat">
-                      <span className="stat-label">Recipients</span>
-                      <span className="stat-value">{campaign.totalRecipients}</span>
-                    </div>
-                    <div className="campaign-stat">
-                      <span className="stat-label">Cost</span>
-                      <span className="stat-value">${campaign.totalCost}</span>
-                    </div>
-                  </div>
-                  <ChevronRight size={20} className="campaign-arrow" />
-                </div>
+          {/* Time Period Filters */}
+          <div className="filters-section">
+            <div className="period-filters">
+              {periods.map((period) => (
+                <button
+                  key={period}
+                  className={`period-button ${selectedPeriod === period ? 'active' : ''}`}
+                  onClick={() => setSelectedPeriod(period)}
+                >
+                  {period}
+                </button>
               ))}
             </div>
-          ) : (
-            <div className="empty-state">
-              <Mail size={48} className="empty-icon" />
-              <h4>No campaigns yet</h4>
-              <p>Create your first campaign to start sending postcards</p>
-              <button className="new-campaign-button primary">
-                <Plus size={20} />
-                <span>Create Campaign</span>
+            <div className="filter-controls">
+              <button className="date-select-button">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M5 1V5M11 1V5M2 7H14" stroke="currentColor" strokeWidth="1.5"/>
+                </svg>
+                Select dates
+              </button>
+              <button className="filters-button">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M1 4H15M3 8H13M5 12H11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                Filters
               </button>
             </div>
-          )}
-        </section>
+          </div>
 
-        {/* Recent Activity */}
-        {analytics?.recentActivity && analytics.recentActivity.length > 0 && (
-          <section className="activity-section">
-            <h3>Recent Activity</h3>
-            <div className="activity-list">
-              {analytics.recentActivity.map((activity, index) => (
-                <div key={index} className="activity-item">
-                  <div className="activity-icon">
-                    <Mail size={16} />
-                  </div>
-                  <div className="activity-content">
-                    <p className="activity-text">
-                      {activity.type === 'campaign_sent' && `Campaign "${activity.campaignName}" sent`}
-                      {activity.details && ` - ${activity.details}`}
-                    </p>
-                    <span className="activity-time">
-                      {new Date(activity.timestamp).toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-      </main>
-    </div>
-  )
-}
+          {/* Analytics Chart */}
+          <AnalyticsChart data={[]} total={400} />
 
-export default Dashboard
+          {/* Campaigns Grid */}
+          <div className="campaigns-grid">
+            {campaigns.map((campaign) => (
+              <CampaignCard
+                key={campaign.id}
+                campaign={campaign}
+                onToggleStatus={toggleCampaignStatus}
+                onEdit={handleEditCampaign}
+                onDelete={handleDeleteCampaign}
+                onDuplicate={handleDuplicateCampaign}
+              />
+            ))}
+          </div>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default Dashboard;

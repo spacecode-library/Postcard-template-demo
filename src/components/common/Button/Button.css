@@ -1,0 +1,200 @@
+@import '../../../styles/design-system.css';
+
+/* Base Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-family: inherit;
+  font-weight: var(--font-semibold);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* Button Sizes */
+.btn-small {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-sm);
+  min-height: 32px;
+}
+
+.btn-medium {
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--font-sm);
+  min-height: 40px;
+}
+
+.btn-large {
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--font-base);
+  min-height: 48px;
+}
+
+/* Button Variants */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover:not(.btn-disabled):not(.btn-loading) {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active:not(.btn-disabled):not(.btn-loading) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-xs);
+}
+
+.btn-secondary {
+  background-color: var(--color-white);
+  color: var(--color-gray-700);
+  border: 1px solid var(--color-gray-300);
+}
+
+.btn-secondary:hover:not(.btn-disabled):not(.btn-loading) {
+  background-color: var(--color-gray-50);
+  border-color: var(--color-gray-400);
+}
+
+.btn-secondary:active:not(.btn-disabled):not(.btn-loading) {
+  background-color: var(--color-gray-100);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-gray-700);
+}
+
+.btn-ghost:hover:not(.btn-disabled):not(.btn-loading) {
+  background-color: var(--color-gray-100);
+}
+
+.btn-ghost:active:not(.btn-disabled):not(.btn-loading) {
+  background-color: var(--color-gray-200);
+}
+
+.btn-danger {
+  background-color: var(--color-error);
+  color: var(--color-white);
+}
+
+.btn-danger:hover:not(.btn-disabled):not(.btn-loading) {
+  background-color: var(--color-error-700);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-danger-outline {
+  background-color: transparent;
+  color: var(--color-error-600);
+  border: 1px solid var(--color-error-600);
+}
+
+.btn-danger-outline:hover:not(.btn-disabled):not(.btn-loading) {
+  background-color: var(--color-error-50);
+  border-color: var(--color-error-700);
+  color: var(--color-error-700);
+}
+
+.btn-danger-outline:active:not(.btn-disabled):not(.btn-loading) {
+  background-color: var(--color-error-100);
+}
+
+/* Full Width */
+.btn-full-width {
+  width: 100%;
+}
+
+/* Disabled State */
+.btn-disabled,
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Loading State */
+.btn-loading {
+  color: transparent;
+  pointer-events: none;
+}
+
+.btn-spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+.spinner-circle {
+  stroke: currentColor;
+  stroke-dasharray: 62.83;
+  stroke-dashoffset: 47.12;
+  animation: spinner-dash 1.5s ease-in-out infinite;
+}
+
+.btn-primary .spinner-circle {
+  stroke: var(--color-white);
+}
+
+.btn-secondary .spinner-circle,
+.btn-ghost .spinner-circle {
+  stroke: var(--color-gray-700);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spinner-dash {
+  0% {
+    stroke-dashoffset: 47.12;
+  }
+  50% {
+    stroke-dashoffset: 15.71;
+  }
+  100% {
+    stroke-dashoffset: 47.12;
+  }
+}
+
+/* Button Icon */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-large .btn-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Focus Styles */
+.btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

@@ -1,0 +1,190 @@
+﻿Direct Mail API Services (LettrLabs Alternatives)
+1. PostGrid (Recommended)
+Website: postgrid.com
+Pricing: Custom pricing (contact for quotes)
+* Postcards: Industry-competitive rates (estimated $0.50-$0.80 based on reviews)
+* Starter Plan: Limited to 500 mailings/month
+* No minimum order requirements
+Key Features:
+* REST API with excellent documentation
+* Address verification included (CASS/DPV certified)
+* Template editor with drag-and-drop functionality
+* QR code and pURL tracking
+* HIPAA compliant options
+* Supports 4x6, 6x9, and 6x11 postcards
+* G2 rating: 5 stars
+API Integration:
+* Well-documented REST API
+* Webhooks for tracking
+* Native integrations available
+* Test mode with free API keys
+
+
+2. Lob
+Website: lob.com
+Pricing: Transparent, tiered pricing
+* Developer Plan (Free): Up to 500 mailings, $0.872/postcard
+* Startup Plan ($260/mo): Up to 3,000 mailings, $0.612/postcard
+* Growth Plan ($550/mo): Up to 6,000 mailings, $0.582/postcard
+* Enterprise: Custom pricing
+Key Features:
+* Industry-standard API
+* HTML template support
+* Address verification ($0.009-$0.05 per verification)
+* Tracking and analytics dashboard
+* $50 initial credit for new accounts
+Pros:
+* Well-established with extensive documentation
+* Wide adoption in the industry
+* Good for developers
+Cons:
+* Reviews mention slow delivery (4-7 days)
+* Limited customization for small batches
+* Some quality control issues reported
+
+
+3. Postalytics
+Website: postalytics.com
+Pricing: All-inclusive pricing
+* Free Plan: Limited features
+* Pro Plan ($399/mo): ~$0.72 per 4x6 postcard (includes everything)
+* Volume discounts available
+Key Features:
+* Marketing automation focused
+* Triggered drip campaigns
+* Built-in design tools
+* pURL and QR code tracking
+* CRM integrations
+Best For: Marketing teams wanting automation features
+4. Click2Mail
+Website: click2mail.com
+Pricing: Pay-as-you-go
+* 4x6 Postcards: From $0.53
+* 6x9 Postcards: From $0.64
+* 6x11 Postcards: From $0.73
+* No monthly fees or minimums
+Key Features:
+* Simple web interface
+* Same-day processing (orders before 8 PM ET)
+* Multiple mailing options
+* Mailing list purchase available
+Best For: Small businesses or one-off campaigns
+5. EDDM (Every Door Direct Mail)  Cheapest Option
+Provider: USPS directly
+Pricing: $0.247 per piece (current rate)
+Key Features:
+* No mailing list needed
+* Target by postal route
+* Minimum 200 pieces
+* Maximum 5,000 pieces/day
+Pros:
+* Extremely low cost
+* Direct from USPS
+* Good for local businesses
+Cons:
+* No personalization
+* Manual process
+* Limited to geographic targeting
+
+
+ New Mover Data Alternatives (Melissa Alternatives)
+1. NCOA Processing Services (Address Updates Only)
+These services update your existing list with new addresses but don't provide new mover leads:
+TrueNCOA ⭐ Best Value
+* Pricing: $20 flat rate per file (unlimited records)
+* Features: 18 & 48-month updates included, CASS/DPV verification
+* Turnaround: Minutes
+* Free: ROI report before purchase
+Other NCOA Providers:
+* Melissa Direct: $2.25-$2.95 per 1,000 records
+* FreeNCOA: $0.35-$0.75 per 1,000 records
+* ListCleaners: ~$2 per 1,000 records
+2. New Mover Data Providers (Fresh Leads)
+Speedeon Data  (Recommended)
+Website: speedeondata.com
+Pricing: Custom (contact for quotes)
+Data Coverage:
+* 39.1 million moving events annually
+* Pre-movers, active movers, and newly moved
+* Updated 24/7, triple validated
+* Covers 75%+ of movers (vs NCOA's 50%)
+API Features:
+* REST API available
+* Real-time updates
+* Segmentation options
+* CRM matching capabilities
+Use Cases:
+* Target movers at different stages
+* Demographic filtering
+* Life event triggers
+
+
+Focus USA
+Website: focus-usa.com
+Pricing: Custom pricing
+Features:
+* New mover API available
+* Claims 75% mover coverage
+* Multiple data sources beyond NCOA
+* Timing segmentation (1-3 months)
+3. Alternative Approach: EDDM + Demographics
+Instead of buying new mover lists, use EDDM to target neighborhoods with high turnover:
+* Use census data to identify areas with high mobility
+* Target apartment complexes and new developments
+* Cost: $0.247 per postcard + printing
+
+
+Recommended Stack for MVP
+Option 1: PostGrid + EDDM (Lowest Cost)
+* PostGrid API for personalized campaigns ($0.50-$0.80/card)
+* EDDM for new mover saturation ($0.247/card)
+* Total estimated cost: $0.75-$1.05 per targeted card
+Option 2: Lob + Speedeon (Most Automated)
+* Lob API for printing/mailing ($0.58-$0.87/card)
+* Speedeon API for new mover data (custom pricing)
+* Estimated total: $1.50-$2.50 per targeted card
+Option 3: Click2Mail + TrueNCOA (Hybrid)
+* Click2Mail for simple mailing ($0.53+/card)
+* TrueNCOA for address updates ($20/file)
+* Manual targeting of high-turnover areas
+ Integration Considerations
+API Quality Comparison:
+1. Lob: Best documentation, most mature API
+2. PostGrid: Modern API, good docs, newer player
+3. Click2Mail: Basic API, limited features
+4. Postalytics: Marketing-focused API
+Development Time Estimates:
+* Lob/PostGrid: 1-2 days for basic integration
+* Click2Mail: 2-3 days (less documentation)
+* EDDM: Manual process, no API
+
+
+Cost Analysis Example
+For 1,000 postcards to new movers:
+LettrLabs Estimate: ~$3,000-$5,000
+* Postcards: $0.71 base + premium features
+* New mover data: Included but expensive
+Alternative Stack: ~$800-$1,500
+* PostGrid postcards: ~$600-$800
+* Speedeon data: ~$200-$700 (estimated)
+Next Steps
+1. Create Test Accounts:
+
+   * PostGrid (free test mode)
+   * Lob ($50 credit)
+   * TrueNCOA (free report)
+   2. API Testing Priority:
+
+      * Test PostGrid vs Lob for best pricing
+      * Compare print quality with samples
+      * Evaluate API ease of use
+      3. Data Strategy:
+
+         * Start with EDDM for geographic targeting
+         * Add Speedeon or similar for Phase 2
+         * Use TrueNCOA for list hygiene
+         4. Contact for Custom Pricing:
+
+            * PostGrid: Enterprise rates for volume
+            * Speedeon: New mover data pricing
+            * Consider annual contracts for better rates

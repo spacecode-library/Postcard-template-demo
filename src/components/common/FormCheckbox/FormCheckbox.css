@@ -1,0 +1,84 @@
+/* Import Design System */
+@import '../../../styles/colors.css';
+@import '../../../styles/spacing.css';
+
+/* Form Checkbox Styles */
+.checkbox-group {
+  width: 100%;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.checkbox-label.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.checkbox-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.checkbox-box {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-gray-300);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.checkbox-icon {
+  width: 12px;
+  height: 12px;
+  color: var(--color-white);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s ease;
+}
+
+/* Hover state */
+.checkbox-label:hover .checkbox-box {
+  border-color: var(--color-gray-400);
+}
+
+/* Checked state */
+.checkbox-input:checked + .checkbox-box {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.checkbox-input:checked + .checkbox-box .checkbox-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Focus state */
+.checkbox-input:focus + .checkbox-box {
+  box-shadow: var(--focus-ring-primary);
+}
+
+/* Disabled state */
+.checkbox-input:disabled + .checkbox-box {
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gray-300);
+}
+
+.checkbox-text {
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}

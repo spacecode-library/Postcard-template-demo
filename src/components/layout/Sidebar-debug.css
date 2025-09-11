@@ -1,0 +1,37 @@
+/* Debug CSS to ensure sidebar sections are visible */
+.sidebar {
+  background-color: #FFFFFF !important;
+  border-right: 2px solid red !important; /* Debug border */
+}
+
+.sidebar-header {
+  border: 2px solid blue !important; /* Debug border */
+  background-color: #FFFFFF !important;
+}
+
+.search-section {
+  border: 2px solid green !important; /* Debug border */
+  display: block !important;
+}
+
+.nav-menu {
+  border: 2px solid orange !important; /* Debug border */
+  display: block !important;
+  min-height: 200px !important;
+}
+
+.nav-item {
+  border: 1px solid purple !important; /* Debug border */
+  display: flex !important;
+}
+
+.sidebar-footer {
+  border: 2px solid pink !important; /* Debug border */
+  display: block !important;
+}
+
+/* Ensure nothing is hidden */
+.sidebar * {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
