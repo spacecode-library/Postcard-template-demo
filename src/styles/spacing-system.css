@@ -1,0 +1,160 @@
+/* Global Spacing System for High-Quality Layout */
+
+:root {
+  /* Base Spacing Scale */
+  --spacing-base: 1rem; /* 16px */
+  
+  /* Spacing Values - More Generous */
+  --spacing-xs: 0.5rem;   /* 8px */
+  --spacing-sm: 1rem;     /* 16px */
+  --spacing-md: 1.5rem;   /* 24px */
+  --spacing-lg: 2rem;     /* 32px */
+  --spacing-xl: 3rem;     /* 48px */
+  --spacing-2xl: 4rem;    /* 64px */
+  --spacing-3xl: 6rem;    /* 96px */
+  
+  /* Component Specific Spacing */
+  --form-group-spacing: 2rem;
+  --section-spacing: 3rem;
+  --page-padding: 3rem;
+  --card-padding: 2rem;
+  --button-padding-x: 2.5rem;
+  --button-padding-y: 0.875rem;
+  --input-padding-x: 1.25rem;
+  --input-padding-y: 0.875rem;
+  
+  /* Z-Index System to Prevent Overlaps */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --z-notification: 800;
+  
+  /* Heights for Consistency */
+  --input-height: 48px;
+  --button-height: 48px;
+  --navbar-height: 64px;
+  --footer-height: 120px;
+  
+  /* Shadows for Depth */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Responsive Breakpoints */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* Global Box Sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Prevent Margin Collapse */
+.layout-container {
+  display: flow-root;
+}
+
+/* Responsive Container */
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--page-padding);
+  padding-right: var(--page-padding);
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+/* Utility Classes for Consistent Spacing */
+.section {
+  padding-top: var(--section-spacing);
+  padding-bottom: var(--section-spacing);
+}
+
+.card {
+  padding: var(--card-padding);
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Form Spacing Utilities */
+.form-stack > * + * {
+  margin-top: var(--form-group-spacing);
+}
+
+/* Prevent Content Under Fixed Elements */
+.has-fixed-footer {
+  padding-bottom: var(--footer-height);
+}
+
+.has-fixed-header {
+  padding-top: var(--navbar-height);
+}
+
+/* Scroll Padding for Fixed Elements */
+.scrollable-content {
+  scroll-padding-top: var(--navbar-height);
+  scroll-padding-bottom: var(--footer-height);
+}
+
+/* Safe Area for Mobile Devices */
+.safe-area-inset {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Responsive Spacing */
+@media (max-width: 768px) {
+  :root {
+    --page-padding: 1.5rem;
+    --section-spacing: 2rem;
+    --card-padding: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --page-padding: 1rem;
+    --section-spacing: 1.5rem;
+    --card-padding: 1rem;
+  }
+}

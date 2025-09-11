@@ -21,8 +21,11 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem('token')
       if (token) {
         try {
-          const response = await authService.verify()
-          setUser(response.data.user)
+          // Mock user for development without backend
+          const mockUser = JSON.parse(localStorage.getItem('user') || '{}')
+          if (mockUser.email) {
+            setUser(mockUser)
+          }
         } catch (error) {
           localStorage.removeItem('token')
           localStorage.removeItem('user')
@@ -35,13 +38,22 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await authService.login(email, password)
-      const { user, token } = response.data
-      localStorage.setItem('token', token)
-      localStorage.setItem('user', JSON.stringify(user))
-      setUser(user)
+      // Mock login for development without backend
+      const mockUser = {
+        id: '1',
+        email: email,
+        firstName: 'Test',
+        lastName: 'User',
+        onboardingCompleted: false
+      }
+      const mockToken = 'mock-jwt-token'
+      
+      localStorage.setItem('token', mockToken)
+      localStorage.setItem('user', JSON.stringify(mockUser))
+      setUser(mockUser)
       toast.success('Login successful!')
-      return response
+      
+      return { data: { user: mockUser, token: mockToken } }
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed'
       toast.error(message)
@@ -51,13 +63,22 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await authService.register(userData)
-      const { user, token } = response.data
-      localStorage.setItem('token', token)
-      localStorage.setItem('user', JSON.stringify(user))
-      setUser(user)
+      // Mock register for development without backend
+      const mockUser = {
+        id: '1',
+        email: userData.email,
+        firstName: userData.name || 'Test',
+        lastName: 'User',
+        onboardingCompleted: false
+      }
+      const mockToken = 'mock-jwt-token'
+      
+      localStorage.setItem('token', mockToken)
+      localStorage.setItem('user', JSON.stringify(mockUser))
+      setUser(mockUser)
       toast.success('Registration successful!')
-      return response
+      
+      return { data: { user: mockUser, token: mockToken } }
     } catch (error) {
       const message = error.response?.data?.message || 'Registration failed'
       toast.error(message)
@@ -67,13 +88,22 @@ export const AuthProvider = ({ children }) => {
 
   const googleLogin = async (idToken) => {
     try {
-      const response = await authService.googleLogin(idToken)
-      const { user, token, isNewUser } = response.data
-      localStorage.setItem('token', token)
-      localStorage.setItem('user', JSON.stringify(user))
-      setUser(user)
-      toast.success(isNewUser ? 'Welcome to Postcard!' : 'Welcome back!')
-      return response
+      // Mock Google login for development without backend
+      const mockUser = {
+        id: '1',
+        email: 'google.user@gmail.com',
+        firstName: 'Google',
+        lastName: 'User',
+        onboardingCompleted: false
+      }
+      const mockToken = 'mock-jwt-token'
+      
+      localStorage.setItem('token', mockToken)
+      localStorage.setItem('user', JSON.stringify(mockUser))
+      setUser(mockUser)
+      toast.success('Welcome to Postcard!')
+      
+      return { data: { user: mockUser, token: mockToken, isNewUser: true } }
     } catch (error) {
       const message = error.response?.data?.message || 'Google login failed'
       toast.error(message)

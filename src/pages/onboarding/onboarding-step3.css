@@ -1,0 +1,438 @@
+/* Onboarding Step 3 - Postcard Editor Styles */
+
+/* Editor Layout */
+.editor-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.editor-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 2rem;
+  width: 100%;
+  align-items: start;
+}
+
+/* Postcard Preview Section */
+.postcard-preview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.postcard-preview-editor {
+  background-color: #F8F9FA;
+  border-radius: 12px;
+  padding: 2rem;
+  min-height: 450px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.postcard-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.postcard-content-overlay {
+  position: relative;
+  background: white;
+  border-radius: 8px;
+  padding: 2.5rem;
+  width: 90%;
+  max-width: 480px;
+  min-height: 380px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.postcard-logo {
+  background-color: #60A5FA;
+  color: white;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+  margin-bottom: 1.25rem;
+}
+
+.postcard-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.postcard-offer {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.3;
+  margin-bottom: 0.75rem;
+}
+
+.postcard-tagline {
+  font-style: italic;
+  color: #6B7280;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.postcard-cta {
+  font-size: 0.875rem;
+  color: #111827;
+  font-weight: 500;
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid #E5E7EB;
+}
+
+.postcard-contact {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #4B5563;
+  line-height: 1.5;
+}
+
+.postcard-contact p {
+  margin: 0;
+}
+
+.postcard-footer {
+  font-size: 0.8125rem;
+  color: #9CA3AF;
+  font-style: italic;
+  text-align: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #F3F4F6;
+}
+
+/* Product Details Toggle */
+.product-details-section {
+  margin-top: 0;
+}
+
+.product-details-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  border-top: 1px solid #E5E7EB;
+}
+
+.chevron {
+  transition: transform 0.2s;
+  color: #6B7280;
+  font-size: 0.75rem;
+}
+
+.chevron.up {
+  transform: rotate(180deg);
+}
+
+.product-details-content {
+  padding: 1rem 0;
+  font-size: 0.875rem;
+  color: #4B5563;
+  line-height: 1.6;
+}
+
+.product-details-content ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.product-details-content li {
+  margin-bottom: 0.5rem;
+}
+
+/* Editor Form Section */
+.editor-form {
+  background-color: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 1.75rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 250px);
+}
+
+.template-info {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.template-info h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+/* Form Fields */
+.form-field {
+  margin-bottom: 1.5rem;
+}
+
+.form-field label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #111827;
+  background-color: white;
+  transition: all 0.2s;
+}
+
+.form-field input:focus {
+  outline: none;
+  border-color: #20B2AA;
+  box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.1);
+}
+
+.form-field input::placeholder {
+  color: #9CA3AF;
+}
+
+.section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  margin-top: 1.75rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Image Upload Area */
+.image-upload-area {
+  border: 2px dashed #D1D5DB;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: #FAFAFA;
+}
+
+.image-upload-area:hover {
+  border-color: #20B2AA;
+  background-color: #F0FDFA;
+}
+
+.image-upload-area svg {
+  margin-bottom: 0.75rem;
+}
+
+.image-upload-area p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.image-upload-area span {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+}
+
+/* Idea Generator Section */
+.idea-generator {
+  background-color: #F3E8FF;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1.75rem;
+}
+
+.idea-generator h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 0.5rem 0;
+}
+
+.idea-generator p {
+  font-size: 0.8125rem;
+  color: #4B5563;
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+.campaign-input {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.campaign-input input {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  border: 1px solid #E9D5FF;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  background-color: white;
+  color: #111827;
+}
+
+.campaign-input input::placeholder {
+  color: #9CA3AF;
+}
+
+.generate-button {
+  padding: 0.625rem 1.25rem;
+  background-color: #9333EA;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.generate-button:hover {
+  background-color: #7C3AED;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(147, 51, 234, 0.2);
+}
+
+/* Footer Styles for Step 3 - Removed to avoid conflicts with unified CSS */
+/* Footer positioning is handled in onboarding-unified.css */
+
+.footer-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.step-indicator {
+  font-size: 0.875rem;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.save-draft-button {
+  padding: 0.75rem 1.5rem;
+  background-color: white;
+  color: #20B2AA;
+  border: 1.5px solid #20B2AA;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-draft-button:hover {
+  background-color: rgba(32, 178, 170, 0.05);
+  transform: translateY(-1px);
+}
+
+.continue-button {
+  padding: 0.75rem 2rem;
+  background-color: #20B2AA;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.continue-button:hover {
+  background-color: #1a9d96;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 178, 170, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .editor-layout {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 968px) {
+  .editor-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .postcard-preview-editor {
+    min-height: 400px;
+  }
+  
+  .editor-form {
+    max-height: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .postcard-preview-editor {
+    padding: 1.5rem;
+    min-height: 350px;
+  }
+  
+  .postcard-content-overlay {
+    padding: 1.5rem;
+    min-height: 320px;
+  }
+  
+  .postcard-title {
+    font-size: 1.25rem;
+  }
+  
+  .postcard-offer {
+    font-size: 1.125rem;
+  }
+  
+  .campaign-input {
+    flex-direction: column;
+  }
+  
+  .campaign-input input,
+  .generate-button {
+    width: 100%;
+  }
+}

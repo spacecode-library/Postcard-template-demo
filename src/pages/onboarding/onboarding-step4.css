@@ -1,0 +1,300 @@
+/* Onboarding Step 4 - Targeting & Budget Styles */
+
+/* Main Content */
+.targeting-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.main-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 2.5rem;
+}
+
+/* Targeting Options */
+.targeting-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.option-card {
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 1.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: white;
+  position: relative;
+}
+
+.option-card:hover {
+  border-color: #D1D5DB;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.option-card.selected {
+  border-color: #20B2AA;
+  background-color: #F0FDFA;
+}
+
+.option-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.option-radio {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #D1D5DB;
+  position: relative;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.option-card.selected .option-radio {
+  border-color: #20B2AA;
+}
+
+.option-card.selected .option-radio::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #20B2AA;
+}
+
+.option-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.option-description {
+  font-size: 0.875rem;
+  color: #6B7280;
+  line-height: 1.5;
+  margin: 0;
+  padding-left: 2.25rem;
+}
+
+/* Map/Content Area */
+.map-container {
+  background-color: #F8F9FA;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.map-placeholder {
+  text-align: center;
+  color: #9CA3AF;
+}
+
+.map-placeholder svg {
+  margin-bottom: 1rem;
+}
+
+.map-placeholder p {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Radius Settings Panel */
+.radius-settings {
+  background-color: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 1.75rem;
+  margin-top: 2rem;
+}
+
+.settings-header {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.form-field input {
+  padding: 0.75rem 1rem;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #111827;
+  background-color: white;
+  transition: all 0.2s;
+}
+
+.form-field input:focus {
+  outline: none;
+  border-color: #20B2AA;
+  box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.1);
+}
+
+/* Target Audience */
+.target-audience {
+  margin-top: 1.5rem;
+}
+
+.audience-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.audience-options {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #111827;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #20B2AA;
+  cursor: pointer;
+}
+
+/* Apply Button */
+.apply-button {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #20B2AA;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.apply-button:hover {
+  background-color: #1a9d96;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(32, 178, 170, 0.2);
+}
+
+/* ZIP Codes Settings */
+.zip-settings {
+  background-color: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 1.75rem;
+  margin-top: 2rem;
+}
+
+.zip-input-area {
+  margin-bottom: 1.5rem;
+}
+
+.zip-input-area label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.zip-input-area textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #111827;
+  background-color: white;
+  resize: vertical;
+  transition: all 0.2s;
+}
+
+.zip-input-area textarea:focus {
+  outline: none;
+  border-color: #20B2AA;
+  box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.1);
+}
+
+.zip-helper-text {
+  font-size: 0.75rem;
+  color: #6B7280;
+  margin-top: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .audience-options {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .main-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .option-card {
+    padding: 1.25rem;
+  }
+  
+  .option-description {
+    padding-left: 0;
+    margin-top: 0.5rem;
+  }
+  
+  .option-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

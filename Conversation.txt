@@ -1,0 +1,312 @@
+movepost
+@Marty created this channel on August 29th. This is the very beginning of the movepost channel.
+
+
+Marty
+  9:23 PM
+joined movepost. Also, Rahul Kumar
+ and Mukela Katungu
+ joined via invite.
+
+
+Marty
+  9:26 PM
+renamed the channel from “movemail” to “movepost”
+
+
+Marty
+  10:04 PM
+interesting link / inspiration for radius tool? https://www.growmail.com/new-movers-map-tool/
+GrowmailGrowmail
+New Movers Map Tool - Growmail
+Getting your message across to people just moving into your area has never been easier thanks to GrowMail's new mover map tool!
+Est. reading time
+1 minute
+
+
+Marty
+  10:30 PM
+would you guys prefer I send you the direct logins under my credentials for all platforms or create team accounts?
+
+
+Rahul Kumar
+  4:43 PM
+logins will be good.
+
+
+Mukela Katungu
+  10:47 AM
+Hey @Marty, how are you doing today?
+10:47
+Wanted to find out if you can send us the login credentials
+
+
+Mukela Katungu
+  11:23 AM
+@Marty here are the alternatives to melissa and lettrlabs
+11:23
+https://docs.google.com/document/d/1a1efpxVi8L10UypLBi_HHIf4jyUchDwUddqFo5bo_6c/edit?usp=sharing
+
+
+Marty
+  5:01 PM
+Thanks, still working on logins. How can we get Speedeon pricing?
+5:01
+Or was it on the website somewhere?
+5:02
+It is a holiday in the us until Tuesday so I will get you guys all logins then at the latest
+
+
+Mukela Katungu
+  5:18 PM
+No problem, btw @Marty for speedeon you have to contact them
+
+
+Marty
+  5:37 PM
+just did thanks
+5:38
+contacted focus too
+:white_check_mark:
+1
+
+
+
+Mukela Katungu
+  10:08 AM
+@Marty awesome, we will begin frontend development while we wait for the accounts to be set up
+
+
+Marty
+  4:10 PM
+thank you
+4:10
+working on them today
+
+
+Marty
+  11:33 PM
+I will need your help with google iam policy additions
+11:33
+Screenshot 2025-09-02 at 2.33.42 PM.png
+ 
+Screenshot 2025-09-02 at 2.33.42 PM.png
+11:35
+I am adding mukela.j.katungu@gmail.com and rahulkumarhavit@gmail.com to everything now
+
+
+Marty
+  11:41 PM
+brandfetch api key mc30VsdsPg7ipaZ8WyJoQQj3NKEJC6RsqdlNIhhvycE=
+11:41
+DynaPictures api 20626fa775ee1e845ae758ece87aaba1577e3bedbb0775b1
+
+
+Marty
+  11:52 PM
+we will start with lob and see if that works
+
+
+Marty
+  11:58 PM
+Can I just add one of you to netlify so I don't have to pay for 2 seats?
+11:58
+just added rahul, please connect that to GH (it failed for me)
+11:59
+You should have access to everything except google, we can set that up tomorrow. let me know what time you're free to chat
+
+
+Marty
+  2:06 AM
+I’m available at 6:30 am pst if that works (edited) 
+
+
+Marty
+  8:19 AM
+Let’s do around 930 am pst aftually if that’s pkay
+8:19
+Okay
+
+
+Rahul Kumar
+  8:19 AM
+yeah sure.
+
+
+Mukela Katungu
+  3:14 PM
+@Marty I will be on my commute back home by that time. Is 8am pst okay? if not we can push it to later
+3:16
+I'm available now till 8 am pst mostly likely be back home and settled after 10:30 am pst
+
+
+Marty
+  3:53 PM
+Might need to be around 10:30 am pst
+
+
+Mukela Katungu
+  6:20 PM
+That’s fine with me
+
+
+Marty
+  7:01 PM
+Great, chat then. Might be a few mins after, I’ll send a link
+
+
+Marty
+  7:19 PM
+11
+
+
+Mukela Katungu
+  7:28 PM
+sure
+
+
+Marty
+  7:41 PM
+Sorry I need  bit more time will ping
+7:42
+Just like 15-20 mins more maybe
+
+
+Mukela Katungu
+  7:50 PM
+no problem
+
+
+Marty
+  8:10 PM
+Ready
+8:10
+1 min
+
+
+Marty
+  8:18 PM
+please film me a video of how I can get you the right google access
+8:18
+we can skip the call
+8:18
+you can begin and send loom videos with questions and I will answer async
+
+
+Marty
+  10:40 PM
+Please lay out a timeline for development efforts as well. Thank you!
+
+
+Marty
+  4:52 PM
+I will be expecting daily updates and a summary of what was worked on along with any questions, please provide today’s update and the video for setting up google
+
+
+Mukela Katungu
+  5:23 PM
+It will take 3 weeks till we have a production ready system with 3 revisions
+5:23
+So once we have made significant progress we will setup a meeting to discuss what we have done (edited) 
+5:24
+Done and what changes you would want
+
+
+Marty
+  5:24 PM
+Okay, what happened to the initial week timeline? That is still okay
+5:24
+Please send the google video
+
+
+Mukela Katungu
+  5:27 PM
+A week might cause low quality work because the services might have there own roadblocks and breaks throughout the development process. We would recommend 3 weeks because it allows for more test time and platform confirmation
+
+
+Marty
+  5:28 PM
+That’s fine
+
+
+Mukela Katungu
+  5:28 PM
+@Rahul Kumar will send the loom video
+
+
+Marty
+  5:28 PM
+Please send updates daily so I am in the loop
+5:29
+Just a quick summary of what was worked on so I can track progress and we can course correct if needed
+5:31
+It is very important to me that we have good communication, it helps us avoid a lot of delays
+
+
+Mukela Katungu
+  5:40 PM
+Sure, no problem i will keep you in touch
+
+
+Marty
+  5:41 PM
+Thanks
+5:41
+What is being worked on today
+
+
+Rahul Kumar
+  5:47 PM
+working on frontend.
+designing of the remaning pages. (edited) 
+
+
+Marty
+  3:16 PM
+Thank you
+:+1:
+1
+
+
+
+Marty
+  9:36 PM
+Please provide daily update without me needing to ask
+
+
+Mukela Katungu
+  8:27 AM
+Will do, because out timezone is different it may, i can set a time i will provide update everyday
+8:28
+10am pst i would have provided you with an update daily
+
+
+Marty
+  3:42 PM
+Thank you
+
+
+Mukela Katungu
+  7:45 AM
+Hey we are completely done with the frontend design we will be starting the backend
+7:46
+Can you invite @Rahul Kumar to superbase again he didn’t manage to login
+
+
+Rahul Kumar
+  7:47 AM
+Email:- rahulkumarhavit@gmail.com
+
+
+Mukela Katungu
+  8:04 AM
+Btw @Marty , do you have a logo yet for MovePost?
+
+
+
+
+
+
+
+
+

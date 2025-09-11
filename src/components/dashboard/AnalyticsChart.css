@@ -1,0 +1,81 @@
+.analytics-chart-container {
+  background-color: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.chart-header {
+  margin-bottom: 1.5rem;
+}
+
+.chart-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6B7280;
+  margin-bottom: 0.5rem;
+}
+
+.chart-total {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+.chart-wrapper {
+  position: relative;
+}
+
+.chart-svg {
+  width: 100%;
+  height: 250px;
+}
+
+.chart-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 3.125rem 0;
+  margin-top: 0.5rem;
+}
+
+.month-label {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  font-weight: 500;
+}
+
+/* Responsive Chart */
+@media (max-width: 1200px) {
+  .chart-labels {
+    padding: 1rem 2rem 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .analytics-chart-container {
+    padding: 1rem;
+  }
+  
+  .chart-total {
+    font-size: 2rem;
+  }
+  
+  .chart-svg {
+    height: 200px;
+  }
+  
+  .chart-labels {
+    padding: 1rem 1rem 0;
+  }
+  
+  .month-label {
+    font-size: 0.625rem;
+  }
+  
+  /* Show only every other month on mobile */
+  .month-label:nth-child(even) {
+    display: none;
+  }
+}

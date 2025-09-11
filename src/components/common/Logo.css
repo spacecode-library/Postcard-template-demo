@@ -1,0 +1,38 @@
+.logo-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-placeholder {
+  background-color: #475569;
+  color: white;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+/* Logo Variants */
+.logo-container.auth .logo-placeholder {
+  background-color: #475569;
+  font-size: 0.875rem;
+  padding: 0.625rem 1rem;
+}
+
+.logo-container.sidebar .logo-placeholder {
+  background-color: #475569;
+}
+
+.logo-container.large .logo-placeholder {
+  font-size: 1.125rem;
+  padding: 0.875rem 1.5rem;
+}
+
+/* Hover Effects */
+.logo-container:not(.no-hover) .logo-placeholder:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

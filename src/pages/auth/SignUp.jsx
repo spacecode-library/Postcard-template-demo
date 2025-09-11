@@ -1,173 +1,145 @@
-import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { useAuth } from '../../contexts/AuthContext'
-import { useGoogleSignIn } from '../../hooks/useGoogleSignIn'
-import { Eye, EyeOff } from 'lucide-react'
-import './auth.css'
-
-const signupSchema = z.object({
-  email: z.string().email('Please enter a valid email'),
-  firstName: z.string().min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number')
-    .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
-})
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import AuthLayout from '../../components/auth/AuthLayout';
+import Logo from '../../components/common/Logo';
+import './signup.css';
 
 const SignUp = () => {
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const { register: signUp } = useAuth()
-  const navigate = useNavigate()
-  const { renderGoogleButton } = useGoogleSignIn()
+  const navigate = useNavigate();
+  const { register, googleLogin } = useAuth();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(signupSchema),
-  })
+  const testimonial = {
+    text: "We've been using 0 to kick start every new project and can't imagine working without it. It's incredible.",
+    author: "Caitlyn King",
+    title: "Lead Designer, Layers",
+    company: "Web Development Agency"
+  };
 
-  useEffect(() => {
-    // Render Google button after component mounts
-    const timer = setTimeout(() => {
-      renderGoogleButton('google-signin-button')
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [renderGoogleButton])
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
-  const onSubmit = async (data) => {
-    setIsLoading(true)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      await signUp(data)
-      navigate('/onboarding')
+      await register(formData);
+      navigate('/onboarding');
     } catch (error) {
-      console.error('Signup error:', error)
-    } finally {
-      setIsLoading(false)
+      console.error('Registration error:', error);
     }
-  }
+  };
+
+  const handleGoogleSignUp = async () => {
+    try {
+      await googleLogin('mock-google-token');
+      navigate('/onboarding');
+    } catch (error) {
+      console.error('Google signup error:', error);
+    }
+  };
+
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="logo-container">
-          <div className="logo-placeholder">
-            <span>Postcard</span>
+    <AuthLayout testimonial={testimonial}>
+      <div className="signup-form-container">
+        <Logo variant="auth" className="signup-logo" />
+          
+        <h1 className="auth-title">Sign up</h1>
+        <p className="auth-subtitle">Start your 30-day free trial.</p>
+          
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label htmlFor="name" className="form-label">Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Enter your name"
+              className="form-input"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
           </div>
-        </div>
-
-        <div className="auth-content">
-          <div className="auth-header">
-            <h1>Create your account</h1>
-            <p>Start sending smart postcards today</p>
+            
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Enter your email"
+              className="form-input"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
           </div>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="auth-form">
-            <div className="form-section">
-              <div className="input-group">
-                <label htmlFor="firstName">First Name</label>
-                <input
-                  id="firstName"
-                  type="text"
-                  placeholder="John"
-                  {...register('firstName')}
-                  className={errors.firstName ? 'error' : ''}
-                />
-                {errors.firstName && (
-                  <span className="error-message">{errors.firstName.message}</span>
-                )}
-              </div>
-
-              <div className="input-group">
-                <label htmlFor="lastName">Last Name</label>
-                <input
-                  id="lastName"
-                  type="text"
-                  placeholder="Doe"
-                  {...register('lastName')}
-                  className={errors.lastName ? 'error' : ''}
-                />
-                {errors.lastName && (
-                  <span className="error-message">{errors.lastName.message}</span>
-                )}
-              </div>
-
-              <div className="input-group">
-                <label htmlFor="email">Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="john@company.com"
-                  {...register('email')}
-                  className={errors.email ? 'error' : ''}
-                />
-                {errors.email && (
-                  <span className="error-message">{errors.email.message}</span>
-                )}
-              </div>
-
-              <div className="input-group">
-                <div className="label-row">
-                  <label htmlFor="password">Password</label>
-                  <span className="password-hint">8+ characters</span>
-                </div>
-                <div className="password-input-container">
-                  <input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Create a strong password"
-                    {...register('password')}
-                    className={errors.password ? 'error' : ''}
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-                {errors.password && (
-                  <span className="error-message">{errors.password.message}</span>
-                )}
-              </div>
-            </div>
-
-            <div className="button-section">
-              <button
-                type="submit"
-                className={`primary-button ${isLoading ? 'loading' : ''}`}
-                disabled={isLoading}
-              >
-                {isLoading ? 'Creating account...' : 'Create account'}
-              </button>
-
-              <div className="divider">
-                <span>or</span>
-              </div>
-
-              <div id="google-signin-button" style={{ width: '100%' }}></div>
-            </div>
-          </form>
-
-          <div className="auth-footer">
-            <span>Already have an account?</span>
-            <Link to="/login">Sign in</Link>
+            
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Create a password"
+              className="form-input"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              minLength="8"
+            />
+            <span className="helper-text">Must be at least 8 characters.</span>
           </div>
-        </div>
+            
+          <div className="form-group">
+            <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="Confirm your password"
+              className="form-input"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+            />
+            <span className="helper-text">
+              This password must be the same with previous password.
+            </span>
+          </div>
+            
+          <button type="submit" className="auth-button">
+            Get started
+          </button>
+        </form>
+          
+        <button onClick={handleGoogleSignUp} className="google-button">
+          <svg className="google-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M18.1713 8.36791H17.5V8.33329H10V11.6666H14.7096C14.0225 13.6071 12.1763 15 10 15C7.23877 15 5.00002 12.7612 5.00002 9.99996C5.00002 7.23871 7.23877 4.99996 10 4.99996C11.2746 4.99996 12.4342 5.48079 13.3171 6.26621L15.6738 3.90954C14.1863 2.52204 12.195 1.66663 10 1.66663C5.39752 1.66663 1.66669 5.39746 1.66669 9.99996C1.66669 14.6025 5.39752 18.3333 10 18.3333C14.6025 18.3333 18.3334 14.6025 18.3334 9.99996C18.3334 9.44121 18.2759 8.89579 18.1713 8.36791Z" fill="#FFC107"/>
+            <path d="M2.62752 6.12121L5.36544 8.12913C6.10627 6.29538 7.90044 4.99996 10 4.99996C11.2746 4.99996 12.4342 5.48079 13.3171 6.26621L15.6738 3.90954C14.1863 2.52204 12.195 1.66663 10 1.66663C6.79919 1.66663 4.02335 3.47371 2.62752 6.12121Z" fill="#FF3D00"/>
+            <path d="M10 18.3333C12.1525 18.3333 14.1084 17.5095 15.5871 16.17L13.0079 13.9875C12.1431 14.6452 11.0865 15.0009 10 15C7.83255 15 5.99213 13.6179 5.29879 11.6891L2.58046 13.7829C3.96046 16.4816 6.76129 18.3333 10 18.3333Z" fill="#4CAF50"/>
+            <path d="M18.1713 8.36795H17.5V8.33333H10V11.6667H14.7096C14.3809 12.5902 13.7889 13.3972 13.0067 13.9879L13.0079 13.9871L15.5871 16.1696C15.4046 16.3354 18.3334 14.1667 18.3334 10C18.3334 9.44129 18.2759 8.89587 18.1713 8.36795Z" fill="#1976D2"/>
+          </svg>
+          Sign up with Google
+        </button>
+          
+        <p className="auth-switch">
+          Already have an account? <Link to="/login" className="auth-link">Log in</Link>
+        </p>
       </div>
-    </div>
-  )
-}
+    </AuthLayout>
+  );
+};
 
-export default SignUp
+export default SignUp;

@@ -1,0 +1,13 @@
+/* Engagement Value */
+.engagement-value {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.engagement-positive {
+  color: #10B981;
+}
+
+.engagement-negative {
+  color: #111827;
+}

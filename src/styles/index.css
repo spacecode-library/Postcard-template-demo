@@ -1,0 +1,16 @@
+/* ===================================
+   POSTCARD FRONTEND STYLES
+   Main Entry Point
+   =================================== */
+
+/* Import Design System */
+@import './design-system.css';
+
+/* Import Responsive Utilities */
+@import './responsive.css';
+
+/* Import Animations */
+@import './animations.css';
+
+/* Import existing spacing system for backward compatibility */
+@import './spacing-system.css';

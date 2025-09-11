@@ -1,0 +1,261 @@
+/* Onboarding Step 5 - Payment Setup Styles */
+
+/* Main Content */
+.payment-content {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.main-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 2.5rem;
+}
+
+/* Billing Information */
+.billing-section {
+  margin-bottom: 2.5rem;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1.25rem;
+}
+
+.form-field {
+  margin-bottom: 1.5rem;
+}
+
+.form-field label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.form-field label .required {
+  color: #EF4444;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #111827;
+  background-color: white;
+  transition: all 0.2s;
+}
+
+.form-field input:focus {
+  outline: none;
+  border-color: #20B2AA;
+  box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.1);
+}
+
+.form-field input::placeholder {
+  color: #9CA3AF;
+}
+
+/* Payment Method */
+.payment-method-section {
+  margin-bottom: 2.5rem;
+}
+
+.payment-method-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.payment-method-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stripe-logo {
+  font-weight: 700;
+  color: #635BFF;
+  font-size: 1.125rem;
+}
+
+.payment-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.payment-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+}
+
+.payment-subtitle {
+  font-size: 0.75rem;
+  color: #6B7280;
+}
+
+.payment-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.default-badge {
+  font-size: 0.75rem;
+  color: #6B7280;
+  background-color: #E5E7EB;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+}
+
+.edit-link {
+  font-size: 0.875rem;
+  color: #20B2AA;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.edit-link:hover {
+  text-decoration: underline;
+}
+
+/* Card Information */
+.card-section {
+  margin-bottom: 2rem;
+}
+
+.card-input-group {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.card-field {
+  position: relative;
+}
+
+.card-field input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #111827;
+  background-color: white;
+  transition: all 0.2s;
+}
+
+.card-field input:focus {
+  outline: none;
+  border-color: #20B2AA;
+  box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.1);
+}
+
+.card-field.card-number input {
+  padding-right: 8rem;
+}
+
+.card-icons {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-icon {
+  height: 24px;
+  width: auto;
+}
+
+/* Terms and Privacy */
+.terms-text {
+  font-size: 0.75rem;
+  color: #6B7280;
+  line-height: 1.5;
+  margin-top: 1.5rem;
+}
+
+.terms-text a {
+  color: #20B2AA;
+  text-decoration: none;
+}
+
+.terms-text a:hover {
+  text-decoration: underline;
+}
+
+/* Footer Override for Payment - Removed to use unified styles */
+/* Footer positioning is handled in onboarding-unified.css */
+
+.step-indicator {
+  font-size: 0.875rem;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.continue-button {
+  padding: 0.75rem 2rem;
+  background-color: #20B2AA;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.continue-button:hover {
+  background-color: #1a9d96;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(32, 178, 170, 0.2);
+}
+
+.continue-button:disabled {
+  background-color: #E5E7EB;
+  color: #9CA3AF;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .card-input-group {
+    grid-template-columns: 1fr;
+  }
+  
+  .payment-method-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .payment-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .main-title {
+    font-size: 1.5rem;
+  }
+}

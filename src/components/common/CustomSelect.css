@@ -1,0 +1,110 @@
+/* Custom Select Component Styles */
+.custom-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  background-color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: all 0.2s ease;
+  line-height: 1.5;
+}
+
+.custom-select:hover {
+  border-color: #D1D5DB;
+  background-color: #FAFAFA;
+}
+
+.custom-select:focus {
+  outline: none;
+  border-color: #20B2AA;
+  box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.1);
+  background-color: white;
+}
+
+.custom-select:disabled {
+  background-color: #F9FAFB;
+  color: #9CA3AF;
+  cursor: not-allowed;
+}
+
+/* Dropdown Arrow */
+.select-arrow {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  transition: transform 0.2s ease;
+}
+
+.select-arrow svg {
+  width: 20px;
+  height: 20px;
+  color: #6B7280;
+}
+
+.custom-select:focus + .select-arrow svg {
+  color: #20B2AA;
+}
+
+/* Open state */
+.custom-select-wrapper.open .select-arrow {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Placeholder styling */
+.custom-select.placeholder {
+  color: #9CA3AF;
+}
+
+.custom-select option {
+  color: #111827;
+  font-weight: normal;
+}
+
+.custom-select option:first-child {
+  color: #9CA3AF;
+}
+
+/* Size Variants */
+.custom-select.select-sm {
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.custom-select.select-lg {
+  padding: 1rem 3rem 1rem 1.25rem;
+  font-size: 1rem;
+}
+
+/* Error State */
+.custom-select.error {
+  border-color: #EF4444;
+}
+
+.custom-select.error:focus {
+  border-color: #EF4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Success State */
+.custom-select.success {
+  border-color: #10B981;
+}
+
+.custom-select.success:focus {
+  border-color: #10B981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
