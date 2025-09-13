@@ -39,16 +39,16 @@ const OnboardingStep2 = () => {
 
   // Templates data
   const templates = [
-    { id: 1, name: 'Template Name', image: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=400&h=300&fit=crop' },
-    { id: 2, name: 'Template Name', image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400&h=300&fit=crop' },
-    { id: 3, name: 'Template Name', image: 'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=400&h=300&fit=crop' },
-    { id: 4, name: 'Template Name', image: 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=400&h=300&fit=crop' },
-    { id: 5, name: 'Template Name', image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=300&fit=crop' },
-    { id: 6, name: 'Template Name', image: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=400&h=300&fit=crop' },
-    { id: 7, name: 'Template Name', image: 'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=400&h=300&fit=crop' },
-    { id: 8, name: 'Template Name', image: 'https://images.unsplash.com/photo-1416339306562-f3d12fefd36f?w=400&h=300&fit=crop' },
-    { id: 9, name: 'Template Name', image: 'https://images.unsplash.com/photo-1462826303086-329426d1aef5?w=400&h=300&fit=crop' },
-    { id: 10, name: 'Template Name', image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=400&h=300&fit=crop' }
+    { id: 1, name: 'Fresh & Clean', templateId: 'fresh-clean', image: 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400&h=300&fit=crop' },
+    { id: 2, name: 'Modern Business', image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400&h=300&fit=crop' },
+    { id: 3, name: 'Creative Agency', image: 'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=400&h=300&fit=crop' },
+    { id: 4, name: 'Restaurant Special', image: 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=400&h=300&fit=crop' },
+    { id: 5, name: 'Health & Wellness', image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=300&fit=crop' },
+    { id: 6, name: 'Professional Services', image: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=400&h=300&fit=crop' },
+    { id: 7, name: 'Event Promotion', image: 'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=400&h=300&fit=crop' },
+    { id: 8, name: 'Technology Solutions', image: 'https://images.unsplash.com/photo-1416339306562-f3d12fefd36f?w=400&h=300&fit=crop' },
+    { id: 9, name: 'Retail Sale', image: 'https://images.unsplash.com/photo-1462826303086-329426d1aef5?w=400&h=300&fit=crop' },
+    { id: 10, name: 'Educational Services', image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=400&h=300&fit=crop' }
   ];
 
   const templatesPerPage = 4;

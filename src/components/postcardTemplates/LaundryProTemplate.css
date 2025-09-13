@@ -1,0 +1,267 @@
+@import './design-system.css';
+
+.laundry-pro-template {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.header-section {
+  background: #17A2B8;
+  padding: 40px 50px;
+  text-align: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.headline-text {
+  margin: 0;
+  color: white;
+  text-transform: uppercase;
+  line-height: 0.9;
+}
+
+.headline-top {
+  display: block;
+  font-size: 36px;
+  font-weight: 300;
+  letter-spacing: 4px;
+  margin-bottom: 10px;
+}
+
+.headline-bottom {
+  display: block;
+  font-size: 64px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.middle-section {
+  flex: 1;
+  position: relative;
+  background-image: url('https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=1200&h=400&fit=crop');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.washing-machines-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.1) 100%);
+}
+
+/* Offers positioned at bottom of washing machine section */
+.offers-section {
+  position: absolute;
+  bottom: 100px;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 0;
+  z-index: 3;
+  padding: 0 20px;
+}
+
+.offer-card {
+  flex: 1;
+  padding: 20px 15px;
+  text-align: center;
+  background: white;
+  border-right: 2px dashed #17A2B8;
+  position: relative;
+}
+
+.offer-card:last-child {
+  border-right: none;
+}
+
+.offer-title {
+  font-size: 42px;
+  font-weight: 900;
+  color: #17A2B8;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+}
+
+.offer-description {
+  font-size: 14px;
+  color: #333;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.offer-disclaimer {
+  font-size: 11px;
+  color: #666;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Bottom section with logo and contact */
+.bottom-section {
+  background: #FFD600;
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  height: 100px;
+  position: relative;
+}
+
+.logo-area {
+  background: #17A2B8;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 300px;
+}
+
+.logo-placeholder {
+  width: 60px;
+  height: 60px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+.logo-icon {
+  width: 30px;
+  height: 30px;
+  display: block;
+}
+
+.business-logo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  background: white;
+  border-radius: 50%;
+  padding: 5px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+.business-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: white;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.cta-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 30px;
+}
+
+.cta-text {
+  font-size: 16px;
+  font-weight: 900;
+  color: #333;
+  margin: 0 0 3px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.contact-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.separator {
+  color: #333;
+  font-size: 16px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .header-section {
+    padding: var(--space-md) var(--space-lg);
+  }
+  
+  .headline-top {
+    font-size: var(--font-base);
+    letter-spacing: 2px;
+  }
+  
+  .headline-bottom {
+    font-size: var(--font-3xl);
+  }
+  
+  .middle-section {
+    min-height: 200px;
+  }
+  
+  .bottom-section {
+    flex-direction: column;
+    padding: var(--space-md);
+    gap: var(--space-md);
+  }
+  
+  .logo-area {
+    justify-content: center;
+  }
+  
+  .business-name {
+    font-size: var(--font-xl);
+  }
+  
+  .cta-area {
+    width: 100%;
+  }
+  
+  .offers-section {
+    flex-wrap: wrap;
+    position: relative;
+  }
+  
+  .offer-card {
+    min-width: 50%;
+    border-bottom: 2px dashed var(--primary-teal);
+  }
+  
+  .offer-card:nth-child(even) {
+    border-right: none;
+  }
+  
+  .offer-card:nth-last-child(-n+2) {
+    border-bottom: none;
+  }
+}

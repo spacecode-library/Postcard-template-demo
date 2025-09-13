@@ -1,0 +1,328 @@
+.template-demo-container {
+  display: flex;
+  height: 100vh;
+  background: #f5f5f5;
+}
+
+.demo-sidebar {
+  width: 350px;
+  background: white;
+  padding: 30px;
+  overflow-y: auto;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  max-height: 100vh;
+}
+
+/* Custom scrollbar for sidebar */
+.demo-sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.demo-sidebar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.demo-sidebar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.demo-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.demo-sidebar h2 {
+  margin: 0 0 30px 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.template-selector {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.template-selector h3 {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.template-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+}
+
+.data-editor h3 {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.service-input-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.service-input {
+  flex: 1;
+}
+
+.remove-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #dc3545;
+  background: white;
+  color: #dc3545;
+  border-radius: 4px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.remove-btn:hover {
+  background: #dc3545;
+  color: white;
+}
+
+.add-btn {
+  width: 100%;
+  padding: 8px;
+  border: 2px dashed #28a745;
+  background: white;
+  color: #28a745;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.add-btn:hover {
+  background: #28a745;
+  color: white;
+  border-style: solid;
+}
+
+.pricing-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.rooms-input {
+  width: 80px;
+}
+
+.price-prefix {
+  color: #666;
+  font-weight: 500;
+}
+
+.price-input {
+  flex: 1;
+}
+
+.service-object-group {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1.5fr auto;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.service-title-input,
+.service-desc-input,
+.service-disclaimer-input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.service-title-input {
+  font-weight: 600;
+}
+
+.background-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.background-option {
+  padding: 0;
+  border: 2px solid transparent;
+  background: none;
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.background-option[data-selected="true"] {
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+.background-option:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.background-preview {
+  width: 100%;
+  height: 70px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.background-preview.default {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  border: 1px solid #ddd;
+}
+
+.background-name {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  font-size: 11px;
+  border-radius: 4px;
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.demo-preview {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 30px;
+}
+
+.preview-header {
+  background: white;
+  padding: 15px 20px;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.preview-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.preview-size {
+  margin: 5px 0 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.postcard-preview-wrapper {
+  background: #f0f0f0;
+  flex: 1;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  min-height: 0;
+}
+
+.postcard-template-wrapper {
+  width: 100%;
+  max-width: 900px;
+  aspect-ratio: 1.5; /* 6:9 ratio = 1.5 */
+  background: white;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+}
+
+/* Ensure proper 6x9 postcard ratio */
+@media (min-width: 1200px) {
+  .postcard-template-wrapper {
+    width: 900px;
+    height: 600px;
+    aspect-ratio: 1.5;
+  }
+}
+
+/* Ensure each template is contained */
+.postcard-template-wrapper > * {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Template specific container rules */
+.postcard-template-wrapper[data-template="fresh-clean"] > *,
+.postcard-template-wrapper[data-template="laundry-pro"] > *,
+.postcard-template-wrapper[data-template="sparkle-home"] > *,
+.postcard-template-wrapper[data-template="pet-friendly"] > * {
+  contain: layout style paint;
+}
+
+/* Template container ready state */
+.postcard-template-wrapper {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media (max-width: 1200px) {
+  .demo-sidebar {
+    width: 300px;
+    padding: 20px;
+  }
+  
+  .postcard-preview-wrapper {
+    padding: 20px;
+  }
+}
