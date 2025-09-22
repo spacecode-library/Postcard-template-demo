@@ -3,7 +3,8 @@ import './PetFriendlyTemplate.css';
 
 const PetFriendlyTemplate = ({ businessData }) => {
   const {
-    businessName = 'ABC CARPET CLEANING',
+    businessName = 'ABC',
+    businessTagline = 'CARPET CLEANING',
     headlineTop = "Don't let",
     headlineMain1 = 'Food Stains',
     headlineMain2 = 'Crayons or',
@@ -51,7 +52,10 @@ const PetFriendlyTemplate = ({ businessData }) => {
           ) : (
             <div className="logo-icon">🏠</div>
           )}
-          <h3 className="company-name">{businessName}</h3>
+          <div>
+            <h3 className="company-name">{businessName}</h3>
+            <p className="company-tagline">{businessTagline}</p>
+          </div>
         </div>
 
         <div className="contact-section">

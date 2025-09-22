@@ -36,6 +36,7 @@ const templateFieldConfigs = {
   'pet-friendly': {
     fields: [
       { name: 'businessName', label: 'Business Name', type: 'text' },
+      { name: 'businessTagline', label: 'Business Tagline', type: 'text' },
       { name: 'headlineTop', label: 'Headline Top', type: 'text' },
       { name: 'headlineMain1', label: 'Main Line 1', type: 'text' },
       { name: 'headlineMain2', label: 'Main Line 2', type: 'text' },

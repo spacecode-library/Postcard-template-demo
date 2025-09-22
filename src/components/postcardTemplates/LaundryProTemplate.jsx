@@ -34,47 +34,52 @@ const LaundryProTemplate = ({ businessData }) => {
       >
         <div className="washing-machines-overlay"></div>
         
-        {/* Offers positioned over washing machines */}
-        <div className="offers-section">
-          {services.map((service, index) => (
-            <div key={index} className="offer-card">
-              <h3 className="offer-title">{service.title}</h3>
-              <p className="offer-description">{service.description}</p>
-              <p className="offer-disclaimer">{service.disclaimer}</p>
+        {/* Bottom info bar with logo and CTA */}
+        <div className="bottom-info-bar">
+          <div className="logo-section">
+            {logoUrl ? (
+              <img src={logoUrl} alt={businessName} className="business-logo" />
+            ) : (
+              <div className="logo-icon-wrapper">
+                <svg className="logo-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                  {/* Shirt with water drops */}
+                  <g>
+                    {/* Shirt outline */}
+                    <path d="M20 5 L15 10 L15 13 C15 14 14 15 13 16 L13 30 C13 32 14 33 16 33 L24 33 C26 33 27 32 27 30 L27 16 C26 15 25 14 25 13 L25 10 L20 5 Z" 
+                          fill="none" 
+                          stroke="white" 
+                          strokeWidth="2"/>
+                    {/* Water drops */}
+                    <circle cx="20" cy="20" r="2" fill="white"/>
+                    <circle cx="16" cy="24" r="1.5" fill="white"/>
+                    <circle cx="24" cy="24" r="1.5" fill="white"/>
+                  </g>
+                </svg>
+              </div>
+            )}
+            <h2 className="business-name">{businessName}</h2>
+          </div>
+
+          <div className="cta-section">
+            <p className="cta-text">{callToAction}</p>
+            <div className="contact-info">
+              <span className="phone">{phone}</span>
+              <span className="separator">•</span>
+              <span className="website">{website}</span>
             </div>
-          ))}
+          </div>
         </div>
       </div>
 
-      <div className="bottom-section">
-        <div className="logo-area">
-          {logoUrl ? (
-            <img src={logoUrl} alt={businessName} className="business-logo" />
-          ) : (
-            <div className="logo-placeholder">
-              <svg className="logo-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-                {/* Shirt shape */}
-                <path d="M20 4 L16 8 L16 12 C16 13 15 14 14 15 L14 32 C14 34 15 35 17 35 L23 35 C25 35 26 34 26 32 L26 15 C25 14 24 13 24 12 L24 8 L20 4 Z" 
-                      fill="white"/>
-                {/* Dots/bubbles */}
-                <circle cx="20" cy="20" r="2" fill="#17A2B8"/>
-                <circle cx="16" cy="24" r="1.5" fill="#17A2B8"/>
-                <circle cx="24" cy="24" r="1.5" fill="#17A2B8"/>
-                <circle cx="20" cy="28" r="1" fill="#17A2B8"/>
-              </svg>
-            </div>
-          )}
-          <h2 className="business-name">{businessName}</h2>
-        </div>
-
-        <div className="cta-area">
-          <p className="cta-text">{callToAction}</p>
-          <div className="contact-info">
-            <span className="phone">{phone}</span>
-            <span className="separator">•</span>
-            <span className="website">{website}</span>
+      {/* Offers strip at the very bottom */}
+      <div className="offers-strip">
+        {services.map((service, index) => (
+          <div key={index} className="offer-card">
+            <h3 className="offer-title">{service.title}</h3>
+            <p className="offer-description">{service.description}</p>
+            <p className="offer-disclaimer">{service.disclaimer}</p>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );

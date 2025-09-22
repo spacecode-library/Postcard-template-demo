@@ -24,30 +24,49 @@
   background-position: center right;
   display: flex;
   align-items: center;
-  padding: 30px;
+  padding: 50px;
 }
 
-/* Message note with curled paper effect */
+/* Message note with paper texture and blue lines */
 .message-note {
   background: #ffffff;
-  width: 380px;
-  padding: 30px 35px;
-  margin-left: 20px;
+  width: 420px;
+  padding: 45px 50px;
+  margin-left: 50px;
   position: relative;
   box-shadow: 
-    0 5px 20px rgba(0, 0, 0, 0.1),
-    0 2px 5px rgba(0, 0, 0, 0.1);
-  transform: rotate(-2deg);
+    0 8px 25px rgba(0, 0, 0, 0.15),
+    0 3px 8px rgba(0, 0, 0, 0.1);
+  transform: rotate(-3deg);
+  border: 1px solid #e0e0e0;
+}
+
+/* Paper texture effect */
+.message-note::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 28px,
+    #4A90E2 28px,
+    #4A90E2 29px
+  );
+  opacity: 0.3;
+  pointer-events: none;
 }
 
 /* Paper curl effect */
-.message-note::before {
+.message-note::after {
   content: '';
   position: absolute;
   bottom: -15px;
   right: -15px;
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   background: linear-gradient(
     45deg,
     transparent 50%,
@@ -56,7 +75,7 @@
     #ffffff 100%
   );
   transform: rotate(45deg);
-  box-shadow: -2px -2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: -3px -3px 8px rgba(0, 0, 0, 0.08);
 }
 
 .note-content {
@@ -66,9 +85,9 @@
 }
 
 .top-line {
-  font-size: 20px;
+  font-size: 22px;
   color: #333;
-  margin: 0 0 10px 0;
+  margin: 0 0 15px 0;
   font-style: italic;
   font-weight: 500;
 }
@@ -80,37 +99,38 @@
 
 .main-lines span {
   display: block;
-  font-size: 42px;
+  font-size: 48px;
   font-weight: 700;
-  margin: 3px 0;
+  margin: 5px 0;
 }
 
 .line-stains {
-  color: #8B4513;
+  color: #8B2F2F;
   font-family: 'Brush Script MT', cursive;
   font-style: italic;
   transform: rotate(-1deg);
+  font-size: 50px;
 }
 
 .line-crayons {
-  color: #1E90FF;
+  color: #4A90E2;
   font-family: 'Comic Sans MS', cursive;
   font-style: italic;
-  font-size: 38px;
+  font-size: 46px;
 }
 
 .line-paws {
   color: #654321;
   font-family: 'Brush Script MT', cursive;
   font-style: italic;
-  font-size: 44px;
+  font-size: 50px;
   transform: rotate(1deg);
 }
 
 .bottom-line {
-  font-size: 18px;
+  font-size: 20px;
   color: #333;
-  margin: 10px 0 0 0;
+  margin: 15px 0 0 0;
   font-style: italic;
   font-weight: 500;
 }
@@ -118,27 +138,27 @@
 /* Paw prints decoration */
 .paw-prints {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
-  width: 150px;
-  height: 150px;
-  opacity: 0.15;
+  bottom: 30px;
+  right: 30px;
+  width: 180px;
+  height: 180px;
+  opacity: 0.12;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M30 25c0 5.5-4.5 10-10 10s-10-4.5-10-10 4.5-10 10-10 10 4.5 10 10zM50 25c0 5.5-4.5 10-10 10s-10-4.5-10-10 4.5-10 10-10 10 4.5 10 10zM70 35c0 5.5-4.5 10-10 10s-10-4.5-10-10 4.5-10 10-10 10 4.5 10 10zM90 35c0 5.5-4.5 10-10 10s-10-4.5-10-10 4.5-10 10-10 10 4.5 10 10zM50 55c0 11-9 20-20 20s-20-9-20-20 9-20 20-20 20 9 20 20z' fill='%23654321'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-size: contain;
   transform: rotate(15deg);
 }
 
-/* Blue offer ribbon with angled edges */
+/* Navy blue offer ribbon with angled edges */
 .offer-ribbon {
   background: #1E3A8A;
-  padding: 15px 0;
+  padding: 20px 0;
   position: relative;
   text-align: center;
   color: white;
-  margin-top: -30px;
+  margin-top: -40px;
   z-index: 10;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 /* Angled ribbon edges */
@@ -148,22 +168,22 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 30px;
+  width: 40px;
   background: #1E3A8A;
 }
 
 .offer-ribbon::before {
-  left: -15px;
+  left: -20px;
   transform: skewX(-15deg);
 }
 
 .offer-ribbon::after {
-  right: -15px;
+  right: -20px;
   transform: skewX(15deg);
 }
 
 .offer-text {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 900;
   text-transform: uppercase;
   margin: 0;
@@ -172,44 +192,44 @@
 }
 
 .offer-small {
-  font-size: 12px;
-  margin: 3px 0 0 0;
+  font-size: 14px;
+  margin: 5px 0 0 0;
   font-style: italic;
   opacity: 0.9;
 }
 
-/* Bottom section */
+/* Bottom section split between logo and contact */
 .bottom-section {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 40px;
-  background: white;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-  height: 100px;
+  height: 120px;
+  flex-shrink: 0;
 }
 
 .company-section {
+  background: #f0f0f0;
+  flex: 0 0 45%;
   display: flex;
   align-items: center;
-  gap: 15px;
+  justify-content: center;
+  gap: 20px;
+  padding: 0 40px;
 }
 
 .company-logo {
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   object-fit: contain;
 }
 
 .logo-icon {
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   background: #1E3A8A;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30px;
+  font-size: 35px;
   color: white;
   position: relative;
 }
@@ -218,13 +238,13 @@
 .logo-icon::after {
   content: '💧';
   position: absolute;
-  font-size: 18px;
-  top: -3px;
-  right: -3px;
+  font-size: 20px;
+  top: -5px;
+  right: -5px;
 }
 
 .company-name {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 800;
   color: #1E3A8A;
   margin: 0;
@@ -232,31 +252,41 @@
   letter-spacing: 0.5px;
 }
 
-/* Green contact section */
+.company-tagline {
+  font-size: 16px;
+  color: #333;
+  margin: 5px 0 0 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Teal contact section */
 .contact-section {
-  background: #16A34A;
-  padding: 15px 30px;
-  border-radius: 6px;
-  text-align: center;
+  background: #17A985;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 40px;
   color: white;
-  box-shadow: 0 3px 10px rgba(22, 163, 74, 0.3);
 }
 
 .cta-text {
-  font-size: 13px;
-  margin: 0 0 5px 0;
+  font-size: 18px;
+  margin: 0 0 8px 0;
   font-weight: 600;
 }
 
 .phone-large {
-  font-size: 26px;
+  font-size: 36px;
   font-weight: 900;
-  margin: 0 0 3px 0;
-  letter-spacing: 0.5px;
+  margin: 0 0 5px 0;
+  letter-spacing: 1px;
 }
 
 .website-text {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   margin: 0;
 }
@@ -264,50 +294,55 @@
 /* Mobile responsive */
 @media (max-width: 768px) {
   .background-section {
-    padding: 20px;
+    padding: 30px 20px;
   }
   
   .message-note {
     width: 90%;
     margin-left: 0;
-    padding: 30px;
+    padding: 35px 30px;
     transform: rotate(-1deg);
   }
   
   .main-lines span {
-    font-size: 36px;
-  }
-  
-  .line-crayons {
-    font-size: 34px;
-  }
-  
-  .line-paws {
     font-size: 38px;
   }
   
+  .line-stains {
+    font-size: 40px;
+  }
+  
+  .line-crayons {
+    font-size: 36px;
+  }
+  
+  .line-paws {
+    font-size: 40px;
+  }
+  
   .offer-ribbon {
-    margin-top: -20px;
-    padding: 15px 0;
+    margin-top: -30px;
+    padding: 18px 0;
   }
   
   .offer-text {
-    font-size: 24px;
+    font-size: 26px;
   }
   
   .bottom-section {
     flex-direction: column;
-    gap: 20px;
+    height: auto;
+  }
+  
+  .company-section,
+  .contact-section {
     padding: 20px;
+    flex: none;
+    width: 100%;
   }
   
   .company-name {
     font-size: 24px;
-  }
-  
-  .contact-section {
-    width: 100%;
-    padding: 20px;
   }
   
   .phone-large {
@@ -315,6 +350,6 @@
   }
   
   .website-text {
-    font-size: 16px;
+    font-size: 18px;
   }
 }
