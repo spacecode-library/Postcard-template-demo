@@ -207,23 +207,26 @@
 }
 
 .password-input-container input {
-  padding-right: 44px;
+  padding-right: 54px; /* Increased to accommodate larger touch target */
 }
 
 .password-toggle {
   position: absolute;
-  right: 12px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
   color: #667085;
-  padding: 4px;
+  padding: 0.75rem; /* Increased for larger touch target */
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
+  min-width: 44px; /* Ensure minimum touch target */
+  min-height: 44px; /* Ensure minimum touch target */
+  border-radius: 6px;
 }
 
 .password-toggle:hover {
@@ -429,12 +432,16 @@
 }
 
 .checkbox-group input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+  width: 20px; /* Increased size */
+  height: 20px; /* Increased size */
   border: 1px solid #D0D5DD;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
+  /* Add padding area for larger touch target */
+  padding: 12px; /* Creates 44px total touch area */
+  margin: -12px; /* Negative margin to maintain visual spacing */
+  margin-right: calc(8px - 12px); /* Adjust right margin */
 }
 
 .checkbox-group input[type="checkbox"]:checked {

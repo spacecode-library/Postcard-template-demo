@@ -7,20 +7,9 @@
 @import './onboarding-step4.css';
 @import './onboarding-step5.css';
 
-/* CSS Variables for Onboarding - Override design-system values */
-:root {
-  --sidebar-width: 240px !important;
-  --sidebar-width-tablet: 240px !important;
-  --sidebar-width-mobile: 0 !important;
-  --footer-height: 100px;
-  --footer-height-mobile: 120px;
-  --primary-green: #20B2AA;
-  --primary-green-hover: #1a9d96;
-}
-
-/* Ensure onboarding container uses correct sidebar width */
+/* Onboarding specific overrides for design system variables */
 .onboarding-container {
-  --sidebar-width: 240px !important;
+  --sidebar-width: var(--sidebar-width-tablet); /* 240px from design system */
 }
 
 /* Reset for Onboarding */
@@ -283,23 +272,24 @@ html, body, #root {
    FOOTER SECTION
    ======================== */
 
-/* Footer - Fixed at bottom of main area */
+/* Footer - Fixed at bottom of main area with improved positioning */
 .footer-section,
 .form-footer {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: var(--sidebar-width) !important;
-  right: 0 !important;
+  position: fixed;
+  bottom: 0;
+  left: var(--sidebar-width);
+  right: 0;
   background: white;
   border-top: 1px solid var(--color-gray-200);
-  padding: 1.25rem 2rem;
-  z-index: 1000;
+  padding: var(--space-5) var(--space-8);
+  z-index: var(--z-fixed);
   height: var(--footer-height);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-  width: calc(100% - var(--sidebar-width));
+  box-shadow: var(--shadow-lg);
+  /* Remove width calc to prevent potential overflow issues */
+  width: auto;
 }
 
 .footer-text,
@@ -327,7 +317,7 @@ html, body, #root {
 
 .continue-button {
   padding: var(--space-3) var(--space-8);
-  background-color: var(--primary-green);
+  background-color: var(--color-primary);
   color: white;
   font-size: var(--font-sm);
   font-weight: var(--font-semibold);
@@ -340,7 +330,7 @@ html, body, #root {
 }
 
 .continue-button:hover {
-  background-color: var(--primary-green-hover);
+  background-color: var(--color-primary-hover);
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
@@ -1626,11 +1616,13 @@ html, body, #root {
     flex: unset;
     min-width: unset;
     max-height: unset;
-    padding: 0.5rem;
-    gap: 0.5rem;
+    padding: var(--space-3);
+    gap: var(--space-2);
     flex-direction: column;
     align-items: center;
     text-align: center;
+    min-height: 48px; /* Ensure proper touch target */
+    border-radius: var(--radius-lg);
   }
   
   .step-number {
@@ -1731,46 +1723,68 @@ html, body, #root {
   }
 }
 
-/* CRITICAL FOOTER FIX - Must be at the end to override all other styles */
-.onboarding-container .form-footer,
-.onboarding-container .footer-section {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 240px !important; /* Direct value to ensure it works */
-  right: 0 !important;
-  width: calc(100% - 240px) !important;
-  background: white !important;
-  border-top: 1px solid #E5E7EB !important;
-  padding: 1.25rem 2rem !important;
-  z-index: 1000 !important;
-  height: var(--footer-height) !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05) !important;
-  overflow: visible !important; /* Ensure content is not clipped */
-}
-
-/* Ensure footer actions are properly laid out */
-.onboarding-container .footer-actions {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  width: 100% !important;
-}
-
-/* Ensure button group is visible */
-.onboarding-container .button-group {
-  display: flex !important;
-  gap: 1rem !important;
-  align-items: center !important;
-}
-
 /* Responsive footer positioning */
+@media (max-width: 1024px) {
+  .footer-section,
+  .form-footer {
+    left: var(--sidebar-width-tablet);
+    /* Use auto width instead of calc to prevent overflow */
+    width: auto;
+  }
+}
+
 @media (max-width: 768px) {
-  .onboarding-container .form-footer,
-  .onboarding-container .footer-section {
-    left: 0 !important;
-    width: 100% !important;
+  .footer-section,
+  .form-footer {
+    left: 0;
+    width: 100%;
+    height: var(--footer-height-mobile);
+    padding: var(--space-4);
+  }
+  
+  .footer-actions {
+    flex-direction: column-reverse;
+    gap: var(--space-3);
+  }
+  
+  .continue-button,
+  .save-continue-button,
+  .activate-button {
+    width: 100%;
+    min-height: 48px; /* Better touch target for mobile */
+    font-size: var(--font-base); /* Slightly larger text on mobile */
+  }
+  
+  /* Improve form interactions on mobile */
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    min-height: 48px;
+    font-size: 16px; /* Prevent zoom on iOS */
+    border-radius: var(--radius-xl);
+  }
+  
+  /* Better mobile spacing */
+  .main-content {
+    padding-bottom: calc(var(--footer-height-mobile) + var(--space-8));
+  }
+}
+
+/* Add safe area support for modern mobile devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+  @media (max-width: 768px) {
+    .footer-section,
+    .form-footer {
+      padding-bottom: max(var(--space-4), env(safe-area-inset-bottom));
+    }
+    
+    .main-content {
+      padding-bottom: calc(var(--footer-height-mobile) + var(--space-8) + env(safe-area-inset-bottom));
+    }
+  }
+  
+  .onboarding-container {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }

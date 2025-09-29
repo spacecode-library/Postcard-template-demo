@@ -5,10 +5,6 @@ import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 const OnboardingStep1 = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    businessName: '',
     website: '',
     businessCategory: ''
   });
@@ -57,11 +53,7 @@ const OnboardingStep1 = () => {
   };
 
   const isFormValid = () => {
-    return formData.firstName && 
-           formData.lastName && 
-           formData.email &&
-           formData.businessName && 
-           formData.website && 
+    return formData.website && 
            formData.businessCategory;
   };
 
@@ -73,76 +65,20 @@ const OnboardingStep1 = () => {
         </button>
         
         <h1 className="main-title">What's your business website URL?</h1>
-        <p className="main-subtitle">We will generate some postcard ideas with your URL.</p>
+        <p className="main-subtitle">We'll use your website to get your business details with Brandfetch and suggest the best postcard template for your business.</p>
         
         <form className="onboarding-form" onSubmit={handleContinue}>
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="firstName">First Name *</label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                placeholder="Enter your first name"
-                value={formData.firstName}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="lastName">Last Name *</label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                placeholder="Enter your last name"
-                value={formData.lastName}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-          
           <div className="form-group">
-            <label htmlFor="email">Email *</label>
+            <label htmlFor="website">Website URL *</label>
             <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Enter your email address"
-              value={formData.email}
+              type="url"
+              id="website"
+              name="website"
+              placeholder="https://yourcompany.com"
+              value={formData.website}
               onChange={handleChange}
               required
             />
-          </div>
-          
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="businessName">Business Name *</label>
-              <input
-                type="text"
-                id="businessName"
-                name="businessName"
-                placeholder="Enter your business name"
-                value={formData.businessName}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="website">Website *</label>
-              <input
-                type="url"
-                id="website"
-                name="website"
-                placeholder="company.com"
-                value={formData.website}
-                onChange={handleChange}
-                required
-              />
-            </div>
           </div>
           
           <div className="form-group">
@@ -166,7 +102,7 @@ const OnboardingStep1 = () => {
         
         <div className="footer-section">
           <div className="footer-text">
-            Please select first the template before continuing to the next step
+            Enter your website URL and select your business category to continue
           </div>
           <div className="footer-actions">
             <span className="step-indicator">Step 1 of 6</span>

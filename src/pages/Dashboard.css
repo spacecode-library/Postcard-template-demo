@@ -1,11 +1,10 @@
-/* Import Global Spacing System */
-@import '../styles/spacing-system.css';
-@import '../styles/colors.css';
+/* Import Unified Design System */
+@import '../styles/design-system.css';
 
 /* Dashboard Page */
 .dashboard-page {
-  padding: 2rem 2.5rem;
-  padding-bottom: 3rem;
+  padding: var(--space-8) var(--space-10);
+  padding-bottom: var(--space-12);
   width: 100%;
   height: 100%;
   background-color: var(--color-white);
@@ -24,34 +23,41 @@
 .dashboard-title {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--color-gray-900);
 }
 
-/* Create Campaign Button */
+/* Create Campaign Button - Use standardized design system styles */
 .create-campaign-button {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  font-family: inherit;
+  font-size: var(--font-sm);
+  font-weight: var(--font-semibold);
+  line-height: 1;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  user-select: none;
+  white-space: nowrap;
   background-color: var(--color-primary);
   color: var(--color-white);
-  border: none;
-  border-radius: 0.625rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-sm);
 }
 
-.create-campaign-button:hover {
+.create-campaign-button:hover:not(:disabled) {
   background-color: var(--color-primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(32, 178, 170, 0.25);
+  box-shadow: var(--shadow-md);
 }
 
-.create-campaign-button:active {
+.create-campaign-button:active:not(:disabled) {
   transform: translateY(0);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Filters Section */
@@ -69,86 +75,109 @@
 }
 
 .period-button {
-  padding: 0.5rem 1rem;
-  background-color: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
+  /* Use standardized button outline styles */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-family: inherit;
+  font-size: var(--font-sm);
+  font-weight: var(--font-medium);
+  line-height: 1;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  user-select: none;
   white-space: nowrap;
+  background-color: var(--color-white);
+  color: var(--color-gray-700);
 }
 
 .period-button:hover {
   background-color: var(--color-gray-50);
-  border-color: var(--color-gray-300);
+  border-color: var(--color-gray-400);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .period-button.active {
-  background-color: var(--color-primary-light);
+  background-color: var(--color-primary-50);
   color: var(--color-primary);
   border-color: var(--color-primary);
-  font-weight: 600;
+  font-weight: var(--font-semibold);
 }
 
 .filter-controls {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .date-select-button,
 .filters-button {
+  /* Use standardized button outline styles */
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background-color: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-gray-700);
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-family: inherit;
+  font-size: var(--font-sm);
+  font-weight: var(--font-medium);
+  line-height: 1;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  user-select: none;
+  white-space: nowrap;
+  background-color: var(--color-white);
+  color: var(--color-gray-700);
 }
 
 .date-select-button:hover,
 .filters-button:hover {
   background-color: var(--color-gray-50);
-  border-color: var(--color-gray-300);
+  border-color: var(--color-gray-400);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
-/* Campaigns Grid */
+/* Campaigns Grid - Responsive by default */
 .campaigns-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: var(--spacing-lg);
-  margin-top: var(--spacing-lg);
-  padding-bottom: var(--spacing-xl);
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+  padding-bottom: var(--space-10);
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
   .campaigns-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-5);
   }
 }
 
 @media (max-width: 768px) {
   .dashboard-page {
-    padding: 1rem;
+    padding: var(--space-4) var(--space-4);
   }
   
   .dashboard-header {
     flex-direction: column;
     align-items: stretch;
-    gap: 1rem;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
   }
   
   .dashboard-title {
-    font-size: 1.5rem;
+    font-size: var(--font-2xl);
+    text-align: center;
   }
   
   .create-campaign-button {
@@ -158,36 +187,53 @@
   
   .campaigns-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: var(--space-4);
   }
   
   .filters-section {
     flex-direction: column;
     align-items: stretch;
-    gap: 1rem;
+    gap: var(--space-4);
   }
   
   .period-filters {
     overflow-x: auto;
-    padding-bottom: 0.5rem;
+    padding-bottom: var(--space-2);
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .period-filters::-webkit-scrollbar {
+    display: none;
   }
   
   .filter-controls {
     width: 100%;
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
   
   .date-select-button,
   .filters-button {
     flex: 1;
+    min-width: 0;
   }
 }
 
 @media (max-width: 480px) {
+  .dashboard-page {
+    padding: var(--space-3);
+  }
+  
+  .campaigns-grid {
+    gap: var(--space-3);
+  }
+  
   .period-button {
-    font-size: 0.75rem;
-    padding: 0.375rem 0.75rem;
+    font-size: var(--font-xs);
+    padding: var(--space-2) var(--space-3);
+    white-space: nowrap;
   }
 }
+

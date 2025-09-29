@@ -14,7 +14,6 @@ import History from './pages/History'
 import Settings from './pages/Settings'
 import Profile from './pages/Profile'
 import SidebarTest from './components/layout/SidebarTest'
-import TemplateDemo from './pages/TemplateDemoRefactored'
 import './App.css'
 
 const queryClient = new QueryClient({
@@ -27,9 +26,6 @@ const queryClient = new QueryClient({
 })
 
 function App() {
-  // TEMPORARY: Log reminder to revert routing after client demo
-  console.warn('TEMPORARY: Default route is set to /template-demo for client presentation. Remember to revert to /login after demo!');
-  
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -39,7 +35,6 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
             <Route path="/sidebar-test" element={<SidebarTest />} />
-            <Route path="/template-demo" element={<TemplateDemo />} />
             <Route
               path="/onboarding/*"
               element={
@@ -96,8 +91,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            {/* TEMPORARY: Redirecting to template-demo for client presentation - REVERT TO "/login" AFTER DEMO */}
-            <Route path="/" element={<Navigate to="/template-demo" replace />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
           </Routes>
           </Router>
           <Toaster position="top-right" />

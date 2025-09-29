@@ -1,0 +1,266 @@
+[
+  {
+    "id": "modern-postcard",
+    "name": "Modern Postcard",
+    "description": "Contemporary design for any business or service with 8 editable elements",
+    "primaryColor": "#4A5568",
+    "preview": "/template-previews/cesdk-2025-09-25T13_14_05.762Z.png",
+    "psdFile": "39690114_8731898.psd",
+    "psdFileSize": 6790281,
+    "available": true,
+    "sides": 1,
+    "frontPageIndex": 0,
+    "features": [
+      "Clean Design",
+      "Flexible Layout",
+      "Image Areas",
+      "Typography",
+      "8 Editable Elements"
+    ],
+    "colors": {
+      "primary": "#4A5568",
+      "secondary": "#ED8936",
+      "accent": "#48BB78",
+      "text": "#2D3748",
+      "background": "#F7FAFC"
+    },
+    "editableElements": [
+      "businessName",
+      "headline",
+      "bodyText",
+      "phone",
+      "website",
+      "callToAction",
+      "logo",
+      "images"
+    ],
+    "hasPreview": true
+  },
+  {
+    "id": "professional-business",
+    "name": "Professional Business",
+    "description": "Premium professional design with rich visual elements and multiple customizable sections",
+    "primaryColor": "#1a365d",
+    "preview": "/template-previews/cesdk-2025-09-25T13_15_35.008Z.png",
+    "psdFile": "7209489.psd",
+    "psdFileSize": 35614886,
+    "available": true,
+    "sides": 1,
+    "frontPageIndex": 0,
+    "features": [
+      "Premium Design",
+      "Multiple Sections",
+      "Professional Layout",
+      "Rich Graphics",
+      "10+ Editable Elements"
+    ],
+    "colors": {
+      "primary": "#1a365d",
+      "secondary": "#ed8936",
+      "accent": "#38b2ac",
+      "text": "#2d3748",
+      "background": "#ffffff"
+    },
+    "editableElements": [
+      "businessName",
+      "headline",
+      "subheadline",
+      "bodyText",
+      "services",
+      "phone",
+      "email",
+      "website",
+      "address",
+      "callToAction",
+      "logo",
+      "images"
+    ],
+    "largeFileWarning": true,
+    "hasPreview": true
+  },
+  {
+    "id": "modern-corporate",
+    "name": "Modern Corporate",
+    "description": "Sleek corporate design with contemporary aesthetics and versatile layout options",
+    "primaryColor": "#2c5282",
+    "preview": "/template-previews/cesdk-2025-09-25T13_15_52.340Z.png",
+    "psdFile": "8039429.psd",
+    "psdFileSize": 23040002,
+    "available": true,
+    "sides": 1,
+    "frontPageIndex": 0,
+    "features": [
+      "Corporate Style",
+      "Modern Layout",
+      "Versatile Design",
+      "Clean Typography",
+      "8 Editable Elements"
+    ],
+    "colors": {
+      "primary": "#2c5282",
+      "secondary": "#f56565",
+      "accent": "#48bb78",
+      "text": "#1a202c",
+      "background": "#f7fafc"
+    },
+    "editableElements": [
+      "companyName",
+      "tagline",
+      "mainHeadline",
+      "description",
+      "contactInfo",
+      "website",
+      "socialMedia",
+      "callToAction",
+      "logo",
+      "backgroundImage"
+    ],
+    "largeFileWarning": true,
+    "hasPreview": true
+  },
+  {
+    "id": "demo-double-sided",
+    "name": "Demo Double-Sided Business Card",
+    "description": "A demo double-sided template to showcase front and back editing capabilities",
+    "primaryColor": "#2563eb",
+    "preview": null,
+    "psdFile": null,
+    "available": true,
+    "sides": 2,
+    "frontPageIndex": 0,
+    "backPageIndex": 1,
+    "category": "business",
+    "features": [
+      "Double-Sided",
+      "Demo Template",
+      "Front & Back Design",
+      "Professional Layout"
+    ],
+    "colors": {
+      "primary": "#2563eb",
+      "secondary": "#f59e0b",
+      "accent": "#10b981",
+      "text": "#1f2937",
+      "background": "#ffffff"
+    },
+    "editableElements": [
+      "companyName",
+      "contactPerson",
+      "jobTitle",
+      "phone",
+      "email",
+      "website",
+      "address",
+      "backMessage"
+    ],
+    "dimensions": {
+      "width": 5,
+      "height": 7
+    },
+    "tags": [
+      "business",
+      "demo",
+      "double-sided"
+    ]
+  },
+  {
+    "id": "creative-business",
+    "name": "Creative Business",
+    "description": "Large format creative design with vibrant graphics and modern layout",
+    "primaryColor": "#e11d48",
+    "preview": "/template-previews/cesdk-2025-09-25T13_15_08.985Z.png",
+    "psdFile": "5248770.psd",
+    "psdFileSize": 22623868,
+    "available": true,
+    "sides": 1,
+    "frontPageIndex": 0,
+    "category": "business",
+    "features": [
+      "Creative Design",
+      "Large Format",
+      "Vibrant Graphics",
+      "Modern Layout",
+      "14 Elements"
+    ],
+    "colors": {
+      "primary": "#e11d48",
+      "secondary": "#f59e0b",
+      "accent": "#06b6d4",
+      "text": "#1f2937",
+      "background": "#ffffff"
+    },
+    "editableElements": [
+      "businessName",
+      "tagline",
+      "services",
+      "contactInfo",
+      "phone",
+      "email",
+      "website",
+      "address",
+      "logo",
+      "images"
+    ],
+    "largeFileWarning": true,
+    "dimensions": {
+      "width": 11.85,
+      "height": 6.67
+    },
+    "tags": [
+      "business",
+      "creative",
+      "large-format"
+    ],
+    "hasPreview": true
+  },
+  {
+    "id": "elegant-professional",
+    "name": "Elegant Professional",
+    "description": "Sophisticated professional design with elegant typography and premium feel",
+    "primaryColor": "#7c3aed",
+    "preview": "/template-previews/cesdk-2025-09-25T13_16_32.470Z.png",
+    "psdFile": "8060186.psd",
+    "psdFileSize": 21972171,
+    "available": true,
+    "sides": 1,
+    "frontPageIndex": 0,
+    "category": "professional",
+    "features": [
+      "Elegant Design",
+      "Premium Typography",
+      "Professional Layout",
+      "Sophisticated",
+      "24 Elements"
+    ],
+    "colors": {
+      "primary": "#7c3aed",
+      "secondary": "#f59e0b",
+      "accent": "#10b981",
+      "text": "#1f2937",
+      "background": "#fafafa"
+    },
+    "editableElements": [
+      "companyName",
+      "professionalTitle",
+      "personalName",
+      "phone",
+      "email",
+      "website",
+      "address",
+      "services",
+      "logo",
+      "images"
+    ],
+    "largeFileWarning": true,
+    "dimensions": {
+      "width": 3.5,
+      "height": 2.33
+    },
+    "tags": [
+      "professional",
+      "elegant",
+      "premium"
+    ],
+    "hasPreview": true
+  }
+]

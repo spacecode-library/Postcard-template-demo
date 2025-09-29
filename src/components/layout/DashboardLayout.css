@@ -1,20 +1,16 @@
-/* Import Design System */
-@import '../../styles/design-system.css';
-
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
   background-color: var(--color-white);
   position: relative;
   width: 100%;
-  overflow: hidden;
 }
 
 .dashboard-content-wrapper {
   flex: 1;
   margin-left: var(--sidebar-width);
   width: calc(100% - var(--sidebar-width));
-  height: 100vh;
+  min-height: 100vh;
   background-color: var(--color-white);
   overflow-y: auto;
   overflow-x: hidden;
@@ -24,15 +20,30 @@
 /* Responsive Layout */
 @media (max-width: 1024px) {
   .dashboard-content-wrapper {
-    margin-left: 240px;
-    width: calc(100% - 240px);
+    margin-left: var(--sidebar-width-tablet);
+    width: calc(100% - var(--sidebar-width-tablet));
   }
 }
 
 @media (max-width: 768px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+  
   .dashboard-content-wrapper {
-    margin-left: 0;
+    margin-left: var(--sidebar-width-mobile);
     width: 100%;
-    padding-top: 4rem; /* Space for mobile menu toggle */
+    padding-top: var(--header-height-mobile);
+  }
+}
+
+/* Mobile viewport fix */
+@supports (-webkit-touch-callout: none) {
+  .dashboard-layout {
+    min-height: -webkit-fill-available;
+  }
+  
+  .dashboard-content-wrapper {
+    min-height: -webkit-fill-available;
   }
 }

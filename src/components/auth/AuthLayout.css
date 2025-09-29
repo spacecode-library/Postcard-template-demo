@@ -111,8 +111,8 @@
 }
 
 .nav-arrow {
-  width: 40px;
-  height: 40px;
+  width: 44px; /* Increased to meet touch target minimum */
+  height: 44px; /* Increased to meet touch target minimum */
   border-radius: 50%;
   background-color: white;
   border: 1px solid #E5E7EB;
@@ -134,18 +134,46 @@
   transform: scale(0.95);
 }
 
-/* Responsive Design */
+/* Responsive Design with Intermediate Breakpoints */
+@media (max-width: 1200px) {
+  .testimonial-card {
+    bottom: 2rem;
+    left: 2rem;
+    right: 2rem;
+    padding: 1.5rem;
+  }
+}
+
 @media (max-width: 1024px) {
   .auth-container {
     flex-direction: column;
   }
   
   .auth-right {
-    display: none;
+    min-height: 40vh; /* Show testimonial section on tablet */
+    display: flex;
+  }
+  
+  .auth-left {
+    min-height: 60vh; /* Adjust form area */
+  }
+}
+
+@media (max-width: 768px) {
+  .auth-right {
+    display: none; /* Hide testimonial on mobile */
   }
   
   .auth-left {
     min-height: 100vh;
+    padding: 1.5rem;
+  }
+  
+  .testimonial-card {
+    bottom: 1.5rem;
+    left: 1.5rem;
+    right: 1.5rem;
+    padding: 1.25rem;
   }
 }
 
@@ -156,5 +184,17 @@
   
   .auth-content-wrapper {
     max-width: 100%;
+  }
+}
+
+/* Add safe area support for modern mobile devices */
+@supports (padding: env(safe-area-inset-top)) {
+  @media (max-width: 768px) {
+    .auth-left {
+      padding-top: max(1rem, env(safe-area-inset-top));
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
+      padding-left: max(1rem, env(safe-area-inset-left));
+      padding-right: max(1rem, env(safe-area-inset-right));
+    }
   }
 }

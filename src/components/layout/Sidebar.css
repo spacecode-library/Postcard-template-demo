@@ -1,6 +1,5 @@
 /* Import Design System */
 @import '../../styles/design-system.css';
-@import '../../styles/colors.css';
 
 /* Sidebar Container */
 .sidebar {
@@ -239,33 +238,92 @@
 /* Responsive Sidebar */
 @media (max-width: 1024px) {
   .sidebar {
-    width: 240px;
+    width: var(--sidebar-width-tablet);
   }
 }
 
 @media (max-width: 768px) {
   .sidebar {
+    width: var(--sidebar-width);
     transform: translateX(-100%);
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-base);
+    z-index: var(--z-modal);
   }
   
   .sidebar.open {
     transform: translateX(0);
   }
   
-  /* Add overlay when sidebar is open on mobile */
-  .sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--modal-backdrop);
-    z-index: 99;
+  /* Mobile sidebar header with close button */
+  .sidebar-mobile-header {
     display: none;
   }
   
-  .sidebar-overlay.active {
+  .sidebar-mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--color-gray-200);
+  }
+  
+  .sidebar-close-button {
+    background: none;
+    border: none;
+    color: var(--color-gray-500);
+    cursor: pointer;
+    padding: var(--space-2);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+  }
+  
+  .sidebar-close-button:hover {
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-700);
+  }
+}
+
+/* Sidebar overlay for mobile */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: var(--z-modal-backdrop);
+  display: none;
+  backdrop-filter: blur(4px);
+}
+
+.sidebar-overlay.active {
+  display: block;
+}
+
+/* Mobile menu toggle button */
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: var(--space-4);
+  left: var(--space-4);
+  z-index: var(--z-sticky);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.mobile-menu-toggle:hover {
+  background-color: var(--color-gray-50);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
     display: block;
   }
 }
