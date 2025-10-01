@@ -1,0 +1,117 @@
+/* Error States for Auth Forms */
+
+.form-input.error {
+  border-color: #EF4444;
+  background-color: #FEF2F2;
+}
+
+.form-input.error:focus {
+  border-color: #DC2626;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.error-text {
+  display: block;
+  margin-top: 0.375rem;
+  font-size: 0.875rem;
+  color: #DC2626;
+  font-weight: 500;
+}
+
+.helper-text {
+  display: block;
+  margin-top: 0.375rem;
+  font-size: 0.875rem;
+  color: #6B7280;
+}
+
+/* Disabled States */
+.form-input:disabled,
+.auth-button:disabled,
+.google-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-button:disabled:hover,
+.google-button:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Loading States */
+.auth-button:disabled,
+.google-button:disabled {
+  position: relative;
+}
+
+.auth-button:disabled::after {
+  content: '';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+/* Password Toggle Button */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9CA3AF;
+  transition: color 0.2s;
+}
+
+.password-toggle:hover {
+  color: #6B7280;
+}
+
+.password-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Form Options */
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.forgot-link {
+  color: #20B2AA;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.forgot-link:hover {
+  color: #1A9D96;
+  text-decoration: underline;
+}

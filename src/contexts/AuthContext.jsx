@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect } from 'react'
-import authService from '../services/auth.service'
+import React, { createContext, useContext, useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import supabaseAuthService from '../supabase/api/authService'
 
 const AuthContext = createContext(null)
 
@@ -14,124 +15,211 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
+  const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const navigate = useNavigate()
 
+  // Initialize auth state
   useEffect(() => {
-    const initAuth = async () => {
-      const token = localStorage.getItem('token')
-      if (token) {
-        try {
-          // Mock user for development without backend
-          const mockUser = JSON.parse(localStorage.getItem('user') || '{}')
-          if (mockUser.email) {
-            setUser(mockUser)
-          }
-        } catch (error) {
-          localStorage.removeItem('token')
-          localStorage.removeItem('user')
+    // Check for existing session
+    const initializeAuth = async () => {
+      try {
+        const currentSession = await supabaseAuthService.getSession()
+        
+        if (currentSession) {
+          setSession(currentSession)
+          setUser(currentSession.user)
+          setIsAuthenticated(true)
         }
+      } catch (error) {
+        console.error('Error initializing auth:', error)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
-    initAuth()
+
+    initializeAuth()
+
+    // Listen to auth state changes
+    const { data: { subscription } } = supabaseAuthService.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state change:', event, session)
+        
+        if (session) {
+          setSession(session)
+          setUser(session.user)
+          setIsAuthenticated(true)
+        } else {
+          setSession(null)
+          setUser(null)
+          setIsAuthenticated(false)
+        }
+        
+        setLoading(false)
+      }
+    )
+
+    // Cleanup subscription
+    return () => {
+      subscription?.unsubscribe()
+    }
   }, [])
 
-  const login = async (email, password) => {
-    try {
-      // Mock login for development without backend
-      const mockUser = {
-        id: '1',
-        email: email,
-        firstName: 'Test',
-        lastName: 'User',
-        onboardingCompleted: false
-      }
-      const mockToken = 'mock-jwt-token'
-      
-      localStorage.setItem('token', mockToken)
-      localStorage.setItem('user', JSON.stringify(mockUser))
-      setUser(mockUser)
-      toast.success('Login successful!')
-      
-      return { data: { user: mockUser, token: mockToken } }
-    } catch (error) {
-      const message = error.response?.data?.message || 'Login failed'
-      toast.error(message)
-      throw error
-    }
-  }
-
+  // Register function
   const register = async (userData) => {
     try {
-      // Mock register for development without backend
-      const mockUser = {
-        id: '1',
-        email: userData.email,
-        firstName: userData.name || 'Test',
-        lastName: 'User',
-        onboardingCompleted: false
+      setLoading(true)
+      const response = await supabaseAuthService.register(userData)
+      
+      toast.success(response.message)
+      
+      // If email confirmation is required, user will be null until confirmed
+      if (response.user) {
+        setUser(response.user)
+        setSession(response.session)
+        setIsAuthenticated(true)
       }
-      const mockToken = 'mock-jwt-token'
       
-      localStorage.setItem('token', mockToken)
-      localStorage.setItem('user', JSON.stringify(mockUser))
-      setUser(mockUser)
-      toast.success('Registration successful!')
-      
-      return { data: { user: mockUser, token: mockToken } }
+      return response
     } catch (error) {
-      const message = error.response?.data?.message || 'Registration failed'
-      toast.error(message)
+      const errorMessage = error.error || 'Registration failed'
+      toast.error(errorMessage)
       throw error
+    } finally {
+      setLoading(false)
     }
   }
 
-  const googleLogin = async (idToken) => {
+  // Login function
+  const login = async (email, password) => {
     try {
-      // Mock Google login for development without backend
-      const mockUser = {
-        id: '1',
-        email: 'google.user@gmail.com',
-        firstName: 'Google',
-        lastName: 'User',
-        onboardingCompleted: false
-      }
-      const mockToken = 'mock-jwt-token'
+      setLoading(true)
+      const response = await supabaseAuthService.login(email, password)
       
-      localStorage.setItem('token', mockToken)
-      localStorage.setItem('user', JSON.stringify(mockUser))
-      setUser(mockUser)
-      toast.success('Welcome to Postcard!')
+      setUser(response.user)
+      setSession(response.session)
+      setIsAuthenticated(true)
       
-      return { data: { user: mockUser, token: mockToken, isNewUser: true } }
+      toast.success(response.message)
+      
+      return response
     } catch (error) {
-      const message = error.response?.data?.message || 'Google login failed'
-      toast.error(message)
+      const errorMessage = error.error || 'Login failed'
+      toast.error(errorMessage)
       throw error
+    } finally {
+      setLoading(false)
     }
   }
 
-  const logout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    setUser(null)
-    toast.success('Logged out successfully')
+  // Google login function
+  const googleLogin = async () => {
+    try {
+      setLoading(true)
+      const response = await supabaseAuthService.googleLogin()
+      toast.success(response.message)
+      return response
+    } catch (error) {
+      const errorMessage = error.error || 'Google login failed'
+      toast.error(errorMessage)
+      throw error
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const updateUser = (updatedUser) => {
-    setUser(updatedUser)
-    localStorage.setItem('user', JSON.stringify(updatedUser))
+  // Logout function
+  const logout = async () => {
+    try {
+      setLoading(true)
+      await supabaseAuthService.logout()
+      
+      setUser(null)
+      setSession(null)
+      setIsAuthenticated(false)
+      
+      toast.success('Logged out successfully')
+      navigate('/login')
+    } catch (error) {
+      const errorMessage = error.error || 'Logout failed'
+      toast.error(errorMessage)
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Update profile function
+  const updateProfile = async (updates) => {
+    try {
+      setLoading(true)
+      const response = await supabaseAuthService.updateProfile(updates)
+      
+      setUser(response.user)
+      toast.success(response.message)
+      
+      return response
+    } catch (error) {
+      const errorMessage = error.error || 'Profile update failed'
+      toast.error(errorMessage)
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Reset password function
+  const resetPassword = async (email) => {
+    try {
+      setLoading(true)
+      const response = await supabaseAuthService.resetPassword(email)
+      toast.success(response.message)
+      return response
+    } catch (error) {
+      const errorMessage = error.error || 'Password reset failed'
+      toast.error(errorMessage)
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Update password function
+  const updatePassword = async (newPassword) => {
+    try {
+      setLoading(true)
+      const response = await supabaseAuthService.updatePassword(newPassword)
+      toast.success(response.message)
+      return response
+    } catch (error) {
+      const errorMessage = error.error || 'Password update failed'
+      toast.error(errorMessage)
+      throw error
+    } finally {
+      setLoading(false)
+    }
   }
 
   const value = {
     user,
+    session,
     loading,
-    login,
+    isAuthenticated,
     register,
+    login,
     googleLogin,
     logout,
-    updateUser,
+    updateProfile,
+    resetPassword,
+    updatePassword
   }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
+
+export default AuthContext

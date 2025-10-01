@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
+import brandfetchService from '../../supabase/api/brandFetchService';
+import supabaseCompanyService from '../../supabase/api/companyService';
+import toast from 'react-hot-toast'
 
 const OnboardingStep1 = () => {
   const navigate = useNavigate();
@@ -8,6 +11,9 @@ const OnboardingStep1 = () => {
     website: '',
     businessCategory: ''
   });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingBrand, setIsFetchingBrand] = useState(false);
 
   const steps = [
     { number: 1, title: 'URL Business', subtitle: 'Please provide email' },
@@ -43,24 +49,117 @@ const OnboardingStep1 = () => {
     navigate('/login');
   };
 
-  const handleContinue = (e) => {
+  const handleContinue = async (e) => {
     e.preventDefault();
-    if (isFormValid()) {
-      // Save form data to localStorage for now
-      localStorage.setItem('onboardingStep1', JSON.stringify(formData));
+    
+    if (!isFormValid()) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setIsLoading(true);
+    setIsFetchingBrand(true);
+
+    try {
+      // Step 1: Fetch brand information from Brandfetch
+      toast.loading('Fetching your brand information...', { id: 'brand-fetch' });
+      
+      let brandData = null;
+      try {
+        brandData = await brandfetchService.fetchBrandInfo(formData.website);
+        toast.success('Brand information retrieved!', { id: 'brand-fetch' });
+      } catch (brandError) {
+        console.warn('Brandfetch error:', brandError);
+        toast.dismiss('brand-fetch');
+        toast.error('Could not fetch brand info, but you can continue with manual setup');
+        // Continue anyway - we'll use default values
+      }
+
+      setIsFetchingBrand(false);
+
+      // Step 2: Prepare company data
+      const companyData = {
+        website: formData.website,
+        businessCategory: formData.businessCategory,
+        name: brandData?.name || extractCompanyNameFromURL(formData.website),
+        domain: brandData?.domain || brandfetchService.extractDomain(formData.website),
+        description: brandData?.description || '',
+        industry: brandData?.industry || formData.businessCategory,
+        logo: brandData?.logo || null,
+        colors: brandData?.colors || {
+          primary: '#20B2AA',
+          secondary: '#15B79E',
+          accent: null,
+          palette: []
+        },
+        fonts: brandData?.fonts || [],
+        socialLinks: brandData?.socialLinks || {},
+        companyInfo: brandData?.companyInfo || {},
+        rawData: brandData?.rawData || null
+      };
+
+      // Step 3: Save to Supabase database
+      // toast.loading('Saving your company information...', { id: 'company-save' });
+      
+      const saveResult = await supabaseCompanyService.saveCompanyInfo(companyData);
+      
+      toast.success('Company information saved!', { id: 'company-save' });
+
+      // Step 4: Store in localStorage for use in next steps
+      localStorage.setItem('onboardingStep1', JSON.stringify({
+        ...formData,
+        companyData: companyData,
+        companyId: saveResult.company.id
+      }));
+
+      // Step 5: Navigate to next step
       navigate('/onboarding/step2');
+      
+    } catch (error) {
+      console.error('Onboarding Step 1 error:', error);
+      toast.error(error.error || 'Failed to process your information. Please try again.');
+    } finally {
+      setIsLoading(false);
+      setIsFetchingBrand(false);
     }
   };
 
   const isFormValid = () => {
     return formData.website && 
-           formData.businessCategory;
+           formData.businessCategory &&
+           isValidURL(formData.website);
+  };
+
+  const isValidURL = (url) => {
+    try {
+      // Add protocol if missing
+      const testUrl = url.startsWith('http') ? url : `https://${url}`;
+      new URL(testUrl);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const extractCompanyNameFromURL = (url) => {
+    try {
+      const domain = brandfetchService.extractDomain(url);
+      // Remove TLD and capitalize
+      const name = domain.split('.')[0];
+      return name.charAt(0).toUpperCase() + name.slice(1);
+    } catch {
+      return 'My Company';
+    }
   };
 
   return (
     <OnboardingLayout steps={steps} currentStep={1}>
       <div className="main-content">
-        <button className="back-button" onClick={handleBack}>
+        <button  
+          className="back-button" 
+          onClick={handleBack}
+          disabled={isLoading}
+          >
           ← Back
         </button>
         
@@ -78,7 +177,13 @@ const OnboardingStep1 = () => {
               value={formData.website}
               onChange={handleChange}
               required
+              disabled={isLoading}
             />
+            {formData.website && !isValidURL(formData.website) && (
+              <span className="error-text" style={{ fontSize: '0.875rem', color: '#DC2626', marginTop: '0.25rem', display: 'block' }}>
+                Please enter a valid URL
+              </span>
+            )}
           </div>
           
           <div className="form-group">
@@ -89,6 +194,7 @@ const OnboardingStep1 = () => {
               value={formData.businessCategory}
               onChange={handleChange}
               required
+              disabled={isLoading}
             >
               <option value="">Please select a category</option>
               {businessCategories.map((category) => (
@@ -107,11 +213,11 @@ const OnboardingStep1 = () => {
           <div className="footer-actions">
             <span className="step-indicator">Step 1 of 6</span>
             <button 
-              className="continue-button"
+            className="continue-button"
               onClick={handleContinue}
-              disabled={!isFormValid()}
+              disabled={!isFormValid() || isLoading}
             >
-              Continue
+              {isLoading ? 'Processing...' : 'Continue'}
             </button>
           </div>
         </div>
