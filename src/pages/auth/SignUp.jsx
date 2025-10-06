@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
 import AuthLayout from '../../components/auth/AuthLayout';
 import Logo from '../../components/common/Logo';
 import './signup.css';
+import './auth-errors.css'
+import { useAuth } from '../../contexts/AuthContext';
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const { register, googleLogin } = useAuth();
+  const { register, googleLogin, loading } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
+
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const testimonial = {
     text: "We've been using 0 to kick start every new project and can't imagine working without it. It's incredible.",
@@ -22,29 +26,81 @@ const SignUp = () => {
     company: "Web Development Agency"
   };
 
-  const handleChange = (e) => {
+   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+    // Clear error when user types
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: ''
+      });
+    }
   };
 
-  const handleSubmit = async (e) => {
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      await register(formData);
+      await register({
+        email: formData.email,
+        password: formData.password,
+        name: formData.name
+      });
+      
+      // Navigate to onboarding after successful registration
       navigate('/onboarding');
     } catch (error) {
       console.error('Registration error:', error);
+      // Error is already handled by AuthContext with toast
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleGoogleSignUp = async () => {
     try {
-      await googleLogin('mock-google-token');
-      navigate('/onboarding');
+      await googleLogin();
+      // Redirect will happen automatically via OAuth
     } catch (error) {
       console.error('Google signup error:', error);
+      // Error is already handled by AuthContext with toast
     }
   };
 
@@ -65,11 +121,14 @@ const SignUp = () => {
               id="name"
               name="name"
               placeholder="Enter your name"
-              className="form-input"
+              className={`form-input ${errors.name ? 'error' : ''}`}
               value={formData.name}
               onChange={handleChange}
-              required
+              disabled={isSubmitting || loading}
             />
+            {errors.name && (
+              <span className="error-text">{errors.name}</span>
+            )}
           </div>
             
           <div className="form-group">
@@ -79,52 +138,71 @@ const SignUp = () => {
               id="email"
               name="email"
               placeholder="Enter your email"
-              className="form-input"
+              className={`form-input ${errors.email ? 'error' : ''}`}
               value={formData.email}
               onChange={handleChange}
-              required
+              disabled={isSubmitting || loading}
             />
+            {errors.email && (
+              <span className="error-text">{errors.email}</span>
+            )}
           </div>
             
           <div className="form-group">
             <label htmlFor="password" className="form-label">Password</label>
-            <input
+             <input
               type="password"
               id="password"
               name="password"
               placeholder="Create a password"
-              className="form-input"
+              className={`form-input ${errors.password ? 'error' : ''}`}
               value={formData.password}
               onChange={handleChange}
-              required
-              minLength="8"
+              disabled={isSubmitting || loading}
             />
-            <span className="helper-text">Must be at least 8 characters.</span>
+            {errors.password ? (
+              <span className="error-text">{errors.password}</span>
+            ) : (
+              <span className="helper-text">Must be at least 8 characters.</span>
+            )}
           </div>
             
           <div className="form-group">
             <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
-            <input
+             <input
               type="password"
               id="confirmPassword"
               name="confirmPassword"
               placeholder="Confirm your password"
-              className="form-input"
+              className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
               value={formData.confirmPassword}
               onChange={handleChange}
-              required
+              disabled={isSubmitting || loading}
             />
-            <span className="helper-text">
-              This password must be the same with previous password.
-            </span>
+            {errors.confirmPassword ? (
+              <span className="error-text">{errors.confirmPassword}</span>
+            ) : (
+              <span className="helper-text">
+                This password must be the same with previous password.
+              </span>
+            )}
           </div>
             
-          <button type="submit" className="auth-button">
-            Get started
+          <button 
+            type="submit" 
+            className="auth-button"
+            disabled={isSubmitting || loading}
+          >
+            {isSubmitting ? 'Creating account...' : 'Get started'}
           </button>
         </form>
           
-        <button onClick={handleGoogleSignUp} className="google-button">
+        <button 
+          onClick={handleGoogleSignUp} 
+          className="google-button"
+          disabled={isSubmitting || loading}
+
+        >
           <svg className="google-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path d="M18.1713 8.36791H17.5V8.33329H10V11.6666H14.7096C14.0225 13.6071 12.1763 15 10 15C7.23877 15 5.00002 12.7612 5.00002 9.99996C5.00002 7.23871 7.23877 4.99996 10 4.99996C11.2746 4.99996 12.4342 5.48079 13.3171 6.26621L15.6738 3.90954C14.1863 2.52204 12.195 1.66663 10 1.66663C5.39752 1.66663 1.66669 5.39746 1.66669 9.99996C1.66669 14.6025 5.39752 18.3333 10 18.3333C14.6025 18.3333 18.3334 14.6025 18.3334 9.99996C18.3334 9.44121 18.2759 8.89579 18.1713 8.36791Z" fill="#FFC107"/>
             <path d="M2.62752 6.12121L5.36544 8.12913C6.10627 6.29538 7.90044 4.99996 10 4.99996C11.2746 4.99996 12.4342 5.48079 13.3171 6.26621L15.6738 3.90954C14.1863 2.52204 12.195 1.66663 10 1.66663C6.79919 1.66663 4.02335 3.47371 2.62752 6.12121Z" fill="#FF3D00"/>

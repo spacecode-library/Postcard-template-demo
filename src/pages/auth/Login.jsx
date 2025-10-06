@@ -4,10 +4,12 @@ import { useAuth } from '../../contexts/AuthContext';
 import AuthLayout from '../../components/auth/AuthLayout';
 import Logo from '../../components/common/Logo';
 import './Login.css';
+import './auth-errors.css'
+
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, googleLogin } = useAuth();
+  const { login, googleLogin, resetPassword, loading } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -15,45 +17,105 @@ const Login = () => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await login(formData.email, formData.password);
-      navigate('/onboarding');
-    } catch (error) {
-      console.error('Login error:', error);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      await googleLogin('mock-google-token');
-      navigate('/onboarding');
-    } catch (error) {
-      console.error('Google login error:', error);
-    }
-  };
-
-  const handleForgotPassword = (e) => {
-    e.preventDefault();
-    // Handle forgot password
-    console.log('Forgot password clicked');
-  };
+   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const testimonial = {
     text: "We've been using 0 to kick start every new project and can't imagine working without it. It's incredible.",
     author: "Fleur Cook",
     title: "Founder, Catalog",
     company: "Web Design Agency"
+  };
+
+    const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value
+    });
+    // Clear error when user types
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: ''
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+  
+    try {
+      await login(formData.email, formData.password);
+      
+      // Navigate to dashboard after successful login
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Login error:', error);
+      // Error is already handled by AuthContext with toast
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await googleLogin();
+      // Redirect will happen automatically via OAuth
+    } catch (error) {
+      console.error('Google login error:', error);
+      // Error is already handled by AuthContext with toast
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+
+    if (!formData.email.trim()) {
+      setErrors({
+        ...errors,
+        email: 'Please enter your email to reset password'
+      });
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      setErrors({
+        ...errors,
+        email: 'Please enter a valid email'
+      });
+      return;
+    }
+
+    try {
+      await resetPassword(formData.email);
+    } catch (error) {
+      console.error('Password reset error:', error);
+      // Error is already handled by AuthContext with toast
+    }
   };
 
   return (
@@ -64,7 +126,7 @@ const Login = () => {
         <h1 className="auth-title">Welcome back</h1>
         <p className="auth-subtitle">Welcome back! Please enter your details.</p>
 
-        <form onSubmit={handleSubmit} className="auth-form">
+                <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label htmlFor="email" className="form-label">Email</label>
             <input
@@ -74,9 +136,12 @@ const Login = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
-              className="form-input"
-              required
+              className={`form-input ${errors.email ? 'error' : ''}`}
+              disabled={isSubmitting || loading}
             />
+            {errors.email && (
+              <span className="error-text">{errors.email}</span>
+            )}
           </div>
 
           <div className="form-group">
@@ -89,14 +154,15 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className="form-input"
-                required
+                className={`form-input ${errors.password ? 'error' : ''}`}
+                disabled={isSubmitting || loading}
               />
               <button
                 type="button"
                 className="password-toggle"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
+                disabled={isSubmitting || loading}
               >
                 {showPassword ? (
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -111,30 +177,36 @@ const Login = () => {
                 )}
               </button>
             </div>
+            {errors.password && (
+              <span className="error-text">{errors.password}</span>
+            )}
           </div>
 
           <div className="form-options">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                name="rememberMe"
-                checked={formData.rememberMe}
-                onChange={handleChange}
-                className="checkbox-input"
-              />
-              <span>Remember for 30 days</span>
-            </label>
-            <a href="#" onClick={handleForgotPassword} className="forgot-link">
+            <a 
+              href="#" 
+              onClick={handleForgotPassword} 
+              className="forgot-link"
+            >
               Forgot password
             </a>
           </div>
 
-          <button type="submit" className="auth-button">
-            Sign in
+          <button 
+            type="submit" 
+            className="auth-button"
+            disabled={isSubmitting || loading}
+          >
+            {isSubmitting ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
 
-        <button className="google-button" onClick={handleGoogleSignIn}>
+        <button 
+          className="google-button" 
+          onClick={handleGoogleSignIn}
+          disabled={isSubmitting || loading}
+
+        >
           <svg className="google-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path d="M18.1713 8.36791H17.5V8.33329H10V11.6666H14.7096C14.0225 13.6071 12.1763 15 10 15C7.23877 15 5.00002 12.7612 5.00002 9.99996C5.00002 7.23871 7.23877 4.99996 10 4.99996C11.2746 4.99996 12.4342 5.48079 13.3171 6.26621L15.6738 3.90954C14.1863 2.52204 12.195 1.66663 10 1.66663C5.39752 1.66663 1.66669 5.39746 1.66669 9.99996C1.66669 14.6025 5.39752 18.3333 10 18.3333C14.6025 18.3333 18.3334 14.6025 18.3334 9.99996C18.3334 9.44121 18.2759 8.89579 18.1713 8.36791Z" fill="#FFC107"/>
             <path d="M2.62752 6.12121L5.36544 8.12913C6.10627 6.29538 7.90044 4.99996 10 4.99996C11.2746 4.99996 12.4342 5.48079 13.3171 6.26621L15.6738 3.90954C14.1863 2.52204 12.195 1.66663 10 1.66663C6.79919 1.66663 4.02335 3.47371 2.62752 6.12121Z" fill="#FF3D00"/>
