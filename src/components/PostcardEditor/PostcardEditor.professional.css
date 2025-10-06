@@ -170,8 +170,13 @@
 .editor-content-professional {
   flex: 1;
   display: flex;
+  flex-direction: column;
   overflow: hidden;
   background: var(--color-background-secondary);
+  position: relative;
+  min-height: 0; /* Allow flex children to shrink */
+  /* Account for onboarding footer height (z-index 100) */
+  max-height: calc(100vh - 70px); /* 70px = header height, footer is handled separately */
 }
 
 /* Simple Mode Layout */
@@ -265,6 +270,8 @@
   flex: 1;
   position: relative;
   height: 100%;
+  min-height: 0; /* Critical for nested flex containers */
+  width: 100%;
 }
 
 .cesdk-container-professional.simple-mode-preview {
@@ -288,6 +295,10 @@
 .cesdk-container-professional .ubq-inspector {
   background: var(--color-white);
   border-left: 1px solid var(--color-border);
+  /* Ensure inspector sidebar fits within viewport and doesn't overflow behind footer */
+  max-height: calc(100vh - 140px) !important; /* 70px header + 70px footer */
+  overflow-y: auto !important;
+  position: relative !important;
 }
 
 .cesdk-container-professional .ubq-asset-library {
@@ -298,6 +309,81 @@
 .cesdk-container-professional .ubq-navigation-bar {
   background: var(--color-white);
   border-bottom: 1px solid var(--color-border);
+}
+
+/* CESDK Inspector Panel - Ensure it doesn't get hidden by footer */
+.cesdk-container-professional [class*="Inspector"] {
+  max-height: calc(100vh - 140px) !important;
+  overflow-y: auto !important;
+}
+
+/* CESDK Inspector Content - Scrollable */
+.cesdk-container-professional [class*="Inspector"] > div {
+  max-height: 100% !important;
+  overflow-y: auto !important;
+}
+
+/* When inside onboarding layout, account for onboarding footer */
+.onboarding-main .postcard-editor-professional {
+  /* Full height minus onboarding footer (80px) */
+  height: calc(100vh - 80px);
+}
+
+.onboarding-main .postcard-editor-professional .cesdk-container-professional .ubq-inspector {
+  /* Account for editor header (70px) + onboarding footer (80px) */
+  max-height: calc(100vh - 150px) !important;
+}
+
+.onboarding-main .postcard-editor-professional .cesdk-container-professional [class*="Inspector"] {
+  max-height: calc(100vh - 150px) !important;
+}
+
+/* Target all CESDK inspector and panel elements to ensure they fit in viewport */
+.cesdk-container-professional div[class*="inspector"],
+.cesdk-container-professional div[class*="Inspector"],
+.cesdk-container-professional div[class*="panel"],
+.cesdk-container-professional div[class*="Panel"],
+.cesdk-container-professional aside,
+.cesdk-container-professional [role="complementary"] {
+  max-height: calc(100vh - 140px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* When in onboarding layout, reduce height further */
+.onboarding-main .cesdk-container-professional div[class*="inspector"],
+.onboarding-main .cesdk-container-professional div[class*="Inspector"],
+.onboarding-main .cesdk-container-professional div[class*="panel"],
+.onboarding-main .cesdk-container-professional div[class*="Panel"],
+.onboarding-main .cesdk-container-professional aside,
+.onboarding-main .cesdk-container-professional [role="complementary"] {
+  max-height: calc(100vh - 150px) !important;
+}
+
+/* Ensure scrollbars are visible and styled */
+.cesdk-container-professional div[class*="inspector"]::-webkit-scrollbar,
+.cesdk-container-professional div[class*="Inspector"]::-webkit-scrollbar,
+.cesdk-container-professional aside::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cesdk-container-professional div[class*="inspector"]::-webkit-scrollbar-track,
+.cesdk-container-professional div[class*="Inspector"]::-webkit-scrollbar-track,
+.cesdk-container-professional aside::-webkit-scrollbar-track {
+  background: var(--color-gray-100);
+}
+
+.cesdk-container-professional div[class*="inspector"]::-webkit-scrollbar-thumb,
+.cesdk-container-professional div[class*="Inspector"]::-webkit-scrollbar-thumb,
+.cesdk-container-professional aside::-webkit-scrollbar-thumb {
+  background: var(--color-gray-400);
+  border-radius: 4px;
+}
+
+.cesdk-container-professional div[class*="inspector"]::-webkit-scrollbar-thumb:hover,
+.cesdk-container-professional div[class*="Inspector"]::-webkit-scrollbar-thumb:hover,
+.cesdk-container-professional aside::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-500);
 }
 
 /* Loading Overlay */

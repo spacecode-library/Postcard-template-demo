@@ -1110,3 +1110,322 @@ When rate limit is exceeded:
    - Campaign status notifications
    - Subscription notifications (ready to implement)
    - Password reset emails (ready to implement)
+
+---
+
+## PSD Template Requirements for Frontend
+
+### Overview
+
+The frontend application uses PSD (Photoshop Document) files as postcard templates, loaded and edited using the IMG.LY Creative Engine SDK. For optimal editing capabilities, template designers must follow specific requirements.
+
+### ⚠️ CRITICAL: Vector Shapes Required
+
+**Background layers MUST be vector shapes, NOT rasterized images.**
+
+The IMG.LY engine distinguishes between:
+
+| Block Type | Description | Colorable | Use Case |
+|-----------|-------------|-----------|----------|
+| `//ly.img.ubq/graphic` with `fill/solid` | Vector shape with solid color fill | ✅ Yes | Backgrounds, decorative shapes |
+| `//ly.img.ubq/graphic` with `fill/image` | Graphic with image fill | ❌ No | Not recommended for backgrounds |
+| `//ly.img.ubq/image` | Rasterized image block | ❌ No | Photos, logos (replaceable, not colorable) |
+| `//ly.img.ubq/text` | Text layer | ✅ Yes | All text content |
+
+### File Specifications
+
+```json
+{
+  "format": ".psd",
+  "colorMode": "RGB Color",
+  "resolution": "300 DPI",
+  "dimensions": {
+    "width": "1500px",
+    "height": "2100px",
+    "ratio": "5:7 inches"
+  },
+  "maxFileSize": "50MB (recommended)",
+  "compression": "Maximum compatibility"
+}
+```
+
+### Layer Requirements
+
+#### 1. Background Layers (CRITICAL)
+
+```
+✅ CORRECT:
+- Created using Photoshop Shape Tool (Rectangle, Ellipse, etc.)
+- Has solid color fill
+- Shows vector icon in Layers panel
+- Can have color changed in Properties panel
+
+❌ WRONG:
+- Rasterized layer (pixels)
+- Image fill
+- Smart Object → Rasterize Layer
+- Flattened/merged layer
+```
+
+#### 2. Layer Naming Conventions
+
+| Purpose | Naming Pattern | Examples |
+|---------|---------------|----------|
+| Background shapes | `background`, `Background`, `*background*` | "Background", "background-shape", "bg-layer" |
+| Text elements | Descriptive name | "Company Name", "Offer Text", "Address Block" |
+| Logo placeholder | `logo`, `Logo`, `*logo*` | "Logo", "company-logo", "brand-logo" |
+| Brand overlay | Auto-created by system | "Brand Overlay" |
+
+#### 3. Layer Organization
+
+**Required Structure:**
+```
+Root
+├── Front Side (Group)
+│   ├── Background (Vector Shape - Solid Fill) ✅
+│   ├── Decorative Elements (Vector Shapes)
+│   ├── Logo (Smart Object - NOT Rasterized)
+│   ├── Company Name (Text Layer)
+│   ├── Offer Heading (Text Layer)
+│   └── Offer Body (Text Layer)
+└── Back Side (Group) [Optional for 2-sided]
+    ├── Background (Vector Shape - Solid Fill) ✅
+    ├── Address Label (Text Layer)
+    ├── Address Lines (Text Layers)
+    └── Contact Info (Text Layer)
+```
+
+### Brand Color Integration
+
+#### Brand Color API Format
+
+**Company Endpoint Response:**
+```json
+{
+  "primary_color": "#20B2AA",
+  "secondary_color": "#15B79E",
+  "color_palette": [
+    { "hex": "#20B2AA", "name": "Primary Teal" },
+    { "hex": "#15B79E", "name": "Secondary Teal" },
+    { "hex": "#1A9D96", "name": "Dark Teal" }
+  ]
+}
+```
+
+Or simplified:
+```json
+{
+  "primary_color": "#20B2AA",
+  "secondary_color": "#15B79E",
+  "color_palette": ["#20B2AA", "#15B79E", "#1A9D96"]
+}
+```
+
+#### Color Format Validation
+
+```javascript
+// Server-side validation
+const hexColorRegex = /^#[0-9A-Fa-f]{6}$/;
+
+// Valid examples:
+"#20B2AA" ✅
+"#FFFFFF" ✅
+"#000000" ✅
+
+// Invalid examples:
+"20B2AA"  ❌ (missing #)
+"#20B"    ❌ (too short)
+"rgb(...)" ❌ (wrong format)
+```
+
+#### Frontend Color Application Logic
+
+```javascript
+// Detection functions
+function isVectorBlock(engine, blockId) {
+  const blockType = engine.block.getType(blockId);
+  if (blockType === '//ly.img.ubq/graphic') {
+    return engine.block.supportsFill(blockId) &&
+           !isRasterizedBlock(engine, blockId);
+  }
+  return false;
+}
+
+function isRasterizedBlock(engine, blockId) {
+  const blockType = engine.block.getType(blockId);
+
+  // Image blocks are always rasterized
+  if (blockType === '//ly.img.ubq/image') {
+    return true;
+  }
+
+  // Graphics with image fills are rasterized
+  if (blockType === '//ly.img.ubq/graphic') {
+    const hasFill = engine.block.hasFill(blockId);
+    if (hasFill) {
+      const fill = engine.block.getFill(blockId);
+      const fillType = engine.block.getType(fill);
+      return fillType === '//ly.img.ubq/fill/image';
+    }
+  }
+
+  return false;
+}
+
+// Application logic
+function applyBrandColor(engine, hexColor) {
+  // Convert hex to RGB
+  const rgb = hexToRGB(hexColor);
+
+  // Find applicable blocks
+  const backgrounds = engine.block.findAll().filter(block => {
+    const blockName = engine.block.getName(block);
+    const isBackground = blockName.includes('background');
+    return isBackground && isVectorBlock(engine, block);
+  });
+
+  if (backgrounds.length > 0) {
+    backgrounds.forEach(bg => {
+      engine.block.setFillSolidColor(bg, rgb);
+    });
+    return { success: true, count: backgrounds.length };
+  }
+
+  return {
+    success: false,
+    reason: 'no_vector_backgrounds',
+    message: 'Background layers are rasterized images'
+  };
+}
+```
+
+### Template Metadata Format
+
+**Required fields in `templates.json`:**
+
+```json
+{
+  "id": "template-001",
+  "name": "Modern Business",
+  "psdFile": "modern-business.psd",
+  "preview": "/template-previews/modern-business.png",
+  "sides": 2,
+  "available": true,
+  "psdFileSize": 15728640,
+  "largeFileWarning": false,
+  "editableElements": [
+    "Company Name",
+    "Offer Heading",
+    "Offer Body",
+    "Address Line 1",
+    "Address Line 2"
+  ],
+  "features": [
+    "Double-Sided",
+    "Logo Placement",
+    "Brand Colors",
+    "Custom Text"
+  ],
+  "category": "business",
+  "primaryColor": "#20B2AA"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | ✅ | Unique identifier |
+| `psdFile` | string | ✅ | Filename in `/public/PSD-files/` |
+| `preview` | string | ✅ | Preview image path (PNG/JPG) |
+| `sides` | number | ✅ | 1 or 2 |
+| `available` | boolean | ✅ | Can be selected |
+| `editableElements` | array | ❌ | List of editable text layers |
+| `features` | array | ❌ | Feature tags for filtering |
+
+### Error Handling
+
+#### PSD Loading Errors
+
+```json
+{
+  "PSD_NOT_FOUND": "PSD file not found at /public/PSD-files/{filename}",
+  "PSD_PARSE_ERROR": "Failed to parse PSD layers - file may be corrupt",
+  "PSD_NO_EDITABLE_CONTENT": "PSD has no editable text or shape layers",
+  "PSD_TOO_LARGE": "File exceeds 50MB limit - optimize and re-export"
+}
+```
+
+#### Brand Color Application Errors
+
+```json
+{
+  "NO_VECTOR_SHAPES": "No vector shapes found for color application",
+  "RASTERIZED_BACKGROUNDS": "Background layers are rasterized images and cannot be colored",
+  "INVALID_HEX_FORMAT": "Color must be in hex format (#RRGGBB)",
+  "COLOR_CONVERSION_FAILED": "Failed to convert hex to RGB (NaN values)"
+}
+```
+
+#### User-Facing Warnings
+
+When brand colors cannot be applied, the UI shows:
+
+```
+⚠️ Background layers are rasterized images and cannot have colors applied.
+   Use vector shapes for color customization.
+```
+
+```
+⚠️ No vector shapes found to apply brand colors.
+   Select individual text or shape elements to change their colors.
+```
+
+### Testing Requirements
+
+Before deploying a PSD template:
+
+1. **Visual Inspection in Photoshop**
+   - [ ] Check Layers panel - backgrounds show vector icon
+   - [ ] Double-click shape - Fill shows "Color", not "Image"
+   - [ ] Try changing background color manually
+   - [ ] Verify text layers are NOT rasterized
+
+2. **Frontend Testing**
+   - [ ] Upload PSD to `/public/PSD-files/`
+   - [ ] Add entry to `templates.json`
+   - [ ] Load in editor - no parse errors
+   - [ ] Select background layer
+   - [ ] Click "Apply Brand Color" button
+   - [ ] Verify SUCCESS message (not warning)
+   - [ ] Confirm color actually changes
+
+3. **Export Testing**
+   - [ ] Export as PNG - 300 DPI maintained
+   - [ ] Export as PDF - text remains editable
+   - [ ] File size reasonable (< 5MB for PNG)
+
+### Best Practices Summary
+
+| ✅ DO | ❌ DON'T |
+|-------|----------|
+| Use Shape Tool for backgrounds | Rasterize background layers |
+| Solid color fills | Image fills on backgrounds |
+| Descriptive layer names | Generic names ("Layer 1") |
+| Organize in groups (Front/Back) | Flatten to single layer |
+| Keep text as text layers | Rasterize text for effects |
+| Test color application | Skip testing before deployment |
+| 300 DPI, RGB mode | Lower resolution or CMYK |
+| Under 50MB file size | Exceed size limits |
+
+### Support Resources
+
+- [IMG.LY Creative Engine Docs](https://img.ly/docs/cesdk/)
+- [Photoshop Shape Layers Guide](https://helpx.adobe.com/photoshop/using/creating-shapes.html)
+- [Frontend README.md](./README.md) - Detailed designer guidelines
+- Support: support@postcard-app.com
+
+### Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.1.0 | 2025-01-06 | Added PSD template requirements section |
+| 1.0.0 | 2025-08-21 | Initial API documentation |

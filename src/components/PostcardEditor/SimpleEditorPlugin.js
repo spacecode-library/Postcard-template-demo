@@ -524,7 +524,148 @@ export const SimpleEditorPlugin = () => ({
             }
           });
         */
-        
+
+        // ===== BRAND COLORS SECTION =====
+        // Show brand colors if available - check dynamically on each panel build
+        const isValidHex = (color) => {
+          if (!color || typeof color !== 'string') return false;
+          const cleanHex = color.replace('#', '').trim();
+          return /^[0-9A-Fa-f]{6}$/.test(cleanHex);
+        };
+
+        // Helper to convert hex to RGB
+        const hexToRGB = (hex) => {
+          if (!hex || typeof hex !== 'string') return null;
+          const cleanHex = hex.replace(/^#/, '').trim();
+          if (!/^[0-9A-Fa-f]{6}$/.test(cleanHex)) return null;
+          const r = parseInt(cleanHex.substring(0, 2), 16) / 255;
+          const g = parseInt(cleanHex.substring(2, 4), 16) / 255;
+          const b = parseInt(cleanHex.substring(4, 6), 16) / 255;
+          if (isNaN(r) || isNaN(g) || isNaN(b)) return null;
+          return { r, g, b, a: 1 };
+        };
+
+        if (window.brandColors && isValidHex(window.brandColors.primary)) {
+          console.log('[BRAND COLORS] Adding brand colors section to sidebar:', window.brandColors);
+
+          builder.Section('simple-editor.brand-colors', {
+            title: 'Brand Colors',
+            children: () => {
+              // Show brand name
+              if (window.brandName) {
+                builder.Text('brand-name-display', {
+                  text: `Brand: ${window.brandName}`,
+                  style: { fontWeight: 'bold', marginBottom: '8px' }
+                });
+              }
+
+              // Show primary color
+              if (window.brandColors.primary) {
+                const primaryRGB = hexToRGB(window.brandColors.primary);
+                if (primaryRGB) {
+                  builder.ColorInput('brand-primary-swatch', {
+                    inputLabel: `Primary: ${window.brandColors.primary}`,
+                    value: primaryRGB,
+                    disabled: true
+                  });
+                }
+              }
+
+              // Show secondary color
+              if (window.brandColors.secondary && isValidHex(window.brandColors.secondary)) {
+                const secondaryRGB = hexToRGB(window.brandColors.secondary);
+                if (secondaryRGB) {
+                  builder.ColorInput('brand-secondary-swatch', {
+                    inputLabel: `Secondary: ${window.brandColors.secondary}`,
+                    value: secondaryRGB,
+                    disabled: true
+                  });
+                }
+              }
+
+              // Show palette colors
+              if (window.brandColors.palette && Array.isArray(window.brandColors.palette) && window.brandColors.palette.length > 0) {
+                builder.Text('brand-palette-label', {
+                  text: 'Brand Palette:',
+                  style: { marginTop: '12px', fontWeight: '600', fontSize: '0.875rem' }
+                });
+
+                window.brandColors.palette.slice(0, 6).forEach((colorObj, index) => {
+                  const colorHex = (typeof colorObj === 'string') ? colorObj : (colorObj.hex || null);
+                  const colorName = (typeof colorObj === 'object') ? colorObj.name : null;
+
+                  if (colorHex && isValidHex(colorHex)) {
+                    const colorRGB = hexToRGB(colorHex);
+                    if (colorRGB) {
+                      builder.ColorInput(`brand-palette-color-${index}`, {
+                        inputLabel: colorName ? `${colorName}: ${colorHex}` : `Color ${index + 1}: ${colorHex}`,
+                        value: colorRGB,
+                        disabled: true
+                      });
+                    }
+                  }
+                });
+              }
+
+              builder.Text('brand-colors-info', {
+                text: 'Tip: These are your brand colors. Select text or shapes to apply them manually.',
+                style: {
+                  marginTop: '12px',
+                  fontSize: '0.75rem',
+                  color: '#718096',
+                  fontStyle: 'italic'
+                }
+              });
+            }
+          });
+        } else {
+          console.log('[WARNING] Brand colors not available in sidebar (window.brandColors:', window.brandColors, ')');
+        }
+
+        // ===== BRAND LOGO SECTION =====
+        // Show brand logo if available
+        if (window.brandLogo || window.editorBrandLogo) {
+          const logoUrl = window.brandLogo || window.editorBrandLogo;
+          console.log('[BRAND LOGO] Adding brand logo section to sidebar:', logoUrl);
+
+          builder.Section('simple-editor.brand-logo', {
+            title: 'Brand Logo',
+            children: () => {
+              // Show brand name
+              if (window.brandName) {
+                builder.Text('brand-logo-name', {
+                  text: `${window.brandName}`,
+                  style: { fontWeight: 'bold', marginBottom: '8px' }
+                });
+              }
+
+              // Show logo URL
+              builder.Text('brand-logo-url', {
+                text: `Logo: ${logoUrl.substring(0, 50)}...`,
+                style: {
+                  fontSize: '0.75rem',
+                  color: '#4A5568',
+                  marginBottom: '8px',
+                  fontFamily: 'monospace'
+                }
+              });
+
+              builder.Text('brand-logo-usage-info', {
+                text: 'Tip: Click on any image placeholder, then use the "Use Brand Logo" button to replace it with your logo.',
+                style: {
+                  marginTop: '8px',
+                  fontSize: '0.75rem',
+                  color: '#718096',
+                  fontStyle: 'italic',
+                  lineHeight: '1.4'
+                }
+              });
+            }
+          });
+        } else {
+          console.log('[WARNING] Brand logo not available in sidebar');
+        }
+
         console.groupEnd();
       }
     );
@@ -543,6 +684,12 @@ export const SimpleEditorPlugin = () => ({
 
 // Helper functions
 const waitUntilLoaded = async (engine) => {
+  // Add null safety checks
+  if (!engine || !engine.scene || typeof engine.scene.get !== 'function') {
+    console.warn('waitUntilLoaded: Engine not fully initialized yet');
+    return;
+  }
+
   const scene = engine.scene.get();
   if (scene) {
     await engine.block.forceLoadResources([scene]);
@@ -1121,7 +1268,7 @@ const buildContextualSidebar = (builder, engine, state, selectedBlock, data) => 
 
     // Typography controls for selected text block
     builder.Section('simple-editor.selected-typography', {
-      title: '✏️ Text Formatting',
+      title: 'Text Formatting',
       children: () => {
         try {
           if (!engine.block.isValid(selectedBlock)) {
@@ -1301,7 +1448,7 @@ const buildContextualSidebar = (builder, engine, state, selectedBlock, data) => 
     console.log(`🖼️ Creating image editor for selected graphic block`);
     
     builder.Section('simple-editor.selected-image', {
-      title: '🖼️ Image Editing',
+      title: 'Image Editing',
       children: () => {
         try {
           if (!engine.block.isValid(selectedBlock)) {
@@ -1367,7 +1514,7 @@ const buildContextualSidebar = (builder, engine, state, selectedBlock, data) => 
                     try {
                       const url = URL.createObjectURL(file);
                       const fillToChange = engine.block.getFill(selectedBlock);
-                      
+
                       if (!fillToChange || !engine.block.isValid(fillToChange)) {
                         throw new Error('Cannot get valid fill block');
                       }
@@ -1375,7 +1522,7 @@ const buildContextualSidebar = (builder, engine, state, selectedBlock, data) => 
                       // Clear existing image data
                       engine.block.setString(fillToChange, 'fill/image/imageFileURI', '');
                       engine.block.setSourceSet(fillToChange, 'fill/image/sourceSet', []);
-                      
+
                       // Add new image
                       engine.block
                         .addImageFileURIToSourceSet(fillToChange, 'fill/image/sourceSet', url)
@@ -1403,10 +1550,64 @@ const buildContextualSidebar = (builder, engine, state, selectedBlock, data) => 
             }
           });
 
+          // Show "Use Brand Logo" button if brand logo is available
+          if (window.brandLogo || window.editorBrandLogo) {
+            const logoUrl = window.brandLogo || window.editorBrandLogo;
+            const logoLoadingState = state(`brandLogoLoading-${selectedBlock}`, false);
+
+            builder.Button(`use-brand-logo-${selectedBlock}`, {
+              label: 'Use Brand Logo',
+              isLoading: logoLoadingState.value,
+              onClick: () => {
+                try {
+                  console.log('[BRAND LOGO] Applying brand logo:', logoUrl);
+                  logoLoadingState.setValue(true);
+
+                  const fillToChange = engine.block.getFill(selectedBlock);
+
+                  if (!fillToChange || !engine.block.isValid(fillToChange)) {
+                    throw new Error('Cannot get valid fill block');
+                  }
+
+                  // Clear existing image data
+                  engine.block.setString(fillToChange, 'fill/image/imageFileURI', '');
+                  engine.block.setSourceSet(fillToChange, 'fill/image/sourceSet', []);
+
+                  // Add brand logo
+                  engine.block
+                    .addImageFileURIToSourceSet(fillToChange, 'fill/image/sourceSet', logoUrl)
+                    .then(() => {
+                      logoLoadingState.setValue(false);
+                      engine.editor.addUndoStep();
+                      console.log('[SUCCESS] Applied brand logo to:', blockName);
+                    })
+                    .catch((addError) => {
+                      console.error('[ERROR] Adding brand logo to source set:', addError);
+                      logoLoadingState.setValue(false);
+                    });
+                } catch (error) {
+                  console.error('[ERROR] Applying brand logo:', error);
+                  logoLoadingState.setValue(false);
+                }
+              }
+            });
+
+            // Show logo preview
+            builder.Text('brand-logo-info', {
+              text: 'Quick replace with your company logo',
+              style: {
+                fontSize: '0.75rem',
+                color: '#718096',
+                marginTop: '4px',
+                fontStyle: 'italic'
+              }
+            });
+          }
+
           // Add image properties if there's an image
           if (uri) {
             builder.Section('simple-editor.image-properties', {
-              title: '⚙️ Image Properties',
+              title: 'Image Properties',
               children: () => {
                 try {
                   // Image opacity control
@@ -1509,7 +1710,7 @@ const buildContextualSidebar = (builder, engine, state, selectedBlock, data) => 
     console.log(`🎨 Creating color editor for selected element with ${elementColors.length} colors`);
     
     builder.Section('simple-editor.selected-colors', {
-      title: '🎨 Element Colors',
+      title: 'Element Colors',
       children: () => {
         elementColors.forEach((colorInfo, index) => {
           const colorState = state(`selectedColor-${selectedBlock}-${index}`, colorInfo.color);
@@ -1537,20 +1738,20 @@ const buildOverviewSidebar = (builder, engine, state, data) => {
 
   // Instructions
   builder.Section('simple-editor.instructions', {
-    title: '📋 How to Edit',
+    title: 'How to Edit',
     children: () => {
       builder.Text('instructions-main', {
-        text: '👆 Click on any text or image in the canvas to edit it directly'
+        text: 'Click on any text or image in the canvas to edit it directly'
       });
       builder.Text('instructions-sub', {
-        text: '💡 Or use the sections below to edit multiple elements at once'
+        text: 'Tip: Use the sections below to edit multiple elements at once'
       });
     }
   });
 
   // Page Background Controls
   builder.Section('simple-editor.page-background', {
-    title: '🎨 Page Background',
+    title: 'Page Background',
     children: () => {
       try {
         const pages = engine.block.findByType('page');
@@ -1649,11 +1850,11 @@ const buildOverviewSidebar = (builder, engine, state, data) => {
   // Global theme colors section for bulk color changes
   if (Object.keys(colors).length > 0) {
     builder.Section('simple-editor.theme-colors', {
-      title: '🎨 Theme Colors',
+      title: 'Theme Colors',
       children: () => {
         try {
           builder.Text('theme-colors-info', {
-            text: '🎨 Change colors across multiple elements at once'
+            text: 'Change colors across multiple elements at once'
           });
 
           Object.entries(colors).forEach(([colorId, foundColors], index) => {
@@ -1728,6 +1929,117 @@ const buildOverviewSidebar = (builder, engine, state, data) => {
           console.error('Error creating theme colors section:', error);
           builder.Text('theme-colors-error', { 
             text: 'Error loading theme colors' 
+          });
+        }
+      }
+    });
+  }
+
+  // ===== BRAND COLOR OVERLAY CONTROLS =====
+  // Show overlay controls if a brand overlay exists
+  const allBlocks = engine.block.findAll();
+  const brandOverlay = allBlocks.find(block => {
+    try {
+      return engine.block.getMetadata(block, 'isBrandOverlay') === 'true';
+    } catch (e) {
+      return false; // Block doesn't have this metadata
+    }
+  });
+
+  if (brandOverlay && engine.block.isValid(brandOverlay)) {
+    builder.Section('simple-editor.brand-overlay', {
+      title: 'Brand Color Tint',
+      children: () => {
+        builder.Text('overlay-description', {
+          text: 'Adjust the brand color overlay on your PSD template. Increase intensity for stronger brand color presence.',
+          style: { fontSize: '0.875rem', color: '#718096', marginBottom: '12px' }
+        });
+
+        try {
+          const fill = engine.block.getFill(brandOverlay);
+          if (fill && engine.block.isValid(fill)) {
+            const currentColor = engine.block.getColor(fill, 'fill/color/value');
+            const currentOpacity = currentColor.a || 0.15;
+
+            // Color picker for overlay
+            const overlayColorState = state('overlay-color', currentColor);
+            builder.ColorInput('overlay-tint-color', {
+              inputLabel: 'Tint Color',
+              value: overlayColorState.value,
+              setValue: (newColor) => {
+                engine.block.setFillSolidColor(brandOverlay, {
+                  r: newColor.r,
+                  g: newColor.g,
+                  b: newColor.b,
+                  a: currentOpacity  // Preserve current opacity
+                });
+                overlayColorState.setValue(newColor);
+                engine.editor.addUndoStep();
+              }
+            });
+
+            // Opacity slider
+            const opacityState = state('overlay-opacity', currentOpacity);
+            builder.Slider('overlay-intensity', {
+              inputLabel: `Tint Intensity (${Math.round(opacityState.value * 100)}%)`,
+              value: opacityState.value,
+              min: 0,
+              max: 0.5,  // Max 50% to prevent overwhelming the design
+              step: 0.05,
+              setValue: (newOpacity) => {
+                const color = engine.block.getColor(fill, 'fill/color/value');
+                engine.block.setFillSolidColor(brandOverlay, {
+                  r: color.r,
+                  g: color.g,
+                  b: color.b,
+                  a: newOpacity
+                });
+                opacityState.setValue(newOpacity);
+                engine.editor.addUndoStep();
+              }
+            });
+
+            // Reset button
+            builder.Button('reset-overlay', {
+              label: 'Reset to Original Brand Color',
+              onClick: () => {
+                const originalColor = engine.block.getMetadata(brandOverlay, 'originalColor');
+                if (originalColor && typeof originalColor === 'string') {
+                  const hex = originalColor.replace(/^#/, '').trim();
+                  if (/^[0-9A-Fa-f]{6}$/.test(hex)) {
+                    const r = parseInt(hex.substring(0, 2), 16) / 255;
+                    const g = parseInt(hex.substring(2, 4), 16) / 255;
+                    const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+                    if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+                      const resetColor = { r, g, b, a: 0.15 };
+                      engine.block.setFillSolidColor(brandOverlay, resetColor);
+                      overlayColorState.setValue(resetColor);
+                      opacityState.setValue(0.15);
+                      engine.editor.addUndoStep();
+                      console.log('✅ Reset overlay to original brand color');
+                    }
+                  }
+                }
+              }
+            });
+
+            // Toggle visibility button
+            const isVisible = engine.block.isVisible(brandOverlay);
+            builder.Button('toggle-overlay-visibility', {
+              label: isVisible ? 'Hide Brand Tint' : 'Show Brand Tint',
+              onClick: () => {
+                const currentVisibility = engine.block.isVisible(brandOverlay);
+                engine.block.setVisible(brandOverlay, !currentVisibility);
+                engine.editor.addUndoStep();
+              }
+            });
+          }
+        } catch (error) {
+          console.warn('Error rendering overlay controls:', error);
+          builder.Text('overlay-error', {
+            text: 'Could not load overlay controls',
+            style: { color: '#E53E3E' }
           });
         }
       }

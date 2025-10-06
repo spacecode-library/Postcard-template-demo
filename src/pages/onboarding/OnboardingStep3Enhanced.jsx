@@ -268,11 +268,13 @@ const OnboardingStep3Enhanced = () => {
         }
 
         .step3-editor-container {
-          /* The PostcardEditor will handle its own sizing and layout */
+          /* Fill available space - footer is position:fixed so excluded from layout */
           width: 100%;
-          height: calc(100vh - var(--header-height, 64px) - var(--footer-height, 100px) - var(--space-16, 64px));
+          height: 100%;
+          flex: 1;
           min-height: 600px;
           position: relative;
+          overflow: hidden;
         }
 
         /* Ensure the editor fills the available space */

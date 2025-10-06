@@ -34,7 +34,10 @@
       "logo",
       "images"
     ],
-    "hasPreview": true
+    "hasPreview": true,
+    "backgroundEditable": false,
+    "supportsColorOverlay": true,
+    "backgroundType": "graphic"
   },
   {
     "id": "professional-business",
@@ -76,7 +79,10 @@
       "images"
     ],
     "largeFileWarning": true,
-    "hasPreview": true
+    "hasPreview": true,
+    "backgroundEditable": false,
+    "supportsColorOverlay": true,
+    "backgroundType": "graphic"
   },
   {
     "id": "modern-corporate",
@@ -116,7 +122,10 @@
       "backgroundImage"
     ],
     "largeFileWarning": true,
-    "hasPreview": true
+    "hasPreview": true,
+    "backgroundEditable": false,
+    "supportsColorOverlay": true,
+    "backgroundType": "graphic"
   },
   {
     "id": "demo-double-sided",
@@ -161,7 +170,10 @@
       "business",
       "demo",
       "double-sided"
-    ]
+    ],
+    "backgroundEditable": true,
+    "supportsColorOverlay": true,
+    "backgroundType": "color"
   },
   {
     "id": "creative-business",
@@ -211,7 +223,10 @@
       "creative",
       "large-format"
     ],
-    "hasPreview": true
+    "hasPreview": true,
+    "backgroundEditable": false,
+    "supportsColorOverlay": true,
+    "backgroundType": "graphic"
   },
   {
     "id": "elegant-professional",
@@ -261,6 +276,9 @@
       "elegant",
       "premium"
     ],
-    "hasPreview": true
+    "hasPreview": true,
+    "backgroundEditable": false,
+    "supportsColorOverlay": true,
+    "backgroundType": "graphic"
   }
 ]

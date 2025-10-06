@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 import LoadingScreen from '../../components/onboarding/LoadingScreen';
 import OnboardingFooter from '../../components/onboarding/OnboardingFooter';
+import TemplateCardSkeleton from '../../components/common/TemplateCardSkeleton';
+import supabaseCompanyService from '../../supabase/api/companyService';
 import './onboarding-step2-redesign.css';
 
 // Import preview generators for browser console access
@@ -40,7 +42,8 @@ const OnboardingStep2Enhanced = () => {
     address1: '3900 Morse Rd, Columbus, OH',
     address2: '43219, United States',
     website: 'brewbean@company.com',
-    footer: '"Perfect to start the day, Good Staff, Delicious"'
+    footer: '"Perfect to start the day, Good Staff, Delicious"',
+    colors: null  // Will be populated from Supabase
   });
 
   const templatesPerPage = 4;
@@ -52,16 +55,49 @@ const OnboardingStep2Enhanced = () => {
       try {
         setIsLoading(true);
         setError(null);
-        
-        // Load business data from Step 1
+
+        // Load business data from Step 1 localStorage
         const step1Data = localStorage.getItem('onboardingStep1');
         if (step1Data) {
           const parsedData = JSON.parse(step1Data);
           setBusinessData(prevData => ({
             ...prevData,
-            name: 'Your Business', // Will be filled by Brandfetch later
+            name: parsedData.companyData?.name || 'Your Business',
             website: parsedData.website || prevData.website
           }));
+        }
+
+        // Load brand colors from Supabase
+        try {
+          const companyData = await supabaseCompanyService.getCompanyInfo();
+          if (companyData) {
+            console.log('Loaded company data from Supabase:', companyData);
+
+            // Parse color_palette if it's a string
+            let colorPalette = companyData.color_palette;
+            if (typeof colorPalette === 'string') {
+              try {
+                colorPalette = JSON.parse(colorPalette);
+              } catch (e) {
+                console.warn('Could not parse color_palette:', e);
+                colorPalette = [];
+              }
+            }
+
+            setBusinessData(prevData => ({
+              ...prevData,
+              name: companyData.name || prevData.name,
+              colors: {
+                primary: companyData.primary_color,
+                secondary: companyData.secondary_color,
+                palette: Array.isArray(colorPalette) ? colorPalette : []
+              },
+              logo: companyData.logo_url
+            }));
+          }
+        } catch (companyError) {
+          console.warn('Could not load company data:', companyError);
+          // Continue with default values
         }
 
         // Load templates from templates.json (with cache busting)
@@ -216,6 +252,43 @@ const OnboardingStep2Enhanced = () => {
         <p className="step2-subtitle">
           Choose from {templates.length} professional PSD templates with real preview images and full editing capabilities
         </p>
+
+        {/* Brand Colors Indicator */}
+        {businessData.colors && businessData.colors.palette && businessData.colors.palette.length > 0 && (
+          <div style={{
+            marginTop: '16px',
+            padding: '12px 16px',
+            backgroundColor: '#F7FAFC',
+            borderRadius: '8px',
+            border: '1px solid #E2E8F0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
+            <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#4A5568' }}>
+              🎨 Your Brand Colors:
+            </span>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              {businessData.colors.palette.slice(0, 4).map((color, index) => (
+                <div
+                  key={index}
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    backgroundColor: color.hex || color,
+                    borderRadius: '6px',
+                    border: '2px solid white',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                  }}
+                  title={color.hex || color}
+                />
+              ))}
+            </div>
+            <span style={{ fontSize: '0.75rem', color: '#718096', marginLeft: 'auto' }}>
+              These will be applied to your template
+            </span>
+          </div>
+        )}
         
         <p className="step2-preview-label">Preview of selected Template</p>
         
@@ -322,44 +395,52 @@ const OnboardingStep2Enhanced = () => {
         
         {/* Templates Grid */}
         <div className="step2-templates-grid">
-          {getCurrentPageTemplates().map((template) => (
-            <div
-              key={template.id}
-              className={`step2-template-card ${selectedTemplate?.id === template.id ? 'selected' : ''}`}
-              onClick={() => handleTemplateSelect(template)}
-            >
-              <img 
-                src={getTemplatePreviewUrl(template)} 
-                alt={template.name}
-                className="step2-template-image"
-                onError={(e) => {
-                  console.warn(`Failed to load template image for ${template.name}:`, e.target.src);
-                  e.target.src = `data:image/svg+xml,${encodeURIComponent(`
-                    <svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
-                      <rect width="100%" height="100%" fill="${template.primaryColor || '#f7fafc'}"/>
-                      <text x="50%" y="50%" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="white">
-                        ${template.name}
-                      </text>
-                    </svg>
-                  `)}`;
-                }}
-              />
-              <div className="step2-template-info">
-                <h3 className="step2-template-name">{template.name}</h3>
-                <div className="step2-template-meta">
-                  <span className="element-count">
-                    {template.editableElements ? template.editableElements.length : 'Multiple'} Elements
-                  </span>
-                  {template.sides === 2 && (
-                    <span className="double-sided-badge">2-Sided</span>
-                  )}
+          {isLoading ? (
+            // Show skeleton loaders during loading
+            Array.from({ length: templatesPerPage }).map((_, index) => (
+              <TemplateCardSkeleton key={`skeleton-${index}`} />
+            ))
+          ) : (
+            // Show actual template cards when loaded
+            getCurrentPageTemplates().map((template) => (
+              <div
+                key={template.id}
+                className={`step2-template-card ${selectedTemplate?.id === template.id ? 'selected' : ''}`}
+                onClick={() => handleTemplateSelect(template)}
+              >
+                <img
+                  src={getTemplatePreviewUrl(template)}
+                  alt={template.name}
+                  className="step2-template-image"
+                  onError={(e) => {
+                    console.warn(`Failed to load template image for ${template.name}:`, e.target.src);
+                    e.target.src = `data:image/svg+xml,${encodeURIComponent(`
+                      <svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="100%" height="100%" fill="${template.primaryColor || '#f7fafc'}"/>
+                        <text x="50%" y="50%" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="white">
+                          ${template.name}
+                        </text>
+                      </svg>
+                    `)}`;
+                  }}
+                />
+                <div className="step2-template-info">
+                  <h3 className="step2-template-name">{template.name}</h3>
+                  <div className="step2-template-meta">
+                    <span className="element-count">
+                      {template.editableElements ? template.editableElements.length : 'Multiple'} Elements
+                    </span>
+                    {template.sides === 2 && (
+                      <span className="double-sided-badge">2-Sided</span>
+                    )}
+                  </div>
+                  <button className="step2-template-button">
+                    {selectedTemplate?.id === template.id ? 'Selected' : 'Select'}
+                  </button>
                 </div>
-                <button className="step2-template-button">
-                  {selectedTemplate?.id === template.id ? 'Selected' : 'Select'}
-                </button>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
         
         {/* Pagination */}

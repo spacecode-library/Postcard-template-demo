@@ -477,7 +477,81 @@ export class PSDLoader {
               engine.block.setVisible(page, isFront);
             });
           }
-          
+
+          // Apply brand color overlay if brand colors are available
+          if (template?.brandColors && template?.brandColors?.primary) {
+            console.log('🎨 Applying brand color overlay to PSD template...');
+
+            pages.forEach((page, pageIndex) => {
+              try {
+                if (!engine.block.isValid(page)) {
+                  console.warn(`Page ${pageIndex} is not valid for overlay`);
+                  return;
+                }
+
+                const pageWidth = engine.block.getWidth(page);
+                const pageHeight = engine.block.getHeight(page);
+
+                // Create overlay rectangle
+                const overlay = engine.block.create('//ly.img.ubq/graphic');
+                engine.block.setName(overlay, 'Brand Color Overlay');
+                engine.block.setWidth(overlay, pageWidth);
+                engine.block.setHeight(overlay, pageHeight);
+                engine.block.setPositionX(overlay, 0);
+                engine.block.setPositionY(overlay, 0);
+
+                // Convert hex to RGB with validation
+                const primaryColor = template.brandColors.primary;
+                if (!primaryColor || typeof primaryColor !== 'string') {
+                  console.warn('Invalid primary color:', primaryColor);
+                  return;
+                }
+
+                const hex = primaryColor.replace(/^#/, '').trim();
+                if (!/^[0-9A-Fa-f]{6}$/.test(hex)) {
+                  console.warn('Invalid hex format:', primaryColor);
+                  return;
+                }
+
+                const r = parseInt(hex.substring(0, 2), 16) / 255;
+                const g = parseInt(hex.substring(2, 4), 16) / 255;
+                const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+                if (isNaN(r) || isNaN(g) || isNaN(b)) {
+                  console.warn('Color conversion resulted in NaN:', { hex, r, g, b });
+                  return;
+                }
+
+                // Set semi-transparent brand color (15% opacity for subtle tint)
+                engine.block.setFillSolidColor(overlay, { r, g, b, a: 0.15 });
+
+                // Try to set blend mode for better color mixing
+                try {
+                  engine.block.setBlendMode(overlay, 'color');
+                  console.log('✅ Set overlay blend mode to "color"');
+                } catch (blendError) {
+                  console.warn('Blend mode not available, using normal opacity:', blendError);
+                }
+
+                // Add to page and send to back (behind all content)
+                engine.block.appendChild(page, overlay);
+                engine.block.sendToBack(overlay);
+
+                // Make overlay editable so users can adjust it
+                engine.block.setScopeEnabled(overlay, 'fill/change', true);
+                engine.block.setScopeEnabled(overlay, 'editor/select', true);
+
+                // Tag with metadata for easy identification
+                engine.block.setMetadata(overlay, 'isBrandOverlay', 'true');
+                engine.block.setMetadata(overlay, 'originalColor', primaryColor);
+
+                console.log(`✅ Brand color overlay applied to page ${pageIndex} with color ${primaryColor}`);
+              } catch (overlayError) {
+                console.warn(`Failed to apply overlay to page ${pageIndex}:`, overlayError);
+              }
+            });
+          }
+
           onProgress?.({ stage: 'complete', message: 'PSD loaded successfully!', progress: 100 });
         } catch (processingError) {
           throw new Error(`Error processing imported page: ${processingError.message}`);

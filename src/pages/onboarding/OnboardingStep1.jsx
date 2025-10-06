@@ -14,6 +14,7 @@ const OnboardingStep1 = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingBrand, setIsFetchingBrand] = useState(false);
+  const [brandPreview, setBrandPreview] = useState(null);
 
   const steps = [
     { number: 1, title: 'URL Business', subtitle: 'Please provide email' },
@@ -68,6 +69,15 @@ const OnboardingStep1 = () => {
       try {
         brandData = await brandfetchService.fetchBrandInfo(formData.website);
         toast.success('Brand information retrieved!', { id: 'brand-fetch' });
+
+        // Set brand preview to show to user
+        if (brandData) {
+          setBrandPreview({
+            name: brandData.name,
+            logo: brandData.logo?.primary || brandData.logo?.icon,
+            colors: brandData.colors
+          });
+        }
       } catch (brandError) {
         console.warn('Brandfetch error:', brandError);
         toast.dismiss('brand-fetch');
@@ -205,7 +215,108 @@ const OnboardingStep1 = () => {
             </select>
           </div>
         </form>
-        
+
+        {/* Brand Preview Card */}
+        {brandPreview && (
+          <div className="brand-preview-card" style={{
+            marginTop: '24px',
+            padding: '20px',
+            backgroundColor: '#F7FAFC',
+            borderRadius: '12px',
+            border: '2px solid #20B2AA',
+            animation: 'slideIn 0.3s ease-out'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                backgroundColor: '#20B2AA',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '24px'
+              }}>
+                ✓
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600', color: '#1A202C' }}>
+                  Brand Found: {brandPreview.name}
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: '#718096' }}>
+                  Your brand identity has been retrieved successfully
+                </p>
+              </div>
+            </div>
+
+            {brandPreview.logo && (
+              <div style={{ marginBottom: '16px', textAlign: 'center' }}>
+                <img
+                  src={brandPreview.logo}
+                  alt={`${brandPreview.name} logo`}
+                  style={{
+                    maxWidth: '200px',
+                    maxHeight: '80px',
+                    objectFit: 'contain'
+                  }}
+                  onError={(e) => { e.target.style.display = 'none' }}
+                />
+              </div>
+            )}
+
+            {brandPreview.colors && brandPreview.colors.palette && brandPreview.colors.palette.length > 0 && (
+              <div>
+                <p style={{ margin: '0 0 8px 0', fontSize: '0.875rem', fontWeight: '600', color: '#4A5568' }}>
+                  🎨 Brand Colors:
+                </p>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {brandPreview.colors.palette.slice(0, 6).map((color, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '48px',
+                          height: '48px',
+                          backgroundColor: color.hex || color,
+                          borderRadius: '8px',
+                          border: '2px solid #E2E8F0',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                        }}
+                        title={color.hex || color}
+                      />
+                      <span style={{
+                        fontSize: '0.75rem',
+                        color: '#718096',
+                        fontFamily: 'monospace'
+                      }}>
+                        {(color.hex || color).toUpperCase()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div style={{
+              marginTop: '16px',
+              padding: '12px',
+              backgroundColor: '#E6FFFA',
+              borderRadius: '8px',
+              fontSize: '0.875rem',
+              color: '#234E52'
+            }}>
+              <strong>Next:</strong> These colors will be automatically applied to your postcard template in the editor!
+            </div>
+          </div>
+        )}
+
         <div className="footer-section">
           <div className="footer-text">
             Enter your website URL and select your business category to continue

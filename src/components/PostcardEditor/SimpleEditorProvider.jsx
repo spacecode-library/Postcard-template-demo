@@ -60,6 +60,44 @@ export const SimpleEditorProvider = ({
           setIsLoaded(false);
         }, 30000);
 
+        // Get brand colors and logo from global state
+        const brandColors = window.brandColors || {};
+        const brandLogo = window.brandLogo || null;
+
+        // Build color palette for CESDK
+        const colorPalette = [];
+        if (brandColors.primary) {
+          colorPalette.push({
+            id: 'brand-primary',
+            name: 'Brand Primary',
+            color: brandColors.primary
+          });
+        }
+        if (brandColors.secondary) {
+          colorPalette.push({
+            id: 'brand-secondary',
+            name: 'Brand Secondary',
+            color: brandColors.secondary
+          });
+        }
+        if (brandColors.palette && Array.isArray(brandColors.palette)) {
+          brandColors.palette.forEach((color, index) => {
+            const hexColor = typeof color === 'string' ? color : color.hex;
+            if (hexColor) {
+              colorPalette.push({
+                id: `brand-color-${index}`,
+                name: `Brand Color ${index + 1}`,
+                color: hexColor
+              });
+            }
+          });
+        }
+
+        console.log('[BRAND COLORS] Injecting brand colors into CESDK:', colorPalette);
+        if (brandLogo) {
+          console.log('[BRAND LOGO] Brand logo available for suggestions:', brandLogo);
+        }
+
         const editorConfig = {
           license: 'LePTY688e8B3VoxIgNFWBLLbSijS9QJ-WRZQSFFJ9OiVl0z_Jsfu6PEQjMPL-yCX',
           userId: 'postcard-user',
@@ -78,7 +116,27 @@ export const SimpleEditorProvider = ({
                     format: ['image/png', 'application/pdf']
                   }
                 }
+              },
+              view: {
+                navigation: {
+                  zoomToFit: true // Enable zoom to fit button
+                }
+              },
+              // Add brand colors to the inspector panel
+              inspector: {
+                colorPalettes: colorPalette.length > 0 ? [
+                  {
+                    id: 'brand-colors',
+                    name: 'Your Brand Colors',
+                    colors: colorPalette.map(c => c.color)
+                  }
+                ] : undefined
               }
+            },
+            canvasActions: {
+              zoom: true, // Enable zoom controls
+              pan: true, // Enable pan controls
+              wheel: true // Enable mouse wheel zoom
             }
           },
           callbacks: {
@@ -107,6 +165,41 @@ export const SimpleEditorProvider = ({
         console.log('Adding Simple Editor plugin...');
         await localInstance.addPlugin(SimpleEditorPlugin());
         console.log('Simple Editor plugin added');
+
+        // Inject brand colors into the engine's color library
+        if (colorPalette.length > 0) {
+          try {
+            console.log('[INJECT] Injecting brand colors into engine color library...');
+
+            // Store brand colors in engine metadata for access by inspector
+            const scene = localInstance.engine.scene.get();
+            if (scene) {
+              localInstance.engine.block.setMetadata(scene, 'brandColors', JSON.stringify(colorPalette));
+              localInstance.engine.block.setMetadata(scene, 'brandColorsArray', JSON.stringify(colorPalette.map(c => c.color)));
+            }
+
+            // Make colors globally available for the plugin
+            window.editorBrandColors = colorPalette;
+            console.log('[SUCCESS] Brand colors injected successfully');
+          } catch (err) {
+            console.warn('Failed to inject brand colors:', err);
+          }
+        }
+
+        // Inject brand logo for image replacement suggestions
+        if (brandLogo) {
+          try {
+            console.log('[INJECT] Injecting brand logo for image suggestions...');
+            const scene = localInstance.engine.scene.get();
+            if (scene) {
+              localInstance.engine.block.setMetadata(scene, 'brandLogo', brandLogo);
+            }
+            window.editorBrandLogo = brandLogo;
+            console.log('[SUCCESS] Brand logo injected successfully');
+          } catch (err) {
+            console.warn('Failed to inject brand logo:', err);
+          }
+        }
 
         // Custom configuration
         if (configure && mountedRef.current) {
@@ -182,7 +275,7 @@ export const SimpleEditorProvider = ({
     return (
       <div className="error-overlay professional">
         <div className="error-box">
-          <div className="error-icon">⚠️</div>
+          <div className="error-icon" style={{ fontSize: '48px', color: '#F56565' }}>!</div>
           <h3>Simple Editor Initialization Error</h3>
           <p>{error}</p>
           <p style={{ fontSize: '14px', marginTop: '10px', opacity: 0.8 }}>

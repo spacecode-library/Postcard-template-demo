@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { SimpleEditorProvider } from './SimpleEditorProvider';
 import { AdvancedEditorProvider } from './AdvancedEditorProvider';
 import { PSDLoader } from './PSDLoader';
+import supabaseCompanyService from '../../supabase/api/companyService';
 import './PostcardEditor.professional.css';
 
 
@@ -16,10 +17,65 @@ const PostcardEditorNew = ({ selectedTemplate, onBack }) => {
   const [loadingProgress, setLoadingProgress] = useState(null);
   const [currentSide, setCurrentSide] = useState('front');
   const [isDoubleSided, setIsDoubleSided] = useState(false);
-  
+  const [companyBrandData, setCompanyBrandData] = useState(null);
+
   const simpleContainerRef = useRef(null);
   const advancedContainerRef = useRef(null);
   const currentEditorInstance = useRef(null);
+
+  // Load company brand data from Supabase on mount
+  useEffect(() => {
+    async function loadBrandData() {
+      try {
+        const company = await supabaseCompanyService.getCompanyInfo();
+        if (company) {
+          console.log('[BRAND DATA] Loaded brand data for editor:', company.name);
+          console.log('[BRAND DATA] Raw company data from Supabase:', {
+            primary_color: company.primary_color,
+            secondary_color: company.secondary_color,
+            color_palette: company.color_palette
+          });
+
+          // Parse color_palette if it's a string
+          let colorPalette = company.color_palette;
+          if (typeof colorPalette === 'string') {
+            try {
+              colorPalette = JSON.parse(colorPalette);
+            } catch (e) {
+              console.warn('Could not parse color_palette:', e);
+              colorPalette = [];
+            }
+          }
+
+          const brandData = {
+            name: company.name,
+            logo: company.logo_url,
+            logoIcon: company.logo_icon_url,
+            colors: {
+              primary: company.primary_color || null,
+              secondary: company.secondary_color || null,
+              palette: Array.isArray(colorPalette) ? colorPalette : []
+            },
+            fonts: company.fonts
+          };
+          setCompanyBrandData(brandData);
+
+          // Make brand data globally available for editor plugins
+          window.brandColors = brandData.colors;
+          window.brandName = brandData.name;
+          window.brandLogo = brandData.logo;
+
+          console.log('[BRAND COLORS] Brand colors loaded:', brandData.colors);
+          console.log('[BRAND COLORS] Primary color type:', typeof brandData.colors.primary, 'Value:', brandData.colors.primary);
+          console.log('[BRAND COLORS] Secondary color type:', typeof brandData.colors.secondary, 'Value:', brandData.colors.secondary);
+        }
+      } catch (error) {
+        console.warn('Could not load brand data:', error);
+        // Continue without brand data - editor will use template defaults
+      }
+    }
+    loadBrandData();
+  }, []);
 
   // Configuration for Simple Editor
   const simpleConfig = {
@@ -104,10 +160,14 @@ const PostcardEditorNew = ({ selectedTemplate, onBack }) => {
         // Load PSD template
         const psdPath = `/PSD-files/${template.psdFile}`;
         const result = await PSDLoader.loadPSDToScene(
-          instance.engine, 
+          instance.engine,
           psdPath,
           (progress) => setLoadingProgress(progress),
-          template
+          {
+            ...template,
+            brandColors: companyBrandData?.colors,
+            brandName: companyBrandData?.name
+          }
         );
         
         // Clear loading progress on completion
@@ -115,7 +175,32 @@ const PostcardEditorNew = ({ selectedTemplate, onBack }) => {
           setLoadingProgress(null);
           setIsDoubleSided(result.isDoubleSided || false);
           currentEditorInstance.current = instance;
-          
+
+          // Zoom to fit and center the postcard (with retry logic)
+          const attemptZoom = (retries = 3, delay = 200) => {
+            setTimeout(() => {
+              try {
+                if (instance?.engine) {
+                  const currentPage = instance.engine.scene.getCurrentPage();
+                  instance.engine.scene.zoomToBlock(
+                    currentPage,
+                    40, 40, 40, 40 // padding top, right, bottom, left
+                  );
+                  console.log('[SUCCESS] Zoomed to fit postcard');
+                }
+              } catch (error) {
+                if (retries > 0 && error.message && error.message.includes("hasn't been layouted yet")) {
+                  console.log(`[RETRY] Block not ready, retrying zoom (${retries} attempts left)...`);
+                  attemptZoom(retries - 1, delay + 100);
+                } else {
+                  console.warn('Could not zoom to fit:', error.message || error);
+                }
+              }
+            }, delay);
+          };
+
+          attemptZoom();
+
           // Refresh Simple Editor content after PSD loading
           if (window.simpleEditorPluginAPI && window.simpleEditorPluginAPI.refreshContent) {
             console.log('🔄 Triggering Simple Editor content refresh...');
@@ -159,21 +244,21 @@ const PostcardEditorNew = ({ selectedTemplate, onBack }) => {
       instance.engine.block.setHeight(page, POSTCARD_HEIGHT_PX / DPI);
       instance.engine.block.appendChild(scene, page);
 
-      // Set background color
-      let backgroundColor = template.primaryColor;
+      // Set background color - use brand colors if available
+      let backgroundColor = companyBrandData?.colors?.primary || template.primaryColor;
       if (isDoubleSided && i === 1) {
         // Use secondary color for back side
-        backgroundColor = template.colors?.secondary || template.primaryColor;
+        backgroundColor = companyBrandData?.colors?.secondary || template.colors?.secondary || template.primaryColor;
       }
       
       if (backgroundColor && backgroundColor !== '#undefined') {
         try {
-          const hex = backgroundColor.replace('#', '');
-          if (hex.length === 6) {
-            const r = parseInt(hex.substr(0, 2), 16) / 255;
-            const g = parseInt(hex.substr(2, 2), 16) / 255;
-            const b = parseInt(hex.substr(4, 2), 16) / 255;
-            
+          const hex = backgroundColor.replace(/^#/, '').trim();
+          if (/^[0-9A-Fa-f]{6}$/.test(hex)) {
+            const r = parseInt(hex.substring(0, 2), 16) / 255;
+            const g = parseInt(hex.substring(2, 4), 16) / 255;
+            const b = parseInt(hex.substring(4, 6), 16) / 255;
+
             if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
               instance.engine.block.setFillSolidColor(page, { r, g, b, a: 1 });
             }
@@ -370,7 +455,7 @@ const PostcardEditorNew = ({ selectedTemplate, onBack }) => {
         {error && (
           <div className="error-overlay professional">
             <div className="error-box">
-              <div className="error-icon">⚠️</div>
+              <div className="error-icon" style={{ fontSize: '48px', color: '#F56565' }}>!</div>
               <h3>Something went wrong</h3>
               <p>{error}</p>
               <div className="error-actions">
