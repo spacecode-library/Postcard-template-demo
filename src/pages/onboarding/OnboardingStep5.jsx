@@ -1,16 +1,274 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { loadStripe } from '@stripe/stripe-js';
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements,
+} from '@stripe/react-stripe-js';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
-import OnboardingFooter from '../../components/onboarding/OnboardingFooter';
+import toast from 'react-hot-toast';
+import { paymentService } from '../../supabase/api/paymentService';
+import './onboarding-step5.css';
+
+// Initialize Stripe - make sure this is outside the component
+// const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
+const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+
+// // Initialize Stripe - MUST be outside component
+let stripePromise;
+
+if (!stripeKey) {
+  console.error('❌ VITE_STRIPE_PUBLISHABLE_KEY is missing!');
+  console.error('   Add it to your .env file:');
+  console.error('   VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...');
+}  else {
+  stripePromise = loadStripe(stripeKey);
+}
+
+const CARD_ELEMENT_OPTIONS = {
+  style: {
+    base: {
+      fontSize: '16px',
+      color: '#111827',
+      fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+      fontSmoothing: 'antialiased',
+      '::placeholder': {
+        color: '#9CA3AF',
+      },
+      iconColor: '#6B7280',
+    },
+    invalid: {
+      color: '#DC2626',
+      iconColor: '#DC2626',
+    },
+    complete: {
+      color: '#059669',
+      iconColor: '#059669',
+    },
+  },
+  hidePostalCode: true,
+};
+
+const PaymentForm = ({ onSuccess, email }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState(null);
+  const [clientSecret, setClientSecret] = useState('');
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [cardReady, setCardReady] = useState(false);
+  const [cardComplete, setCardComplete] = useState(false);
+
+
+  useEffect(() => {
+    const initializeSetupIntent = async () => {
+      if (!email) {
+        setIsInitializing(false);
+        return;
+      }
+
+      try {
+        setIsInitializing(true);
+        
+        const { clientSecret } = await paymentService.createSetupIntent(email);
+        
+        setClientSecret(clientSecret);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        toast.error('Failed to initialize payment setup');
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+
+    initializeSetupIntent();
+  }, [email]);
+
+  const handleCardReady = (element) => {
+    console.log('✅ Card element ready and mounted');
+    setCardReady(true);
+    
+    // Force focus after a brief delay to ensure interactivity
+    setTimeout(() => {
+      if (element) {
+        element.focus();
+      }
+    }, 100);
+  };
+
+  const handleCardChange = (event) => {
+    console.log('💳 Card change event:', {
+      complete: event.complete,
+      empty: event.empty,
+      error: event.error?.message,
+    });
+
+    setCardComplete(event.complete);
+    
+    if (event.error) {
+      setError(event.error.message);
+    } else {
+      setError(null);
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!stripe || !elements || !clientSecret) {
+      console.warn('⚠️ Cannot submit - missing dependencies');
+      toast.error('Payment system not ready. Please wait...');
+      return;
+    }
+
+    if (!cardComplete) {
+      setError('Please complete all card details');
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const cardElement = elements.getElement(CardElement);
+
+      if (!cardElement) {
+        throw new Error('Card element not found');
+      }
+
+      const { setupIntent, error: stripeError } = await stripe.confirmCardSetup(
+        clientSecret,
+        {
+          payment_method: {
+            card: cardElement,
+            billing_details: {
+              email: email,
+            },
+          },
+        }
+      );
+
+      if (stripeError) {
+        console.error('❌ Stripe error:', stripeError);
+        throw new Error(stripeError.message);
+      }
+
+
+      if (setupIntent.status === 'succeeded') {
+        
+        // Confirm with backend
+        await paymentService.confirmSetupIntent(setupIntent.id);
+        
+        // Update onboarding progress
+        await paymentService.updateOnboardingProgress(5, {
+          payment_completed: true,
+        });
+
+        toast.success('Payment method added successfully!');
+        onSuccess();
+      } else {
+        throw new Error(`Setup intent status: ${setupIntent.status}`);
+      }
+    } catch (err) {
+      console.error('❌ Payment error:', err);
+      setError(err.message);
+      toast.error(err.message || 'Payment setup failed');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Show loading state
+  if (isInitializing) {
+    return (
+      <div className="payment-form-stripe">
+        <div className="payment-section">
+          <h3 className="section-title">Card Information</h3>
+          <div className="loading-state">
+            <div className="spinner-small"></div>
+            <p>Initializing secure payment...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="payment-form-stripe">
+      <div className="payment-section">
+        <h3 className="section-title">Card Information</h3>
+        
+        {/* Debug info - remove in production */}
+        {process.env.NODE_ENV === 'development' && (
+          <div style={{ 
+            padding: '8px', 
+            background: '#F3F4F6', 
+            borderRadius: '4px',
+            fontSize: '12px',
+            marginBottom: '12px',
+            fontFamily: 'monospace'
+          }}>
+          </div>
+        )}
+        
+        <div className="card-element-wrapper">
+          <CardElement 
+            options={CARD_ELEMENT_OPTIONS}
+            onReady={handleCardReady}
+            onChange={handleCardChange}
+          />
+        </div>
+
+        {!cardReady && (
+          <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '8px' }}>
+            Loading card input...
+          </p>
+        )}
+
+        {error && (
+          <div className="error-message">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="9" stroke="#EF4444" strokeWidth="2"/>
+              <path d="M10 6v4M10 14h.01" stroke="#EF4444" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+            {error}
+          </div>
+        )}
+
+        <div className="privacy-notice">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 1L3 3v4c0 3.5 2 6.5 5 7 3-0.5 5-3.5 5-7V3l-5-2z" stroke="#6B7280" strokeWidth="1.5" fill="none"/>
+          </svg>
+          Your payment information is securely processed by Stripe. We never store your full card details.
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        className="continue-button"
+        disabled={!stripe || isProcessing || !clientSecret || !cardReady || !cardComplete}
+      >
+        {isProcessing ? (
+          <>
+            <div className="spinner-small"></div>
+            Processing...
+          </>
+        ) : (
+          'Save & Continue'
+        )}
+      </button>
+    </form>
+  );
+};
 
 const OnboardingStep5 = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: '',
-    cardNumber: '',
-    expiration: '',
-    cvc: ''
-  });
+  const [email, setEmail] = useState('');
+  const [savedPaymentMethods, setSavedPaymentMethods] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const steps = [
     { number: 1, title: 'URL Business', subtitle: 'Please provide email' },
@@ -18,174 +276,105 @@ const OnboardingStep5 = () => {
     { number: 3, title: 'Postcard Editor', subtitle: 'Customize your campaign' },
     { number: 4, title: 'Targeting & Budget', subtitle: 'Setup your business financial goals' },
     { number: 5, title: 'Payment Setup', subtitle: 'Provide payment flow' },
-    { number: 6, title: 'Launch Campaign', subtitle: 'Finish your website setup' }
+    { number: 6, title: 'Launch Campaign', subtitle: 'Finish your website setup' },
   ];
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    let formattedValue = value;
+  useEffect(() => {
+    loadPaymentMethods();
+  }, []);
 
-    // Format card number with spaces
-    if (name === 'cardNumber') {
-      formattedValue = value.replace(/\s/g, '').replace(/(.{4})/g, '$1 ').trim();
-      if (formattedValue.length > 19) formattedValue = formattedValue.slice(0, 19);
+  const loadPaymentMethods = async () => {
+    try {
+      const methods = await paymentService.getPaymentMethods();
+      setSavedPaymentMethods(methods || []);
+    } catch (err) {
+      console.error('Failed to load payment methods:', err);
+      setSavedPaymentMethods([]);
+    } finally {
+      setIsLoading(false);
     }
-
-    // Format expiration as MM / YY
-    if (name === 'expiration') {
-      formattedValue = value.replace(/\D/g, '');
-      if (formattedValue.length >= 2) {
-        formattedValue = formattedValue.slice(0, 2) + ' / ' + formattedValue.slice(2, 4);
-      }
-      if (formattedValue.length > 7) formattedValue = formattedValue.slice(0, 7);
-    }
-
-    // Limit CVC to 3 digits
-    if (name === 'cvc') {
-      formattedValue = value.replace(/\D/g, '').slice(0, 3);
-    }
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: formattedValue
-    }));
   };
 
   const handleBack = () => {
     navigate('/onboarding/step4');
   };
 
-  const handleSaveAndContinue = () => {
-    if (canContinue()) {
-      navigate('/onboarding/step6');
-    }
-  };
-
-  const canContinue = () => {
-    return formData.email && 
-           formData.cardNumber.replace(/\s/g, '').length >= 16 && 
-           formData.expiration.length === 7 && 
-           formData.cvc.length === 3;
+  const handlePaymentSuccess = () => {
+    navigate('/onboarding/step6');
   };
 
   return (
     <OnboardingLayout steps={steps} currentStep={5}>
-        <div className="main-content">
-          <button className="back-button" onClick={handleBack}>
-            ← Back
-          </button>
-          
-          <h1 className="main-title">Payment Setup</h1>
-          
-          <div className="payment-form">
-            {/* Billing Information */}
-            <div className="payment-section">
-              <h3 className="section-title">Billing Information</h3>
-              <div className="form-group">
-                <label>Email *</label>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Input your email address"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
+      <div className="main-content">
+        <button className="back-button" onClick={handleBack}>
+          ← Back
+        </button>
 
-            {/* Payment Method */}
-            <div className="payment-section">
-              <h3 className="section-title">Payment Method</h3>
-              <div className={`payment-method-card ${formData.cardNumber ? 'selected' : ''}`}>
-                <div className="payment-method-header">
-                  <div className="stripe-logo">
-                    <svg width="40" height="17" viewBox="0 0 40 17" fill="none">
-                      <path d="M40 8.5c0 4.694-3.806 8.5-8.5 8.5s-8.5-3.806-8.5-8.5S26.806 0 31.5 0 40 3.806 40 8.5z" fill="#6772E5"/>
-                      <path d="M33.25 7.125c-.125-.125-.375-.125-.5 0l-2.25 2.25-1-1c-.125-.125-.375-.125-.5 0-.125.125-.125.375 0 .5l1.25 1.25c.125.125.375.125.5 0l2.5-2.5c.125-.125.125-.375 0-.5z" fill="white"/>
-                    </svg>
-                    <span>stripe</span>
-                  </div>
-                  <div className="payment-method-info">
-                    <div>Stripe ending in 1234</div>
-                    <div className="expiry">Expiry 06/2025</div>
-                  </div>
-                  {formData.cardNumber && (
-                    <svg className="checkmark-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <circle cx="10" cy="10" r="10" fill="#22c997"/>
-                      <path d="m6 10 2 2 6-6" stroke="white" strokeWidth="2" fill="none"/>
-                    </svg>
-                  )}
-                </div>
-                <div className="payment-method-actions">
-                  <span className="set-default">Set as default</span>
-                  <button className="edit-button">Edit</button>
-                </div>
-              </div>
-            </div>
+        <h1 className="main-title">Payment Setup</h1>
 
-            {/* Card Information */}
-            <div className="payment-section">
-              <h3 className="section-title">Card Information</h3>
-              
-              <div className="form-group card-number-group">
-                <input
-                  type="text"
-                  name="cardNumber"
-                  placeholder="1234 1234 1234 1234"
-                  value={formData.cardNumber}
-                  onChange={handleInputChange}
-                  className="card-number-input"
-                />
-                <div className="card-logos">
-                  <img src="data:image/svg+xml,%3Csvg width='24' height='16' viewBox='0 0 24 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='24' height='16' rx='2' fill='%231A1F36'/%3E%3Cpath d='M8.5 4.5h7v7h-7v-7z' fill='%23FF5F00'/%3E%3Cpath d='M8.5 8c0-1.933 1.567-3.5 3.5-3.5s3.5 1.567 3.5 3.5-1.567 3.5-3.5 3.5-3.5-1.567-3.5-3.5z' fill='%23EB001B'/%3E%3Cpath d='M12 4.5c1.933 0 3.5 1.567 3.5 3.5s-1.567 3.5-3.5 3.5' fill='%23F79E1B'/%3E%3C/svg%3E" alt="Mastercard" />
-                  <img src="data:image/svg+xml,%3Csvg width='24' height='16' viewBox='0 0 24 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='24' height='16' rx='2' fill='%23001C64'/%3E%3Cpath d='M10.5 2.5L8 6.5h3.5L9 10.5l4.5-4.5H10l2.5-3.5h-2z' fill='%23FFB511'/%3E%3C/svg%3E" alt="Visa" />
-                  <div className="stripe-card-logo">stripe</div>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Expiration</label>
-                  <input
-                    type="text"
-                    name="expiration"
-                    placeholder="MM / YY"
-                    value={formData.expiration}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>CVC</label>
-                  <input
-                    type="text"
-                    name="cvc"
-                    placeholder="CVC"
-                    value={formData.cvc}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-
-              <div className="privacy-notice">
-                By clicking "Pay" you agree that you have read Flash Account's Privacy Policy and Terms of Service.
-              </div>
+        <div className="payment-form">
+          {/* Billing Information */}
+          <div className="payment-section">
+            <h3 className="section-title">Billing Information</h3>
+            <div className="form-group">
+              <label>Email *</label>
+              <input
+                type="email"
+                name="email"
+                placeholder="Input your email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
             </div>
           </div>
+
+          {/* Saved Payment Methods */}
+          {!isLoading && savedPaymentMethods.length > 0 && (
+            <div className="payment-section">
+              <h3 className="section-title">Saved Payment Methods</h3>
+              {savedPaymentMethods.map((method) => (
+                <div key={method.id} className="payment-method-card saved">
+                  <div className="payment-method-header">
+                    <div className="card-info">
+                      <span className="card-brand">{method.card_brand?.toUpperCase()}</span>
+                      <span className="card-number">•••• {method.card_last4}</span>
+                    </div>
+                    <div className="card-expiry">
+                      Expires {method.card_exp_month}/{method.card_exp_year}
+                    </div>
+                    {method.is_default && (
+                      <span className="default-badge">Default</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Stripe Elements Form */}
+          {email && (
+            <Elements stripe={stripePromise}>
+              <PaymentForm onSuccess={handlePaymentSuccess} email={email} />
+            </Elements>
+          )}
+
+          {!email && (
+            <div className="payment-section">
+              <p style={{ color: '#6B7280', textAlign: 'center', padding: '2rem' }}>
+                Please enter your email address to continue with payment setup
+              </p>
+            </div>
+          )}
         </div>
-        
-        <div className="form-footer">
-          <div className="footer-actions" style={{width: '100%', justifyContent: 'space-between'}}>
-            <span className="step-indicator">Step 5 of 6</span>
-            <button 
-              className="continue-button" 
-              onClick={handleSaveAndContinue}
-              disabled={!canContinue()}
-              style={{minWidth: '150px'}}
-            >
-              Save & Continue
-            </button>
-          </div>
+      </div>
+
+      <div className="form-footer">
+        <div className="footer-actions">
+          <span className="step-indicator">Step 5 of 6</span>
         </div>
+      </div>
     </OnboardingLayout>
   );
 };
