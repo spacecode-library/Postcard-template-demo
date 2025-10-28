@@ -83,19 +83,22 @@
 /* Email Input */
 .email-input-container {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .email-icon {
   position: absolute;
-  left: 0.75rem;
+  left: 0.875rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--color-gray-400);
   pointer-events: none;
+  z-index: 1;
 }
 
 .email-input {
-  padding-left: 2.5rem;
+  padding-left: 2.75rem !important;
 }
 
 /* Password Hint */

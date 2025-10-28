@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import AuthLayout from '../../components/auth/AuthLayout';
 import Logo from '../../components/common/Logo';
+import './Login.css'; // Import common auth styles
 import './signup.css';
 import './auth-errors.css'
 import { useAuth } from '../../contexts/AuthContext';
@@ -188,12 +190,19 @@ const handleSubmit = async (e) => {
             )}
           </div>
             
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="auth-button"
             disabled={isSubmitting || loading}
           >
-            {isSubmitting ? 'Creating account...' : 'Get started'}
+            {isSubmitting ? (
+              <>
+                <Loader2 size={18} className="spinner-icon" />
+                Creating account...
+              </>
+            ) : (
+              'Get started'
+            )}
           </button>
         </form>
           

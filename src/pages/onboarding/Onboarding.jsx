@@ -15,7 +15,7 @@ const Onboarding = () => {
       <Route path="step3" element={<OnboardingStep3Enhanced />} />
       <Route path="step4" element={<OnboardingStep4 />} />
       <Route path="step5" element={<OnboardingStep5 />} />
-\      {<Route path="step6" element={<OnboardingStep6 />} /> }
+      <Route path="step6" element={<OnboardingStep6 />} />
     </Routes>
   );
 };

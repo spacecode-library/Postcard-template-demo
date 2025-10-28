@@ -262,20 +262,16 @@ export const SimpleEditorPlugin = () => ({
     cesdk.ui.registerPanel(
       'simple-editor',
       ({ builder, engine, state }) => {
-        console.group('🎛️ BUILDING DYNAMIC SIDEBAR PANEL');
-        
         const pages = engine.block.findByType('page');
-        console.log(`Found ${pages.length} pages`);
         if (pages.length === 0) {
           console.warn('No pages found - sidebar will be empty');
-          console.groupEnd();
           return;
         }
-        
+
         // Get current selection (with null safety)
         let selectedBlocks = [];
         let selectedBlock = null;
-        
+
         if (engine && engine.block && typeof engine.block.findAllSelected === 'function') {
           try {
             selectedBlocks = engine.block.findAllSelected();
@@ -284,12 +280,6 @@ export const SimpleEditorPlugin = () => ({
             console.warn('Error getting selection:', selectionError);
           }
         }
-        
-        console.log(`📊 Current selection: ${selectedBlock ? `Block ${selectedBlock} (${engine.block.getType(selectedBlock)})` : 'None'}`);
-        console.log(`📊 Available content for sidebar:`);
-        console.log(`   • Image blocks: ${imageBlocks.length}`);
-        console.log(`   • Text blocks: ${textBlocks.length}`);
-        console.log(`   • Color options: ${Object.keys(colors).length}`);
         
         // Build different sections based on what's selected
         if (selectedBlock) {
@@ -665,8 +655,6 @@ export const SimpleEditorPlugin = () => ({
         } else {
           console.log('[WARNING] Brand logo not available in sidebar');
         }
-
-        console.groupEnd();
       }
     );
 
@@ -1622,13 +1610,12 @@ const buildContextualSidebar = (builder, engine, state, selectedBlock, data) => 
                       currentOpacity = engine.block.getOpacity(fillBlock);
                       supportsOpacity = true;
                     } catch (opacityError) {
-                      console.warn('Fill block does not support opacity:', opacityError);
                       // Try to get it from the parent graphic block instead
                       try {
                         currentOpacity = engine.block.getOpacity(selectedBlock);
                         supportsOpacity = true;
                       } catch (parentOpacityError) {
-                        console.warn('Parent block also does not support opacity:', parentOpacityError);
+                        // Block doesn't support opacity - this is expected for some block types
                         supportsOpacity = false;
                       }
                     }

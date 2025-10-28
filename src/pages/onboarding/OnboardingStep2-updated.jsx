@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, Grid, Layout, Palette, Eye } from 'lucide-react';
 import './onboarding-updated.css';
 
 const OnboardingStep2 = () => {
@@ -12,7 +14,7 @@ const OnboardingStep2 = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const steps = [
-    { number: 1, title: 'URL Business', subtitle: 'Please provide email', active: false, completed: true },
+    { number: 1, title: 'Business URL', subtitle: 'Please provide email', active: false, completed: true },
     { number: 2, title: 'Select Postcard Template', subtitle: 'Setup your template', active: true, completed: false },
     { number: 3, title: 'Postcard Editor', subtitle: 'Customize your campaign', active: false, completed: false },
     { number: 4, title: 'Targeting & Budget', subtitle: 'Setup your business financial goals', active: false, completed: false },
@@ -403,28 +405,48 @@ const OnboardingStep2 = () => {
         </div>
       </div>
       
-      {showLeaveModal && (
-        <div className="leave-modal-overlay" onClick={() => setShowLeaveModal(false)}>
-          <div className="leave-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Leave this page?</h3>
-            <p>You haven't finished setting up your campaign. Would you like to save your progress as a draft?</p>
-            <div className="leave-modal-actions">
-              <button 
-                className="modal-button delete"
-                onClick={handleDeleteChanges}
-              >
-                Delete Changes
-              </button>
-              <button 
-                className="modal-button save"
-                onClick={handleSaveAsDraft}
-              >
-                Save as Draft
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {showLeaveModal && (
+          <motion.div
+            className="leave-modal-overlay"
+            onClick={() => setShowLeaveModal(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              className="leave-modal"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
+              <h3>Leave this page?</h3>
+              <p>You haven't finished setting up your campaign. Would you like to save your progress as a draft?</p>
+              <div className="leave-modal-actions">
+                <motion.button
+                  className="modal-button delete"
+                  onClick={handleDeleteChanges}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Delete Changes
+                </motion.button>
+                <motion.button
+                  className="modal-button save"
+                  onClick={handleSaveAsDraft}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Save as Draft
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

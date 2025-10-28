@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 import OnboardingFooter from '../../components/onboarding/OnboardingFooter';
 
@@ -28,7 +29,7 @@ const OnboardingStep3 = () => {
   }, []);
 
   const steps = [
-    { number: 1, title: 'URL Business', subtitle: 'Please provide email' },
+    { number: 1, title: 'Business URL', subtitle: 'Please provide email' },
     { number: 2, title: 'Select Postcard Template', subtitle: 'Setup your template' },
     { number: 3, title: 'Postcard Editor', subtitle: 'Customize your campaign' },
     { number: 4, title: 'Targeting & Budget', subtitle: 'Setup your business financial goals' },
@@ -67,7 +68,8 @@ const OnboardingStep3 = () => {
     <OnboardingLayout steps={steps} currentStep={3}>
         <div className="main-content editor-content">
           <button className="back-button" onClick={handleBack}>
-            ← Back
+            <ChevronLeft size={18} />
+            Back
           </button>
           
           <h1 className="main-title">Customize your postcard</h1>
@@ -98,12 +100,12 @@ const OnboardingStep3 = () => {
               </div>
               
               <div className="product-details-section">
-                <button 
+                <button
                   className="product-details-toggle"
                   onClick={() => setShowProductDetails(!showProductDetails)}
                 >
                   <span>Product Details</span>
-                  <span className={`chevron ${showProductDetails ? 'up' : 'down'}`}>▼</span>
+                  {showProductDetails ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </button>
                 
                 {showProductDetails && (
@@ -216,9 +218,7 @@ const OnboardingStep3 = () => {
               <div className="form-field">
                 <label>Poster Image</label>
                 <div className="image-upload-area" onClick={handleImageUpload}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2">
-                    <path d="M12 4v16m-8-8h16"/>
-                  </svg>
+                  <Plus size={24} color="#6b7280" strokeWidth={2} />
                   <p>Click to upload or drag and drop</p>
                   <span>SVG, PNG, JPG or GIF (max. 600×400px)</span>
                 </div>

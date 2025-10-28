@@ -1,9 +1,41 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Trash2, Copy, Edit, CheckCircle, Clock, XCircle, FileEdit, Eye } from 'lucide-react';
 import './CampaignCard.css';
 
 const CampaignCard = ({ campaign, onToggleStatus, onEdit, onDelete, onDuplicate }) => {
+  const navigate = useNavigate();
+  // Get approval status badge info
+  const getApprovalBadge = () => {
+    const approval = campaign.approvalStatus || campaign.status;
+    switch (approval) {
+      case 'active':
+      case 'approved':
+        return { text: 'Active', className: 'approval-active', Icon: CheckCircle };
+      case 'pending_review':
+      case 'pending':
+        return { text: 'Pending Review', className: 'approval-pending', Icon: Clock };
+      case 'rejected':
+        return { text: 'Rejected', className: 'approval-rejected', Icon: XCircle };
+      case 'draft':
+        return { text: 'Draft', className: 'approval-draft', Icon: FileEdit };
+      default:
+        return { text: campaign.status, className: 'approval-default', Icon: CheckCircle };
+    }
+  };
+
+  const approvalBadge = getApprovalBadge();
+  const BadgeIcon = approvalBadge.Icon;
+
   return (
-    <div className="campaign-card">
+    <motion.div
+      className="campaign-card"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      whileHover={{ y: -4, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)" }}
+    >
       <div className="campaign-card-header">
         <div className="campaign-status-section">
           <div className="toggle-wrapper">
@@ -12,6 +44,7 @@ const CampaignCard = ({ campaign, onToggleStatus, onEdit, onDelete, onDuplicate 
                 type="checkbox"
                 checked={campaign.isActive}
                 onChange={() => onToggleStatus(campaign.id)}
+                disabled={campaign.approvalStatus === 'pending_review'}
               />
               <span className="toggle-slider"></span>
             </label>
@@ -19,8 +52,9 @@ const CampaignCard = ({ campaign, onToggleStatus, onEdit, onDelete, onDuplicate 
               {campaign.isActive ? 'Active' : 'Paused'}
             </span>
           </div>
-          <span className={`status-badge ${campaign.status.toLowerCase()}`}>
-            • {campaign.status}
+          <span className={`approval-badge ${approvalBadge.className}`}>
+            <BadgeIcon className="badge-icon" size={14} />
+            {approvalBadge.text}
           </span>
         </div>
       </div>
@@ -41,42 +75,52 @@ const CampaignCard = ({ campaign, onToggleStatus, onEdit, onDelete, onDuplicate 
           <span className="detail-value">{campaign.targetArea}</span>
         </div>
         <div className="detail-item">
-          <span className="detail-label">Post card sent</span>
-          <span className="detail-value">{campaign.postcardsSent}</span>
+          <span className="detail-label">Postcards Sent</span>
+          <span className="detail-value">{campaign.postcardsSent.toLocaleString()}</span>
         </div>
       </div>
 
       <div className="campaign-actions">
-        <button 
-          className="edit-button"
-          onClick={() => onEdit(campaign.id)}
+        <motion.button
+          className="view-details-button"
+          onClick={() => navigate(`/campaign/${campaign.id}/details`)}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          Edit Campaign
-        </button>
+          <Eye size={18} />
+          View Details
+        </motion.button>
         <div className="action-buttons">
-          <button 
-            className="icon-button delete"
-            onClick={() => onDelete(campaign.id)}
-            title="Delete"
+          <motion.button
+            className="icon-button edit"
+            onClick={() => onEdit(campaign.id)}
+            title="Edit"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
           >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M3 5H15M7 5V3.5C7 3.22386 7.22386 3 7.5 3H10.5C10.7761 3 11 3.22386 11 3.5V5M4 5L4.5 15C4.5 15.5523 4.94772 16 5.5 16H12.5C13.0523 16 13.5 15.5523 13.5 15L14 5" 
-                stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          </button>
-          <button 
+            <Edit size={18} />
+          </motion.button>
+          <motion.button
             className="icon-button duplicate"
             onClick={() => onDuplicate(campaign.id)}
             title="Duplicate"
+            whileHover={{ scale: 1.1, rotate: -5 }}
+            whileTap={{ scale: 0.9 }}
           >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <rect x="3" y="3" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.5"/>
-              <rect x="7" y="7" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.5"/>
-            </svg>
-          </button>
+            <Copy size={18} />
+          </motion.button>
+          <motion.button
+            className="icon-button delete"
+            onClick={() => onDelete(campaign.id)}
+            title="Delete"
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <Trash2 size={18} />
+          </motion.button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -1,16 +1,18 @@
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
+  max-height: 100vh;
   background-color: var(--color-white);
   position: relative;
   width: 100%;
+  overflow: hidden;
 }
 
 .dashboard-content-wrapper {
   flex: 1;
   margin-left: var(--sidebar-width);
   width: calc(100% - var(--sidebar-width));
-  min-height: 100vh;
+  height: 100vh;
   background-color: var(--color-white);
   overflow-y: auto;
   overflow-x: hidden;
@@ -29,11 +31,11 @@
   .dashboard-layout {
     flex-direction: column;
   }
-  
+
   .dashboard-content-wrapper {
-    margin-left: var(--sidebar-width-mobile);
+    margin-left: 0;
     width: 100%;
-    padding-top: var(--header-height-mobile);
+    padding-top: 0;
   }
 }
 

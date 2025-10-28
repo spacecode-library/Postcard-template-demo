@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Mail } from 'lucide-react';
 import './ProfileTab.css';
 
 const ProfileTab = ({ onSave, onCancel }) => {
@@ -56,10 +57,7 @@ const ProfileTab = ({ onSave, onCancel }) => {
             Email address <span className="required">*</span>
           </label>
           <div className="email-input-container">
-            <svg className="email-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M3 5L10 10L17 5M3 5V15C3 15.5523 3.44772 16 4 16H16C16.5523 16 17 15.5523 17 15V5M3 5C3 4.44772 3.44772 4 4 4H16C16.5523 4 17 4.44772 17 5" 
-                stroke="currentColor" strokeWidth="1.5"/>
-            </svg>
+            <Mail className="email-icon" size={18} />
             <input
               type="email"
               className="form-input email-input"

@@ -1,9 +1,19 @@
 // src/services/newmover.service.js
 
 import { supabase } from "../integration/client"
+import { parseMultipleZipCodes, isValidZipCode } from "../../utils/zipCode"
 
 const MELISSA_API_URL = 'https://dataretriever.melissadata.net/web/V1/NewMovers/doLookup'
 const MELISSA_CUSTOMER_ID = import.meta.env.VITE_MELISSA_CUSTOMER_ID || 'k1QaFUgJ-EgAmdhd6lEhRF**'
+
+/**
+ * Helper function to handle Supabase errors
+ */
+function handleSupabaseError(error) {
+  if (error) {
+    throw error
+  }
+}
 
 export const newMoverService = {
   /**
@@ -51,20 +61,28 @@ export const newMoverService = {
 
   /**
    * Transform Melissa API data to Supabase format
+   * Note: Melissa API returns field names exactly as requested in the 'columns' array
    */
   transformMelissaData(melissaResults, searchedZipCode) {
-    return melissaResults.map(mover => ({
-      melissa_address_key: mover.MelissaAddressKey,
-      full_name: mover.FullName,
-      address_line: mover.AddressLine,
-      city: mover.City,
-      state: mover.State,
-      zip_code: searchedZipCode,
-      previous_address_line: mover.PreviousAddressLine || null,
-      previous_zip_code: mover.PreviousZIPCode || null,
-      phone_number: mover.PhoneNumber || null,
-      move_effective_date: mover.MoveEffectiveDate ? new Date(mover.MoveEffectiveDate).toISOString() : null,
-    }))
+    return melissaResults.map(mover => {
+      // Log first mover to see actual field names returned by API
+      if (melissaResults.indexOf(mover) === 0) {
+        console.log('📋 Sample Melissa API response fields:', Object.keys(mover));
+      }
+
+      return {
+        melissa_address_key: mover.melissaaddresskey || mover.MelissaAddressKey,
+        full_name: mover.fullname || mover.FullName,
+        address_line: mover.AddressLine,
+        city: mover.city || mover.City,
+        state: mover.state || mover.State,
+        zip_code: searchedZipCode,
+        previous_address_line: mover.PreviousAddressLine || null,
+        previous_zip_code: mover.PreviousZIPCode || null,
+        phone_number: mover.PhoneNumber || null,
+        move_effective_date: mover.MoveEffectiveDate ? new Date(mover.MoveEffectiveDate).toISOString() : null,
+      };
+    });
   },
 
   /**
@@ -72,62 +90,146 @@ export const newMoverService = {
    */
   async saveToSupabase(moversData) {
     try {
+      console.log('Attempting to save', moversData.length, 'records to Supabase')
+
+      // Validate data before inserting
+      const invalidRecords = moversData.filter(record => !record.melissa_address_key);
+      if (invalidRecords.length > 0) {
+        console.error('⚠️ Found', invalidRecords.length, 'records with missing melissa_address_key');
+        console.error('📋 Sample invalid record:', invalidRecords[0]);
+
+        // Filter out invalid records
+        const validRecords = moversData.filter(record => record.melissa_address_key);
+        console.log('✅ Proceeding with', validRecords.length, 'valid records');
+
+        if (validRecords.length === 0) {
+          console.error('❌ No valid records to insert');
+          return null;
+        }
+
+        moversData = validRecords;
+      }
+
       const { data, error } = await supabase
         .from('newmover')
         .insert(moversData)
-        .select()
-    //   const { data, error } = await supabase
-    //     .from('newmover')
-    //     .upsert(moversData, {
-    //       onConflict: 'melissa_address_key',
-    //       ignoreDuplicates: false
-    //     })
-    //     .select()
+        .select('*')
 
-    //   handleSupabaseError(error)
+      if (error) {
+        console.error('Supabase insert error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
+        return null
+      }
+
+      console.log('Successfully inserted', data?.length || 0, 'records')
       return data
     } catch (error) {
-      console.error('Error saving to Supabase:', error)
-      throw error
+      console.error('Error saving to Supabase:', error.message || error)
+      return null
     }
   },
 
   /**
    * Fetch from Melissa API and save to Supabase in one operation
+   * Now supports ZIP code ranges and multiple formats
+   * @param {Array|string} zipCodes - Array of ZIP codes or string with ranges (e.g., "10001-10005, 10010")
+   * @param {number} page - Page number for pagination
+   * @returns {Promise<Object>} Result with saved data and count
    */
   async fetchAndSave(zipCodes, page = 1) {
     try {
-      // Validate zip codes
-      if (!Array.isArray(zipCodes) || zipCodes.length === 0) {
-        throw new Error('Please provide at least one zip code')
+      // Parse and validate ZIP codes (supports ranges)
+      let processedZipCodes = [];
+
+      if (typeof zipCodes === 'string') {
+        // If string input, parse it (supports ranges like "10001-10005")
+        const parsed = parseMultipleZipCodes(zipCodes);
+
+        if (parsed.errors && parsed.errors.length > 0) {
+          console.warn('ZIP code parsing errors:', parsed.errors);
+        }
+
+        if (!parsed.zipCodes || parsed.zipCodes.length === 0) {
+          throw new Error('No valid ZIP codes provided. Please check your input.');
+        }
+
+        processedZipCodes = parsed.zipCodes;
+      } else if (Array.isArray(zipCodes)) {
+        // If array, validate each ZIP code
+        processedZipCodes = zipCodes.filter(zip => {
+          const isValid = isValidZipCode(zip);
+          if (!isValid) {
+            console.warn('Invalid ZIP code skipped:', zip);
+          }
+          return isValid;
+        });
+
+        if (processedZipCodes.length === 0) {
+          throw new Error('No valid ZIP codes provided');
+        }
+      } else {
+        throw new Error('Please provide ZIP codes as an array or string');
       }
 
+      console.log(`Processing ${processedZipCodes.length} ZIP codes:`, processedZipCodes);
+
       // Fetch from Melissa API
-      const melissaData = await this.fetchFromMelissa(zipCodes, page)
+      const melissaData = await this.fetchFromMelissa(processedZipCodes, page)
 
       if (!melissaData.Results || melissaData.Results.length === 0) {
         return {
           success: true,
           message: 'No new movers found for the specified zip codes',
           saved: 0,
+          count: 0,
+          zipCodes: processedZipCodes,
+          zipCodeCount: processedZipCodes.length,
           data: []
         }
       }
 
       // Transform data for each zip code
       const allTransformedData = []
-      zipCodes.forEach(zipCode => {
+      processedZipCodes.forEach(zipCode => {
         const transformed = this.transformMelissaData(melissaData.Results, zipCode)
         allTransformedData.push(...transformed)
       })
 
+      // Log sample transformed record for debugging
+      if (allTransformedData.length > 0) {
+        console.log('📋 Sample transformed record:', allTransformedData[0]);
+      }
+
       // Save to Supabase
       const savedData = await this.saveToSupabase(allTransformedData)
-      console.log("all transormed data",allTransformedData)
+
+      // Check if save was successful
+      if (!savedData || !Array.isArray(savedData)) {
+        console.error('Failed to save new movers to Supabase');
+        return {
+          success: false,
+          message: 'Failed to save new mover records to database',
+          saved: 0,
+          count: 0,
+          zipCodes: processedZipCodes,
+          zipCodeCount: processedZipCodes.length,
+          data: []
+        };
+      }
+
+      console.log(`Successfully saved ${savedData.length} new movers across ${processedZipCodes.length} ZIP codes`)
+
       return {
         success: true,
-        // message: `Successfully saved ${savedData.length} new mover records`,
-        // saved: savedData.length,
+        message: `Successfully saved ${savedData.length} new mover records`,
+        saved: savedData.length,
+        count: savedData.length,
+        zipCodes: processedZipCodes,
+        zipCodeCount: processedZipCodes.length,
         data: savedData
       }
     } catch (error) {
@@ -210,6 +312,77 @@ export const newMoverService = {
   },
 
   /**
+   * Get multiple new movers by IDs
+   * @param {Array<string>} ids - Array of new mover IDs
+   * @returns {Promise<Object>} New movers data
+   */
+  async getByIds(ids) {
+    try {
+      if (!ids || ids.length === 0) {
+        return {
+          success: true,
+          data: [],
+          count: 0
+        };
+      }
+
+      const { data, error } = await supabase
+        .from('newmover')
+        .select('*')
+        .in('id', ids)
+        .order('move_effective_date', { ascending: false });
+
+      handleSupabaseError(error);
+
+      return {
+        success: true,
+        data: data || [],
+        count: data?.length || 0
+      };
+    } catch (error) {
+      console.error('Error getting new movers by IDs:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get new movers for a specific campaign (by ZIP codes)
+   * @param {Array<string>} zipCodes - Array of ZIP codes
+   * @param {number} limit - Maximum number of records to return
+   * @returns {Promise<Object>} New movers data
+   */
+  async getByCampaignZipCodes(zipCodes, limit = 100) {
+    try {
+      if (!zipCodes || zipCodes.length === 0) {
+        return {
+          success: true,
+          data: [],
+          count: 0
+        };
+      }
+
+      const { data, error, count } = await supabase
+        .from('newmover')
+        .select('*', { count: 'exact' })
+        .in('zip_code', zipCodes)
+        .order('move_effective_date', { ascending: false })
+        .limit(limit);
+
+      handleSupabaseError(error);
+
+      return {
+        success: true,
+        data: data || [],
+        count: count || 0,
+        totalCount: count || 0
+      };
+    } catch (error) {
+      console.error('Error getting new movers by campaign ZIP codes:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Update a new mover record
    */
   async update(id, updates) {
@@ -265,6 +438,65 @@ export const newMoverService = {
     } catch (error) {
       console.error('Error marking new mover as contacted:', error)
       throw error
+    }
+  },
+
+  /**
+   * Validate ZIP codes and check data availability
+   * Does NOT fetch full data, just checks if data exists
+   * @param {Array} zipCodes - Array of ZIP codes to validate
+   * @returns {Promise<Object>} Validation results with status per ZIP
+   */
+  async validateZipCodes(zipCodes) {
+    try {
+      // Parse and validate ZIP codes if string input
+      let processedZipCodes = [];
+
+      if (typeof zipCodes === 'string') {
+        const parsed = parseMultipleZipCodes(zipCodes);
+        if (!parsed.zipCodes || parsed.zipCodes.length === 0) {
+          throw new Error('No valid ZIP codes provided');
+        }
+        processedZipCodes = parsed.zipCodes;
+      } else if (Array.isArray(zipCodes)) {
+        processedZipCodes = zipCodes.filter(zip => isValidZipCode(zip));
+      } else {
+        throw new Error('Please provide ZIP codes as an array or string');
+      }
+
+      console.log(`Validating ${processedZipCodes.length} ZIP codes...`);
+
+      // Check each ZIP code for data availability in Supabase
+      const validationResults = await Promise.all(
+        processedZipCodes.map(async (zipCode) => {
+          const { count, error } = await supabase
+            .from('newmover')
+            .select('*', { count: 'exact', head: true })
+            .eq('zip_code', zipCode);
+
+          return {
+            zipCode,
+            isValid: true,
+            hasData: !error && count > 0,
+            dataCount: count || 0
+          };
+        })
+      );
+
+      const zipsWithData = validationResults.filter(r => r.hasData);
+      const zipsWithoutData = validationResults.filter(r => !r.hasData);
+
+      return {
+        success: true,
+        totalZipCodes: processedZipCodes.length,
+        zipsWithData: zipsWithData.length,
+        zipsWithoutData: zipsWithoutData.length,
+        results: validationResults,
+        flatRate: 3.00 // Current flat rate per postcard
+      };
+    } catch (error) {
+      console.error('Error validating ZIP codes:', error);
+      throw error;
     }
   },
 

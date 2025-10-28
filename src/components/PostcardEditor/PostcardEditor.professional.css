@@ -464,6 +464,138 @@
   justify-content: center;
 }
 
+/* ============================================
+   CESDK TOOLBAR & BUTTON CUSTOMIZATION
+   Modern, professional styling for shape tools
+   ============================================ */
+
+/* Dock/Toolbar Container */
+.cesdk-container-professional [class*="Dock"],
+.cesdk-container-professional [class*="dock"],
+.cesdk-container-professional [class*="CanvasBar"] {
+  background: var(--color-white) !important;
+  border-color: var(--color-border) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* Toolbar Buttons - Arrow, Line, Shape Tools */
+.cesdk-container-professional button[class*="Button"],
+.cesdk-container-professional button[class*="button"],
+.cesdk-container-professional [class*="ToolButton"] button,
+.cesdk-container-professional [class*="toolButton"] button {
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+  border: 1px solid transparent !important;
+}
+
+/* Hover State */
+.cesdk-container-professional button[class*="Button"]:hover,
+.cesdk-container-professional button[class*="button"]:hover,
+.cesdk-container-professional [class*="ToolButton"] button:hover,
+.cesdk-container-professional [class*="toolButton"] button:hover {
+  background: var(--color-gray-50) !important;
+  border-color: var(--color-gray-200) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Active/Selected State */
+.cesdk-container-professional button[class*="Button"][class*="active"],
+.cesdk-container-professional button[class*="Button"][aria-pressed="true"],
+.cesdk-container-professional button[class*="button"][class*="active"],
+.cesdk-container-professional [class*="ToolButton"] button[class*="active"],
+.cesdk-container-professional [class*="ToolButton"] button[aria-pressed="true"] {
+  background: var(--color-primary-light) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+}
+
+/* Icon Styling Within Buttons */
+.cesdk-container-professional button[class*="Button"] svg,
+.cesdk-container-professional button[class*="button"] svg,
+.cesdk-container-professional [class*="ToolButton"] svg {
+  stroke-width: 1.8 !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Specific Shape Tool Buttons (Arrow, Line, Rectangle, Circle, etc) */
+.cesdk-container-professional [aria-label*="Arrow"] button,
+.cesdk-container-professional [aria-label*="Line"] button,
+.cesdk-container-professional [aria-label*="Shape"] button,
+.cesdk-container-professional [aria-label*="Rectangle"] button,
+.cesdk-container-professional [aria-label*="Circle"] button,
+.cesdk-container-professional [aria-label*="Polygon"] button,
+.cesdk-container-professional [aria-label*="Star"] button {
+  min-width: 40px !important;
+  min-height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 8px 12px !important;
+}
+
+/* Tool Group Separators */
+.cesdk-container-professional [class*="Separator"],
+.cesdk-container-professional [class*="separator"] {
+  background: var(--color-gray-200) !important;
+  margin: 4px 8px !important;
+}
+
+/* Dropdown/Menu Styling */
+.cesdk-container-professional [class*="Dropdown"],
+.cesdk-container-professional [class*="dropdown"],
+.cesdk-container-professional [class*="Menu"],
+.cesdk-container-professional [class*="menu"] {
+  background: var(--color-white) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  padding: 4px !important;
+}
+
+.cesdk-container-professional [class*="MenuItem"],
+.cesdk-container-professional [class*="menuItem"] {
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  margin: 2px 0 !important;
+  transition: all 0.15s ease !important;
+}
+
+.cesdk-container-professional [class*="MenuItem"]:hover,
+.cesdk-container-professional [class*="menuItem"]:hover {
+  background: var(--color-primary-light) !important;
+  color: var(--color-primary) !important;
+}
+
+/* Color Picker Styling */
+.cesdk-container-professional [class*="ColorPicker"],
+.cesdk-container-professional [class*="colorPicker"] {
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+/* Slider/Range Controls */
+.cesdk-container-professional input[type="range"] {
+  accent-color: var(--color-primary) !important;
+}
+
+/* Number Inputs */
+.cesdk-container-professional input[type="number"] {
+  border: 1px solid var(--color-border) !important;
+  border-radius: 6px !important;
+  padding: 6px 8px !important;
+  font-size: 14px !important;
+  transition: all 0.2s ease !important;
+}
+
+.cesdk-container-professional input[type="number"]:focus {
+  outline: none !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.1) !important;
+}
+
 /* Buttons */
 .btn-primary,
 .btn-secondary {

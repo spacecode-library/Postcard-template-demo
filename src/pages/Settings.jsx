@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Search } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Tabs from '../components/common/Tabs';
 import ProfileTab from '../components/settings/ProfileTab';
@@ -29,10 +30,7 @@ const Settings = () => {
           <h1 className="settings-title">Settings</h1>
           <div className="settings-search">
             <div className="search-wrapper">
-              <svg className="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <circle cx="8.5" cy="8.5" r="6" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M13.5 13.5L17.5 17.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
+              <Search className="search-icon" size={20} />
               <input type="text" placeholder="Search" className="search-input" />
               <kbd className="search-shortcut">⌘K</kbd>
             </div>

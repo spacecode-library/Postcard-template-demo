@@ -3,6 +3,26 @@
 }
 
 /* Form Input Styles */
+.email-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.email-icon {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9CA3AF;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.email-input {
+  padding-left: 2.75rem !important;
+}
+
 .phone-input-container {
   position: relative;
 }

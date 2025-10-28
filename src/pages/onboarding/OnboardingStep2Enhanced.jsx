@@ -24,7 +24,7 @@ const OnboardingStep2Enhanced = () => {
 
   // Onboarding steps configuration
   const steps = [
-    { number: 1, title: 'URL Business', subtitle: 'Please provide email' },
+    { number: 1, title: 'Business URL', subtitle: 'Please provide email' },
     { number: 2, title: 'Select Postcard Template', subtitle: 'Setup your template' },
     { number: 3, title: 'Postcard Editor', subtitle: 'Customize your campaign' },
     { number: 4, title: 'Targeting & Budget', subtitle: 'Setup your business financial goals' },
@@ -427,9 +427,6 @@ const OnboardingStep2Enhanced = () => {
                 <div className="step2-template-info">
                   <h3 className="step2-template-name">{template.name}</h3>
                   <div className="step2-template-meta">
-                    <span className="element-count">
-                      {template.editableElements ? template.editableElements.length : 'Multiple'} Elements
-                    </span>
                     {template.sides === 2 && (
                       <span className="double-sided-badge">2-Sided</span>
                     )}

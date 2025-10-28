@@ -60,7 +60,7 @@ export const AdvancedEditorProvider = ({
         }, 30000);
 
         const editorConfig = {
-          license: 'LePTY688e8B3VoxIgNFWBLLbSijS9QJ-WRZQSFFJ9OiVl0z_Jsfu6PEQjMPL-yCX',
+          license: import.meta.env.VITE_IMGLY_LICENSE,
           userId: 'postcard-user',
           baseURL: '/cesdk-assets',
           role: 'Creator',

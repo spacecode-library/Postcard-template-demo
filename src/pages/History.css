@@ -125,44 +125,53 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .history-page {
-    padding: 1rem;
+    padding: 1.5rem;
   }
-  
+
   .history-header {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+    margin-bottom: 2rem;
   }
-  
+
   .history-title {
     font-size: 1.5rem;
   }
-  
+
   .header-actions {
     flex-direction: column;
     width: 100%;
   }
-  
+
   .settings-button,
   .create-new-blast-button {
     width: 100%;
     justify-content: center;
   }
-  
+
   .history-search-input-container {
     max-width: 100%;
+  }
+
+  .history-search-section {
+    margin-bottom: 1rem;
   }
 }
 
 @media (max-width: 480px) {
+  .history-page {
+    padding: 1rem;
+  }
+
   .history-title {
     font-size: 1.25rem;
   }
-  
+
   .settings-button,
   .create-new-blast-button {
-    font-size: 0.75rem;
-    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    padding: 0.625rem 1rem;
   }
 }
 

@@ -7,17 +7,15 @@ import Step1URL from '../components/campaign/Step1URL';
 import Step2Templates from '../components/campaign/Step2Templates';
 import Step3Editor from '../components/campaign/Step3Editor';
 import Step4Targeting from '../components/campaign/Step4Targeting';
-import Step5Payment from '../components/campaign/Step5Payment';
 import Step6Launch from '../components/campaign/Step6Launch';
 import './CreateCampaign.css';
 
 const steps = [
-  { number: 1, title: 'URL Business', subtitle: 'Please provide email' },
+  { number: 1, title: 'Business URL', subtitle: 'Please provide email' },
   { number: 2, title: 'Postcard Template', subtitle: 'Choose and Setup' },
   { number: 3, title: 'Postcard Editor', subtitle: 'Customize campaign' },
   { number: 4, title: 'Targeting & Budget', subtitle: 'Choose package' },
-  { number: 5, title: 'Payment Setup', subtitle: 'Provide payment flow' },
-  { number: 6, title: 'Launch Campaign', subtitle: 'Finish the setup' }
+  { number: 5, title: 'Launch Campaign', subtitle: 'Finish the setup' }
 ];
 
 const CreateCampaign = () => {
@@ -31,7 +29,7 @@ const CreateCampaign = () => {
   };
 
   const handleNext = () => {
-    if (currentStep < 6) {
+    if (currentStep < 5) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -104,17 +102,8 @@ const CreateCampaign = () => {
                   onBack={handleBack}
                 />
               )}
-              
+
               {currentStep === 5 && (
-                <Step5Payment
-                  formData={formData}
-                  onChange={handleUpdateFormData}
-                  onContinue={handleNext}
-                  onBack={handleBack}
-                />
-              )}
-              
-              {currentStep === 6 && (
                 <Step6Launch
                   formData={formData}
                   onLaunch={handleLaunch}
@@ -131,12 +120,12 @@ const CreateCampaign = () => {
               We'll use this to create a customized postcard for your business
             </div>
             <div className="footer-actions">
-              <span className="step-indicator">Step {currentStep} of 6</span>
+              <span className="step-indicator">Step {currentStep} of 5</span>
               <div className="footer-buttons">
                 <button className="campaign-button save-draft-button">
                   Save as Draft
                 </button>
-                <button 
+                <button
                   className="campaign-button continue-button"
                   onClick={handleNext}
                   disabled={!formData.website}

@@ -1,0 +1,410 @@
+/* Import Design System */
+@import './design-system.css';
+
+/* ===================================
+   PROCESS LAYOUT SYSTEM
+   Modern top progress bar layout
+   =================================== */
+
+/* Container - Full viewport with flex column */
+.process-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--color-gray-50);
+}
+
+/* ===================================
+   TOP PROGRESS BAR
+   =================================== */
+
+.process-topbar {
+  height: 80px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 9999 !important;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--color-gray-200);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.process-topbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.process-topbar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.step-text {
+  font-size: var(--font-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-gray-700);
+  letter-spacing: 0.025em;
+}
+
+.progress-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.skip-button {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-gray-500);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 0.25rem 0.5rem;
+}
+
+.skip-button:hover {
+  color: var(--color-gray-700);
+}
+
+.percentage-text {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-gray-600);
+  min-width: 3rem;
+  text-align: right;
+}
+
+/* Progress Bar */
+.progress-bar-track {
+  width: 100%;
+  height: 8px;
+  background-color: var(--color-gray-200);
+  border-radius: 9999px;
+  overflow: hidden;
+  position: relative;
+  z-index: 100;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  min-height: 8px;
+  background: var(--color-primary);
+  border-radius: 9999px;
+  display: block;
+  position: relative;
+  z-index: 101;
+}
+
+/* ===================================
+   CONTENT AREA
+   =================================== */
+
+.process-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+  background-color: var(--color-white);
+  padding: 2rem 2.5rem;
+  padding-top: calc(80px + 2rem);
+}
+
+.process-content-inner {
+  width: 100%;
+  max-width: 1200px;
+  padding-bottom: 100px; /* Ensure content not hidden by footer */
+  min-height: min-content;
+}
+
+/* Smooth scrolling */
+.process-content {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom scrollbar */
+.process-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.process-content::-webkit-scrollbar-track {
+  background: var(--color-gray-100);
+}
+
+.process-content::-webkit-scrollbar-thumb {
+  background: var(--color-gray-400);
+  border-radius: 4px;
+}
+
+.process-content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-500);
+}
+
+/* ===================================
+   FOOTER
+   =================================== */
+
+.process-footer {
+  min-height: 72px;
+  flex-shrink: 0;
+  width: 100%;
+  border-top: 1px solid var(--color-gray-200);
+  background-color: var(--color-white);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.03);
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+}
+
+.process-footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 72px;
+}
+
+.footer-message {
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+  font-weight: 500;
+  flex: 0 1 auto;
+  max-width: 50%;
+  line-height: 1.4;
+}
+
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.footer-step-indicator {
+  font-size: var(--font-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-gray-700);
+}
+
+.footer-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.footer-back-button {
+  padding: 0.625rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-gray-700);
+  background-color: var(--color-white);
+  border: 1.5px solid var(--color-gray-300);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.footer-back-button:hover {
+  background-color: var(--color-gray-50);
+  border-color: var(--color-gray-400);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.footer-back-button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.footer-continue-button {
+  padding: 0.625rem 2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-white);
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(32, 178, 170, 0.2);
+}
+
+.footer-continue-button:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(32, 178, 170, 0.25);
+}
+
+.footer-continue-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(32, 178, 170, 0.2);
+}
+
+.footer-continue-button:disabled {
+  background-color: var(--color-gray-300);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+/* ===================================
+   CONTENT UTILITIES
+   =================================== */
+
+/* Back button styling for content area */
+.process-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  margin-bottom: 2rem;
+  color: var(--color-gray-600);
+  font-size: var(--font-sm);
+  font-weight: var(--font-medium);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.process-back-button:hover {
+  color: var(--color-gray-900);
+}
+
+.process-back-button:disabled {
+  color: var(--color-gray-400);
+  cursor: not-allowed;
+}
+
+/* Title and subtitle */
+.process-title {
+  font-size: var(--font-3xl);
+  font-weight: var(--font-bold);
+  color: var(--color-gray-900);
+  margin: 0 0 0.75rem 0;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.process-subtitle {
+  font-size: var(--font-base);
+  font-weight: var(--font-normal);
+  color: var(--color-gray-600);
+  margin: 0 0 2rem 0;
+  line-height: 1.6;
+}
+
+/* Section styling */
+.process-section {
+  margin-bottom: 2rem;
+}
+
+.process-section:last-child {
+  margin-bottom: 0;
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+@media (max-width: 768px) {
+  .process-topbar {
+    height: 72px;
+  }
+
+  .process-topbar-inner {
+    padding: 0.875rem 1rem;
+  }
+
+  .step-text,
+  .percentage-text {
+    font-size: 0.8125rem;
+  }
+
+  .progress-bar-track {
+    height: 6px;
+  }
+
+  .process-content {
+    padding: 1.5rem 1.25rem;
+    padding-top: calc(72px + 1.5rem);
+  }
+
+  .process-footer-content {
+    padding: 0.875rem 1rem;
+    flex-direction: column;
+    gap: 0.875rem;
+    align-items: flex-start;
+    min-height: auto;
+  }
+
+  .footer-message {
+    text-align: left;
+    max-width: 100%;
+    font-size: 0.8125rem;
+  }
+
+  .footer-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .footer-buttons {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .footer-continue-button {
+    flex: 1;
+  }
+
+  .process-title {
+    font-size: 1.75rem;
+  }
+
+  .process-subtitle {
+    font-size: 0.9375rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .process-topbar {
+    height: 64px;
+  }
+
+  .process-topbar-inner {
+    padding: 0.75rem 0.875rem;
+  }
+
+  .process-content {
+    padding: 1rem 1rem;
+    padding-top: calc(64px + 1rem);
+  }
+
+  .process-footer-content {
+    padding: 0.75rem 0.875rem;
+  }
+
+  .footer-step-indicator {
+    display: none;
+  }
+
+  .process-title {
+    font-size: 1.5rem;
+  }
+}

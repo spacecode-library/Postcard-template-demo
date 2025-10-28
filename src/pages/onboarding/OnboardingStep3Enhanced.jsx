@@ -11,7 +11,7 @@ const OnboardingStep3Enhanced = () => {
   const [error, setError] = useState(null);
 
   const steps = [
-    { number: 1, title: 'URL Business', subtitle: 'Please provide email' },
+    { number: 1, title: 'Business URL', subtitle: 'Please provide email' },
     { number: 2, title: 'Select Postcard Template', subtitle: 'Setup your template' },
     { number: 3, title: 'Postcard Editor', subtitle: 'Customize your campaign' },
     { number: 4, title: 'Targeting & Budget', subtitle: 'Setup your business financial goals' },

@@ -1,84 +1,134 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart3 } from 'lucide-react';
+import { mockCampaignService } from '../../services/mockDataService';
 import './AnalyticsChart.css';
 
 const AnalyticsChart = ({ data, total }) => {
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  
-  // Generate smooth curve path for the chart
-  const generatePath = () => {
-    const width = 800;
-    const height = 200;
-    const padding = 50;
-    const points = 12;
-    
-    let path = `M ${padding},${height - padding}`;
-    
-    for (let i = 0; i < points; i++) {
-      const x = padding + (i * (width - 2 * padding) / (points - 1));
-      const y = height - padding - (Math.random() * 50 + 30);
-      
-      if (i === 0) {
-        path += ` L${x},${y}`;
-      } else {
-        const prevX = padding + ((i - 1) * (width - 2 * padding) / (points - 1));
-        const controlX = (prevX + x) / 2;
-        path += ` Q${controlX},${y} ${x},${y}`;
+  const [analyticsData, setAnalyticsData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load analytics data
+  useEffect(() => {
+    loadAnalyticsData();
+  }, []);
+
+  const loadAnalyticsData = async () => {
+    try {
+      setIsLoading(true);
+      const result = await mockCampaignService.getAnalyticsData();
+      if (result.success) {
+        setAnalyticsData(result.data);
       }
+    } catch (error) {
+      console.error('Error loading analytics:', error);
+    } finally {
+      setIsLoading(false);
     }
-    
-    return path;
+  };
+
+  // Check if we have actual data
+  const hasData = analyticsData && analyticsData.length > 0;
+
+  // Custom tooltip
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="custom-tooltip">
+          <p className="tooltip-label">{label}</p>
+          <p className="tooltip-value">
+            <span className="tooltip-dot" style={{ background: '#20B2AA' }}></span>
+            Postcards: <strong>{payload[0].value.toLocaleString()}</strong>
+          </p>
+          {payload[1] && (
+            <p className="tooltip-value">
+              <span className="tooltip-dot" style={{ background: '#F59E0B' }}></span>
+              Campaigns: <strong>{payload[1].value}</strong>
+            </p>
+          )}
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
     <div className="analytics-chart-container">
       <div className="chart-header">
-        <h3 className="chart-title">Total Postcards Sent</h3>
-        <div className="chart-total">{total.toLocaleString()}</div>
-      </div>
-      
-      <div className="chart-wrapper">
-        <svg className="chart-svg" viewBox="0 0 800 250" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#8B5CF6" stopOpacity="0.2"/>
-              <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0"/>
-            </linearGradient>
-          </defs>
-          
-          {/* Grid lines */}
-          {[0, 1, 2, 3, 4].map((i) => (
-            <line
-              key={i}
-              x1="50"
-              y1={50 + i * 30}
-              x2="750"
-              y2={50 + i * 30}
-              stroke="#F3F4F6"
-              strokeWidth="1"
-            />
-          ))}
-          
-          {/* Chart line */}
-          <path
-            d={generatePath()}
-            stroke="#8B5CF6"
-            strokeWidth="3"
-            fill="none"
-          />
-          
-          {/* Area fill */}
-          <path
-            d={`${generatePath()} L750,200 L50,200 Z`}
-            fill="url(#chartGradient)"
-          />
-        </svg>
-        
-        <div className="chart-labels">
-          {months.map((month) => (
-            <span key={month} className="month-label">{month}</span>
-          ))}
+        <div className="chart-header-left">
+          <h3 className="chart-title">Campaign Analytics</h3>
+          <div className="chart-total">{(total || 0).toLocaleString()} Postcards Sent</div>
         </div>
       </div>
+
+      {isLoading ? (
+        <div className="chart-loading">
+          <div className="loading-spinner"></div>
+          <p>Loading analytics...</p>
+        </div>
+      ) : !hasData || (total || 0) === 0 ? (
+        <div className="chart-empty-state">
+          <div className="empty-state-icon">
+            <BarChart3 size={80} strokeWidth={1.5} />
+          </div>
+          <div className="empty-state-text">
+            <h4>No Campaign Data Yet</h4>
+            <p>Analytics will appear here once your campaigns start sending postcards</p>
+          </div>
+        </div>
+      ) : (
+        <div className="chart-wrapper">
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart
+              data={analyticsData}
+              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient id="colorPostcards" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#20B2AA" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#20B2AA" stopOpacity={0.1}/>
+                </linearGradient>
+                <linearGradient id="colorCampaigns" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#F59E0B" stopOpacity={0.1}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+              <XAxis
+                dataKey="month"
+                stroke="#9CA3AF"
+                style={{ fontSize: '12px' }}
+              />
+              <YAxis
+                stroke="#9CA3AF"
+                style={{ fontSize: '12px' }}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend
+                wrapperStyle={{ fontSize: '14px', paddingTop: '10px' }}
+              />
+              <Area
+                type="monotone"
+                dataKey="postcards_sent"
+                stroke="#20B2AA"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorPostcards)"
+                name="Postcards Sent"
+              />
+              <Area
+                type="monotone"
+                dataKey="campaigns"
+                stroke="#F59E0B"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorCampaigns)"
+                name="Active Campaigns"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 };

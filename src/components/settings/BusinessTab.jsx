@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Mail, ChevronDown } from 'lucide-react';
 import './BusinessTab.css';
 
 const BusinessTab = ({ onSave, onCancel }) => {
@@ -53,10 +54,7 @@ const BusinessTab = ({ onSave, onCancel }) => {
             Business Address <span className="required">*</span>
           </label>
           <div className="email-input-container">
-            <svg className="email-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M3 5L10 10L17 5M3 5V15C3 15.5523 3.44772 16 4 16H16C16.5523 16 17 15.5523 17 15V5M3 5C3 4.44772 3.44772 4 4 4H16C16.5523 4 17 4.44772 17 5" 
-                stroke="currentColor" strokeWidth="1.5"/>
-            </svg>
+            <Mail className="email-icon" size={18} />
             <input
               type="email"
               className="form-input email-input"
@@ -79,9 +77,7 @@ const BusinessTab = ({ onSave, onCancel }) => {
               onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
               placeholder="+1 (555) 123-4567"
             />
-            <svg className="dropdown-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.5"/>
-            </svg>
+            <ChevronDown className="dropdown-icon" size={18} />
           </div>
         </div>
 
@@ -112,9 +108,7 @@ const BusinessTab = ({ onSave, onCancel }) => {
                 <option key={industry} value={industry}>{industry}</option>
               ))}
             </select>
-            <svg className="select-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.5"/>
-            </svg>
+            <ChevronDown className="select-icon" size={18} />
           </div>
         </div>
       </div>

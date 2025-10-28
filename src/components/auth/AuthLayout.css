@@ -13,17 +13,21 @@
   justify-content: center;
   padding: 2rem;
   background-color: #FFFFFF;
+  overflow-y: auto;
 }
 
 .auth-content-wrapper {
   width: 100%;
   max-width: 400px;
+  padding: 2rem 0;
 }
 
 /* Right Side - Image & Testimonial */
 .auth-right {
   flex: 1;
-  position: relative;
+  position: sticky;
+  top: 0;
+  height: 100vh;
   overflow: hidden;
   background-color: #F9FAFB;
 }
@@ -38,27 +42,32 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 }
 
 /* Testimonial Card */
 .testimonial-card {
   position: absolute;
-  bottom: 3rem;
-  left: 3rem;
-  right: 3rem;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 4rem);
+  max-width: 550px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  padding: 2rem;
+  padding: 1.75rem;
   border-radius: 1rem;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .testimonial-text {
-  font-size: 1.125rem;
-  line-height: 1.75;
+  font-size: 1rem;
+  line-height: 1.6;
   color: #111827;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
   font-weight: 500;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .testimonial-footer {
@@ -111,8 +120,8 @@
 }
 
 .nav-arrow {
-  width: 44px; /* Increased to meet touch target minimum */
-  height: 44px; /* Increased to meet touch target minimum */
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background-color: white;
   border: 1px solid #E5E7EB;
@@ -120,27 +129,36 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
-  color: #6B7280;
+  transition: color 0.15s ease, border-color 0.15s ease;
+  color: #9CA3AF;
 }
 
 .nav-arrow:hover {
-  background-color: #F9FAFB;
   border-color: #D1D5DB;
-  color: #374151;
+  color: #111827;
 }
 
 .nav-arrow:active {
   transform: scale(0.95);
 }
 
+.nav-arrow:focus-visible {
+  outline: 2px solid rgba(32, 178, 170, 0.5);
+  outline-offset: 2px;
+}
+
 /* Responsive Design with Intermediate Breakpoints */
 @media (max-width: 1200px) {
   .testimonial-card {
-    bottom: 2rem;
-    left: 2rem;
-    right: 2rem;
+    bottom: 1.5rem;
+    width: calc(100% - 3rem);
+    max-width: 480px;
     padding: 1.5rem;
+  }
+
+  .testimonial-text {
+    font-size: 0.9375rem;
+    line-height: 1.5;
   }
 }
 
@@ -148,14 +166,17 @@
   .auth-container {
     flex-direction: column;
   }
-  
-  .auth-right {
-    min-height: 40vh; /* Show testimonial section on tablet */
-    display: flex;
-  }
-  
+
   .auth-left {
-    min-height: 60vh; /* Adjust form area */
+    min-height: auto;
+    overflow-y: visible;
+  }
+
+  .auth-right {
+    position: relative;
+    height: 50vh;
+    min-height: 400px;
+    display: flex;
   }
 }
 
@@ -163,27 +184,87 @@
   .auth-right {
     display: none; /* Hide testimonial on mobile */
   }
-  
+
   .auth-left {
     min-height: 100vh;
     padding: 1.5rem;
+    overflow-y: auto; /* Keep auto for scrolling */
+    align-items: flex-start; /* Align to top so form can scroll properly */
   }
-  
+
+  .auth-content-wrapper {
+    padding: 1rem 0;
+  }
+
   .testimonial-card {
     bottom: 1.5rem;
-    left: 1.5rem;
-    right: 1.5rem;
+    width: calc(100% - 3rem);
     padding: 1.25rem;
+  }
+
+  .testimonial-text {
+    font-size: 0.9375rem;
   }
 }
 
 @media (max-width: 640px) {
   .auth-left {
     padding: 1rem;
+    overflow-y: auto; /* Keep auto for scrolling */
+    align-items: flex-start; /* Align to top so form can scroll properly */
   }
-  
+
   .auth-content-wrapper {
     max-width: 100%;
+    padding: 0.5rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-left {
+    padding: 0.5rem;
+    align-items: flex-start; /* Align to top so form can scroll properly */
+  }
+
+  .auth-content-wrapper {
+    padding: 0.25rem 0;
+  }
+}
+
+/* Viewport height media queries for very short screens */
+@media (max-height: 700px) {
+  .auth-left {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    align-items: flex-start; /* Align to top so form can scroll properly */
+  }
+
+  .auth-content-wrapper {
+    padding: 0.25rem 0;
+  }
+}
+
+@media (max-height: 600px) {
+  .auth-left {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    align-items: flex-start; /* Align to top so form can scroll properly */
+  }
+
+  .auth-content-wrapper {
+    padding: 0.15rem 0;
+  }
+}
+
+/* Extreme case: very small screens */
+@media (max-height: 550px) {
+  .auth-left {
+    padding: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .auth-content-wrapper {
+    padding: 0.15rem 0;
   }
 }
 

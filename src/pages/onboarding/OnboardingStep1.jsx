@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ChevronLeft, Check, Palette } from 'lucide-react';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 import brandfetchService from '../../supabase/api/brandFetchService';
 import supabaseCompanyService from '../../supabase/api/companyService';
@@ -17,7 +19,7 @@ const OnboardingStep1 = () => {
   const [brandPreview, setBrandPreview] = useState(null);
 
   const steps = [
-    { number: 1, title: 'URL Business', subtitle: 'Please provide email' },
+    { number: 1, title: 'Business URL', subtitle: 'Please provide email' },
     { number: 2, title: 'Select Postcard Template', subtitle: 'Setup your template' },
     { number: 3, title: 'Postcard Editor', subtitle: 'Customize your campaign' },
     { number: 4, title: 'Targeting & Budget', subtitle: 'Setup your business financial goals' },
@@ -165,13 +167,16 @@ const OnboardingStep1 = () => {
   return (
     <OnboardingLayout steps={steps} currentStep={1}>
       <div className="main-content">
-        <button  
-          className="back-button" 
+        <motion.button
+          className="back-button"
           onClick={handleBack}
           disabled={isLoading}
-          >
-          ← Back
-        </button>
+          whileHover={{ scale: 1.02, x: -2 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <ChevronLeft size={18} />
+          Back
+        </motion.button>
         
         <h1 className="main-title">What's your business website URL?</h1>
         <p className="main-subtitle">We'll use your website to get your business details with Brandfetch and suggest the best postcard template for your business.</p>
@@ -218,14 +223,19 @@ const OnboardingStep1 = () => {
 
         {/* Brand Preview Card */}
         {brandPreview && (
-          <div className="brand-preview-card" style={{
-            marginTop: '24px',
-            padding: '20px',
-            backgroundColor: '#F7FAFC',
-            borderRadius: '12px',
-            border: '2px solid #20B2AA',
-            animation: 'slideIn 0.3s ease-out'
-          }}>
+          <motion.div
+            className="brand-preview-card"
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            style={{
+              marginTop: '24px',
+              padding: '20px',
+              backgroundColor: '#F7FAFC',
+              borderRadius: '12px',
+              border: '2px solid #20B2AA'
+            }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
               <div style={{
                 width: '48px',
@@ -235,9 +245,9 @@ const OnboardingStep1 = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '24px'
+                color: 'white'
               }}>
-                ✓
+                <Check size={28} strokeWidth={3} />
               </div>
               <div>
                 <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600', color: '#1A202C' }}>
@@ -266,8 +276,8 @@ const OnboardingStep1 = () => {
 
             {brandPreview.colors && brandPreview.colors.palette && brandPreview.colors.palette.length > 0 && (
               <div>
-                <p style={{ margin: '0 0 8px 0', fontSize: '0.875rem', fontWeight: '600', color: '#4A5568' }}>
-                  🎨 Brand Colors:
+                <p style={{ margin: '0 0 8px 0', fontSize: '0.875rem', fontWeight: '600', color: '#4A5568', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Palette size={16} /> Brand Colors:
                 </p>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {brandPreview.colors.palette.slice(0, 6).map((color, index) => (
@@ -314,7 +324,7 @@ const OnboardingStep1 = () => {
             }}>
               <strong>Next:</strong> These colors will be automatically applied to your postcard template in the editor!
             </div>
-          </div>
+          </motion.div>
         )}
 
         <div className="footer-section">
@@ -323,13 +333,15 @@ const OnboardingStep1 = () => {
           </div>
           <div className="footer-actions">
             <span className="step-indicator">Step 1 of 6</span>
-            <button 
-            className="continue-button"
+            <motion.button
+              className="continue-button"
               onClick={handleContinue}
               disabled={!isFormValid() || isLoading}
+              whileHover={{ scale: 1.02, boxShadow: "0 6px 16px rgba(32, 178, 170, 0.25)" }}
+              whileTap={{ scale: 0.98 }}
             >
               {isLoading ? 'Processing...' : 'Continue'}
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>

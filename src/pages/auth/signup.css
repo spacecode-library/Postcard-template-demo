@@ -7,6 +7,21 @@
   margin-bottom: 2.5rem;
 }
 
+/* Reduce logo size on small screens for signup */
+@media (max-width: 768px) {
+  .signup-form-container .login-logo,
+  .signup-logo {
+    max-height: 32px;
+  }
+}
+
+@media (max-width: 640px) {
+  .signup-form-container .login-logo,
+  .signup-logo {
+    max-height: 28px;
+  }
+}
+
 /* Helper Text */
 .helper-text {
   display: block;
@@ -30,4 +45,361 @@
   margin-bottom: 2rem;
 }
 
+/* Prevent any inherited loading spinner on auth buttons */
+.auth-button::after,
+.auth-button::before {
+  display: none !important;
+}
+
+.auth-button:disabled {
+  color: var(--color-white) !important; /* Prevent text from being transparent */
+}
+
 /* Reuse common auth styles from login.css */
+
+/* Responsive adjustments for signup - more aggressive due to 4 fields */
+@media (max-width: 640px) {
+  .signup-logo {
+    margin-bottom: 0.75rem;
+  }
+
+  .signup-form-container .auth-title {
+    font-size: 1.375rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .signup-form-container .auth-subtitle {
+    font-size: 0.8125rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .signup-form-container .form-group {
+    margin-bottom: 0.625rem;
+  }
+
+  .signup-form-container .auth-form .form-group:last-of-type {
+    margin-bottom: 0.875rem;
+  }
+
+  .signup-form-container .form-label {
+    font-size: 0.8125rem;
+    margin-bottom: 0.375rem;
+  }
+
+  .signup-form-container .form-input {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    min-height: 40px;
+  }
+
+  .signup-form-container .helper-text {
+    font-size: 0.65rem;
+    margin-top: 0.2rem;
+    line-height: 1.25;
+  }
+
+  .signup-form-container .auth-button {
+    margin-bottom: 0.625rem;
+    padding: 0.625rem 1.5rem;
+    font-size: 0.875rem;
+    min-height: 40px;
+  }
+
+  .signup-form-container .google-button {
+    margin-bottom: 0.625rem;
+    padding: 0.625rem 1.5rem;
+    font-size: 0.875rem;
+    min-height: 40px;
+  }
+
+  .signup-form-container .auth-switch {
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .signup-logo {
+    margin-bottom: 0.5rem;
+  }
+
+  .signup-form-container .auth-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .signup-form-container .auth-subtitle {
+    font-size: 0.75rem;
+    margin-bottom: 0.625rem;
+  }
+
+  .signup-form-container .form-group {
+    margin-bottom: 0.5rem;
+  }
+
+  .signup-form-container .auth-form .form-group:last-of-type {
+    margin-bottom: 0.625rem;
+  }
+
+  .signup-form-container .form-label {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .signup-form-container .form-input {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    min-height: 38px;
+  }
+
+  .signup-form-container .helper-text {
+    font-size: 0.625rem;
+    margin-top: 0.15rem;
+    line-height: 1.2;
+  }
+
+  .signup-form-container .auth-button {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.8125rem;
+    min-height: 38px;
+  }
+
+  .signup-form-container .google-button {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.8125rem;
+    min-height: 38px;
+  }
+
+  .signup-form-container .auth-switch {
+    font-size: 0.75rem;
+  }
+}
+
+/* Viewport height media queries for short screens */
+@media (max-height: 750px) {
+  .signup-logo {
+    margin-bottom: 0.75rem;
+  }
+
+  .signup-form-container .auth-title {
+    font-size: 1.375rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .signup-form-container .auth-subtitle {
+    font-size: 0.8125rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .signup-form-container .form-group {
+    margin-bottom: 0.625rem;
+  }
+
+  .signup-form-container .auth-form .form-group:last-of-type {
+    margin-bottom: 0.875rem;
+  }
+
+  .signup-form-container .form-label {
+    font-size: 0.8125rem;
+    margin-bottom: 0.375rem;
+  }
+
+  .signup-form-container .form-input {
+    padding: 0.625rem 0.875rem;
+    min-height: 40px;
+  }
+
+  .signup-form-container .helper-text {
+    font-size: 0.65rem;
+    margin-top: 0.2rem;
+    line-height: 1.25;
+  }
+
+  .signup-form-container .auth-button {
+    margin-bottom: 0.625rem;
+    padding: 0.625rem 1.5rem;
+    min-height: 40px;
+  }
+
+  .signup-form-container .google-button {
+    margin-bottom: 0.625rem;
+    padding: 0.625rem 1.5rem;
+    min-height: 40px;
+  }
+}
+
+@media (max-height: 650px) {
+  .signup-logo {
+    margin-bottom: 0.5rem;
+  }
+
+  .signup-form-container .auth-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .signup-form-container .auth-subtitle {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .signup-form-container .form-group {
+    margin-bottom: 0.5rem;
+  }
+
+  .signup-form-container .auth-form .form-group:last-of-type {
+    margin-bottom: 0.625rem;
+  }
+
+  .signup-form-container .form-label {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .signup-form-container .form-input {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    min-height: 38px;
+  }
+
+  .signup-form-container .helper-text {
+    font-size: 0.625rem;
+    margin-top: 0.15rem;
+    line-height: 1.2;
+  }
+
+  .signup-form-container .auth-button {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.8125rem;
+    min-height: 38px;
+  }
+
+  .signup-form-container .google-button {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.8125rem;
+    min-height: 38px;
+  }
+}
+
+/* Combined small width AND short height - most aggressive */
+@media (max-width: 640px) and (max-height: 700px) {
+  .signup-logo {
+    margin-bottom: 0.5rem;
+  }
+
+  .signup-form-container .auth-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .signup-form-container .auth-subtitle {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .signup-form-container .form-group {
+    margin-bottom: 0.5rem;
+  }
+
+  .signup-form-container .auth-form .form-group:last-of-type {
+    margin-bottom: 0.625rem;
+  }
+
+  .signup-form-container .form-label {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .signup-form-container .form-input {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    min-height: 38px;
+  }
+
+  .signup-form-container .helper-text {
+    font-size: 0.625rem;
+    margin-top: 0.15rem;
+    line-height: 1.2;
+  }
+
+  .signup-form-container .auth-button {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.8125rem;
+    min-height: 38px;
+  }
+
+  .signup-form-container .google-button {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.8125rem;
+    min-height: 38px;
+  }
+
+  .signup-form-container .auth-switch {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+  }
+}
+
+/* Extra aggressive for extremely small screens */
+@media (max-width: 480px) and (max-height: 600px) {
+  .signup-logo {
+    margin-bottom: 0.375rem;
+  }
+
+  .signup-form-container .auth-title {
+    font-size: 1.125rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .signup-form-container .auth-subtitle {
+    font-size: 0.6875rem;
+    margin-bottom: 0.375rem;
+  }
+
+  .signup-form-container .form-group {
+    margin-bottom: 0.375rem;
+  }
+
+  .signup-form-container .auth-form .form-group:last-of-type {
+    margin-bottom: 0.5rem;
+  }
+
+  .signup-form-container .form-label {
+    font-size: 0.6875rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .signup-form-container .form-input {
+    padding: 0.4rem 0.625rem;
+    font-size: 0.75rem;
+    min-height: 36px;
+  }
+
+  .signup-form-container .helper-text {
+    display: none; /* Hide helper text on extremely small screens */
+  }
+
+  .signup-form-container .auth-button {
+    margin-bottom: 0.375rem;
+    padding: 0.4rem 1rem;
+    font-size: 0.75rem;
+    min-height: 36px;
+  }
+
+  .signup-form-container .google-button {
+    margin-bottom: 0.375rem;
+    padding: 0.4rem 1rem;
+    font-size: 0.75rem;
+    min-height: 36px;
+  }
+
+  .signup-form-container .auth-switch {
+    font-size: 0.6875rem;
+    margin-top: 0.2rem;
+  }
+}

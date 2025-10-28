@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthLayout from '../../components/auth/AuthLayout';
 import Logo from '../../components/common/Logo';
@@ -165,15 +166,9 @@ const Login = () => {
                 disabled={isSubmitting || loading}
               >
                 {showPassword ? (
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10 4C4.5 4 2 10 2 10C2 10 4.5 16 10 16C15.5 16 18 10 18 10C18 10 15.5 4 10 4Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M10 13C11.6569 13 13 11.6569 13 10C13 8.34315 11.6569 7 10 7C8.34315 7 7 8.34315 7 10C7 11.6569 8.34315 13 10 13Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <EyeOff size={20} />
                 ) : (
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M14.95 14.95C13.5255 16.0358 11.7909 16.6374 10 16.6667C4.5 16.6667 2 10 2 10C3.02101 7.96622 4.42849 6.17206 6.13333 4.71667M8.5 3.54167C8.82377 3.43736 9.15963 3.36903 9.5 3.33817C9.66472 3.32244 9.83117 3.31934 10 3.31934C10.1688 3.31934 10.3353 3.32244 10.5 3.33817C16 3.66667 18 10 18 10C17.5061 11.0181 16.911 11.9773 16.225 12.8583M11.7667 11.7667C11.5378 12.0123 11.2617 12.2093 10.9541 12.3468C10.6465 12.4844 10.3137 12.5595 9.97583 12.5676C9.63796 12.5758 9.30175 12.5168 8.98726 12.3943C8.67277 12.2719 8.38649 12.0886 8.14506 11.8549C7.90364 11.6213 7.71206 11.343 7.5814 11.0364C7.45074 10.7299 7.38355 10.4012 7.38375 10.0692C7.38394 9.73714 7.45153 9.40851 7.58256 9.10216C7.71359 8.79582 7.90549 8.51781 8.14718 8.28445" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M2 2L18 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <Eye size={20} />
                 )}
               </button>
             </div>
@@ -192,12 +187,19 @@ const Login = () => {
             </a>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="auth-button"
             disabled={isSubmitting || loading}
           >
-            {isSubmitting ? 'Signing in...' : 'Sign in'}
+            {isSubmitting ? (
+              <>
+                <Loader2 size={18} className="spinner-icon" />
+                Signing in...
+              </>
+            ) : (
+              'Sign in'
+            )}
           </button>
         </form>
 

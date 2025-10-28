@@ -235,6 +235,22 @@
   color: var(--color-gray-400);
 }
 
+.logout-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logout-button:hover {
+  background-color: var(--color-gray-100);
+}
+
 /* Responsive Sidebar */
 @media (max-width: 1024px) {
   .sidebar {
@@ -274,12 +290,19 @@
     cursor: pointer;
     padding: var(--space-2);
     border-radius: var(--radius-sm);
-    transition: all var(--transition-fast);
+    transition: color 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  
+
   .sidebar-close-button:hover {
-    background-color: var(--color-gray-100);
-    color: var(--color-gray-700);
+    color: var(--color-gray-900);
+  }
+
+  .sidebar-close-button:focus-visible {
+    outline: 2px solid rgba(32, 178, 170, 0.5);
+    outline-offset: 2px;
   }
 }
 

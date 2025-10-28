@@ -224,11 +224,6 @@
   color: #065F46;
 }
 
-.status-badge:before {
-  content: "✓ ";
-  margin-right: 0.25rem;
-}
-
 .action-cell {
   display: flex;
   justify-content: flex-end;

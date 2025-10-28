@@ -1,5 +1,54 @@
 [
   {
+    "id": "poster-template",
+    "name": "Modern Poster",
+    "description": "Eye-catching poster design perfect for promotions, announcements, and events",
+    "primaryColor": "#FF6B6B",
+    "preview": "/template-previews/poster-template-preview.png",
+    "psdFile": "poster-template.psd",
+    "psdFileSize": 16752798,
+    "available": true,
+    "sides": 1,
+    "frontPageIndex": 0,
+    "features": [
+      "Bold Design",
+      "Large Format",
+      "Eye-Catching Layout",
+      "Professional Typography"
+    ],
+    "colors": {
+      "primary": "#FF6B6B",
+      "secondary": "#4ECDC4",
+      "accent": "#FFE66D",
+      "text": "#2D3436",
+      "background": "#FFFFFF"
+    },
+    "editableElements": [
+      "headline",
+      "subheadline",
+      "bodyText",
+      "eventDetails",
+      "callToAction",
+      "logo",
+      "images",
+      "contactInfo"
+    ],
+    "largeFileWarning": false,
+    "hasPreview": true,
+    "backgroundEditable": false,
+    "supportsColorOverlay": true,
+    "backgroundType": "graphic",
+    "dimensions": {
+      "width": 2700,
+      "height": 1950
+    },
+    "tags": [
+      "poster",
+      "promotional",
+      "event"
+    ]
+  },
+  {
     "id": "modern-postcard",
     "name": "Modern Postcard",
     "description": "Contemporary design for any business or service with 8 editable elements",
@@ -14,8 +63,7 @@
       "Clean Design",
       "Flexible Layout",
       "Image Areas",
-      "Typography",
-      "8 Editable Elements"
+      "Typography"
     ],
     "colors": {
       "primary": "#4A5568",
@@ -44,7 +92,7 @@
     "name": "Professional Business",
     "description": "Premium professional design with rich visual elements and multiple customizable sections",
     "primaryColor": "#1a365d",
-    "preview": "/template-previews/cesdk-2025-09-25T13_15_35.008Z.png",
+    "preview": "/template-previews/cesdk-2025-09-25T13_15_08.985Z.png",
     "psdFile": "7209489.psd",
     "psdFileSize": 35614886,
     "available": true,
@@ -54,8 +102,7 @@
       "Premium Design",
       "Multiple Sections",
       "Professional Layout",
-      "Rich Graphics",
-      "10+ Editable Elements"
+      "Rich Graphics"
     ],
     "colors": {
       "primary": "#1a365d",
@@ -89,7 +136,7 @@
     "name": "Modern Corporate",
     "description": "Sleek corporate design with contemporary aesthetics and versatile layout options",
     "primaryColor": "#2c5282",
-    "preview": "/template-previews/cesdk-2025-09-25T13_15_52.340Z.png",
+    "preview": "/template-previews/cesdk-2025-09-25T13_15_35.008Z.png",
     "psdFile": "8039429.psd",
     "psdFileSize": 23040002,
     "available": true,
@@ -99,8 +146,7 @@
       "Corporate Style",
       "Modern Layout",
       "Versatile Design",
-      "Clean Typography",
-      "8 Editable Elements"
+      "Clean Typography"
     ],
     "colors": {
       "primary": "#2c5282",
@@ -180,7 +226,7 @@
     "name": "Creative Business",
     "description": "Large format creative design with vibrant graphics and modern layout",
     "primaryColor": "#e11d48",
-    "preview": "/template-previews/cesdk-2025-09-25T13_15_08.985Z.png",
+    "preview": "/template-previews/cesdk-2025-09-25T13_15_52.340Z.png",
     "psdFile": "5248770.psd",
     "psdFileSize": 22623868,
     "available": true,
@@ -191,8 +237,7 @@
       "Creative Design",
       "Large Format",
       "Vibrant Graphics",
-      "Modern Layout",
-      "14 Elements"
+      "Modern Layout"
     ],
     "colors": {
       "primary": "#e11d48",
@@ -244,8 +289,7 @@
       "Elegant Design",
       "Premium Typography",
       "Professional Layout",
-      "Sophisticated",
-      "24 Elements"
+      "Sophisticated"
     ],
     "colors": {
       "primary": "#7c3aed",

@@ -3,6 +3,9 @@ import { SimpleEditorProvider } from './SimpleEditorProvider';
 import { AdvancedEditorProvider } from './AdvancedEditorProvider';
 import { PSDLoader } from './PSDLoader';
 import supabaseCompanyService from '../../supabase/api/companyService';
+import cloudinaryService from '../../services/cloudinaryService';
+import campaignService from '../../supabase/api/campaignService';
+import toast from 'react-hot-toast';
 import './PostcardEditor.professional.css';
 
 
@@ -11,13 +14,14 @@ const POSTCARD_WIDTH_PX = 1500; // 5" at 300 DPI
 const POSTCARD_HEIGHT_PX = 2100; // 7" at 300 DPI  
 const DPI = 300;
 
-const PostcardEditorNew = ({ selectedTemplate, onBack }) => {
+const PostcardEditorNew = ({ selectedTemplate, onBack, onSave, campaignId }) => {
   const [isSimpleMode, setIsSimpleMode] = useState(true);
   const [error, setError] = useState(null);
   const [loadingProgress, setLoadingProgress] = useState(null);
   const [currentSide, setCurrentSide] = useState('front');
   const [isDoubleSided, setIsDoubleSided] = useState(false);
   const [companyBrandData, setCompanyBrandData] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const simpleContainerRef = useRef(null);
   const advancedContainerRef = useRef(null);
@@ -142,10 +146,59 @@ const PostcardEditorNew = ({ selectedTemplate, onBack }) => {
       if (!instance || !instance.engine || !instance.engine.scene || !instance.engine.block) {
         throw new Error('Editor instance is not properly initialized');
       }
-      
+
       // Test engine validity
       instance.engine.scene.get();
-      
+
+      // Check if this is a saved scene file from Cloudinary (for editing existing campaigns)
+      if (template.psdPath && (template.psdPath.includes('cloudinary') || template.psdPath.endsWith('.scene'))) {
+        console.log('[Editor] Loading saved scene from Cloudinary:', template.psdPath);
+        setLoadingProgress({
+          stage: 'fetching',
+          message: 'Loading your saved design...',
+          progress: 0
+        });
+
+        try {
+          // Fetch the scene file from Cloudinary
+          const response = await fetch(template.psdPath);
+          if (!response.ok) {
+            throw new Error('Failed to fetch scene file from Cloudinary');
+          }
+
+          setLoadingProgress({
+            stage: 'processing',
+            message: 'Restoring your design...',
+            progress: 50
+          });
+
+          const sceneString = await response.text();
+
+          // Load the scene into the editor
+          await instance.engine.scene.loadFromString(sceneString);
+
+          setLoadingProgress({
+            stage: 'complete',
+            message: 'Design loaded successfully!',
+            progress: 100
+          });
+
+          console.log('[Editor] Scene loaded successfully from Cloudinary');
+
+          // Clear loading progress after a short delay
+          setTimeout(() => {
+            setLoadingProgress(null);
+          }, 500);
+
+          return { success: true, isDoubleSided: instance.engine.scene.getPages().length > 1 };
+
+        } catch (error) {
+          console.error('[Editor] Error loading scene from Cloudinary:', error);
+          setLoadingProgress(null);
+          throw new Error(`Failed to load saved design: ${error.message}`);
+        }
+      }
+
       if (template.psdFile) {
         // Show file size warning for large files
         if (template.largeFileWarning && template.psdFileSize) {
@@ -201,8 +254,8 @@ const PostcardEditorNew = ({ selectedTemplate, onBack }) => {
 
           attemptZoom();
 
-          // Refresh Simple Editor content after PSD loading
-          if (window.simpleEditorPluginAPI && window.simpleEditorPluginAPI.refreshContent) {
+          // Refresh Simple Editor content after PSD loading (ONLY if in simple mode)
+          if (isSimpleMode && window.simpleEditorPluginAPI && window.simpleEditorPluginAPI.refreshContent) {
             console.log('🔄 Triggering Simple Editor content refresh...');
             setTimeout(() => {
               window.simpleEditorPluginAPI.refreshContent();
@@ -356,6 +409,107 @@ const PostcardEditorNew = ({ selectedTemplate, onBack }) => {
     }
   };
 
+  /**
+   * Export and save postcard design
+   * Exports scene file and PNG preview to Cloudinary
+   */
+  const handleSaveDesign = async () => {
+    if (!currentEditorInstance.current) {
+      toast.error('Editor not ready. Please try again.');
+      return;
+    }
+
+    if (!campaignId) {
+      toast.error('No campaign ID provided.');
+      return;
+    }
+
+    setIsSaving(true);
+    const saveToast = toast.loading('Saving your design...');
+
+    try {
+      const instance = currentEditorInstance.current;
+
+      // Ensure all pending operations are complete before export
+      console.log('[Save] Waiting for pending operations...');
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // 1. Export scene as .scene file (PSD equivalent)
+      console.log('[Save] Exporting scene...');
+      const sceneString = await instance.engine.scene.saveToString();
+      const sceneBlob = new Blob([sceneString], { type: 'application/json' });
+      console.log('[Save] Scene exported, size:', (sceneBlob.size / 1024).toFixed(2), 'KB');
+
+      // 2. Export PNG preview with full postcard dimensions
+      console.log('[Save] Exporting PNG preview...');
+      const pages = instance.engine.scene.getPages();
+      const frontPage = pages[0]; // Export front page as preview
+
+      // Get the actual page dimensions from the scene
+      const pageWidth = instance.engine.block.getWidth(frontPage);
+      const pageHeight = instance.engine.block.getHeight(frontPage);
+
+      console.log('[Save] Page dimensions:', pageWidth, 'x', pageHeight);
+      console.log('[Save] Exporting page ID:', frontPage);
+
+      // Export at high resolution (2x) to maintain quality
+      const pngBlob = await instance.engine.block.export(frontPage, 'image/png', {
+        targetWidth: Math.round(pageWidth * 2),
+        targetHeight: Math.round(pageHeight * 2),
+        jpegQuality: 0.95
+      });
+      console.log('[Save] PNG exported, size:', (pngBlob.size / 1024).toFixed(2), 'KB');
+
+      // 3. Upload to Cloudinary
+      console.log('[Save] Uploading to Cloudinary...');
+      toast.loading('Uploading to cloud storage...', { id: saveToast });
+
+      const uploadResult = await cloudinaryService.uploadCampaignAssets(
+        sceneBlob,
+        pngBlob,
+        campaignId
+      );
+
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || 'Failed to upload files');
+      }
+
+      console.log('[Save] Files uploaded successfully');
+      console.log('[Save] Design URL:', uploadResult.designUrl);
+      console.log('[Save] Preview URL:', uploadResult.previewUrl);
+
+      // 4. Save URLs to campaign database
+      toast.loading('Updating campaign...', { id: saveToast });
+
+      const updateResult = await campaignService.saveCampaignDesign(
+        campaignId,
+        uploadResult.designUrl,
+        uploadResult.previewUrl
+      );
+
+      if (!updateResult.success) {
+        throw new Error(updateResult.error || 'Failed to update campaign');
+      }
+
+      toast.success('Design saved successfully!', { id: saveToast });
+      console.log('[Save] Campaign updated successfully');
+
+      // 5. Callback to parent if provided
+      if (onSave) {
+        onSave({
+          designUrl: uploadResult.designUrl,
+          previewUrl: uploadResult.previewUrl
+        });
+      }
+
+    } catch (error) {
+      console.error('[Save] Error saving design:', error);
+      toast.error(error.message || 'Failed to save design', { id: saveToast });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (!selectedTemplate) {
     return null; // Template selection will be handled by parent component
   }
@@ -378,7 +532,7 @@ const PostcardEditorNew = ({ selectedTemplate, onBack }) => {
         <div className="header-actions">
           {isDoubleSided && (
             <div className="side-toggle">
-              <button 
+              <button
                 className={`side-btn ${currentSide === 'front' ? 'active' : ''}`}
                 onClick={() => handleSideSwitch('front')}
                 disabled={currentSide === 'front'}
@@ -390,7 +544,7 @@ const PostcardEditorNew = ({ selectedTemplate, onBack }) => {
                 </svg>
                 Front
               </button>
-              <button 
+              <button
                 className={`side-btn ${currentSide === 'back' ? 'active' : ''}`}
                 onClick={() => handleSideSwitch('back')}
                 disabled={currentSide === 'back'}
@@ -405,21 +559,45 @@ const PostcardEditorNew = ({ selectedTemplate, onBack }) => {
               </button>
             </div>
           )}
-          
+
           <div className="mode-toggle">
-            <button 
+            <button
               className={`mode-btn ${isSimpleMode ? 'active' : ''}`}
               onClick={() => setIsSimpleMode(true)}
             >
               Simple
             </button>
-            <button 
+            <button
               className={`mode-btn ${!isSimpleMode ? 'active' : ''}`}
               onClick={() => setIsSimpleMode(false)}
             >
               Advanced
             </button>
           </div>
+
+          <button
+            className="save-design-btn"
+            onClick={handleSaveDesign}
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <>
+                <svg className="spinner-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="12" cy="12" r="10" strokeWidth="3" strokeDasharray="31.4" strokeDashoffset="10" />
+                </svg>
+                Saving...
+              </>
+            ) : (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                  <polyline points="17 21 17 13 7 13 7 21"/>
+                  <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Save Design
+              </>
+            )}
+          </button>
         </div>
       </div>
       

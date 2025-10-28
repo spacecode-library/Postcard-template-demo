@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, AlertCircle, Shield } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
@@ -230,18 +231,13 @@ const PaymentForm = ({ onSuccess, email }) => {
 
         {error && (
           <div className="error-message">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <circle cx="10" cy="10" r="9" stroke="#EF4444" strokeWidth="2"/>
-              <path d="M10 6v4M10 14h.01" stroke="#EF4444" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
+            <AlertCircle size={20} color="#EF4444" />
             {error}
           </div>
         )}
 
         <div className="privacy-notice">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M8 1L3 3v4c0 3.5 2 6.5 5 7 3-0.5 5-3.5 5-7V3l-5-2z" stroke="#6B7280" strokeWidth="1.5" fill="none"/>
-          </svg>
+          <Shield size={16} color="#6B7280" />
           Your payment information is securely processed by Stripe. We never store your full card details.
         </div>
       </div>
@@ -271,7 +267,7 @@ const OnboardingStep5 = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const steps = [
-    { number: 1, title: 'URL Business', subtitle: 'Please provide email' },
+    { number: 1, title: 'Business URL', subtitle: 'Please provide email' },
     { number: 2, title: 'Select Postcard Template', subtitle: 'Setup your template' },
     { number: 3, title: 'Postcard Editor', subtitle: 'Customize your campaign' },
     { number: 4, title: 'Targeting & Budget', subtitle: 'Setup your business financial goals' },
@@ -303,28 +299,36 @@ const OnboardingStep5 = () => {
     navigate('/onboarding/step6');
   };
 
+  const handleSkipPayment = () => {
+    toast.success('Payment setup skipped. You can add payment details later.');
+    navigate('/onboarding/step6');
+  };
+
   return (
     <OnboardingLayout steps={steps} currentStep={5}>
       <div className="main-content">
         <button className="back-button" onClick={handleBack}>
-          ← Back
+          <ChevronLeft size={18} />
+          Back
         </button>
 
         <h1 className="main-title">Payment Setup</h1>
+        <p style={{ color: '#718096', fontSize: '0.95rem', marginTop: '8px', marginBottom: '24px' }}>
+          Add a payment method now or skip and add it later from your dashboard.
+        </p>
 
         <div className="payment-form">
           {/* Billing Information */}
           <div className="payment-section">
-            <h3 className="section-title">Billing Information</h3>
+            <h3 className="section-title">Billing Information (Optional)</h3>
             <div className="form-group">
-              <label>Email *</label>
+              <label>Email</label>
               <input
                 type="email"
                 name="email"
-                placeholder="Input your email address"
+                placeholder="Input your email address (optional)"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
                 autoComplete="email"
               />
             </div>
@@ -363,7 +367,7 @@ const OnboardingStep5 = () => {
           {!email && (
             <div className="payment-section">
               <p style={{ color: '#6B7280', textAlign: 'center', padding: '2rem' }}>
-                Please enter your email address to continue with payment setup
+                Enter your email address above to add payment details, or click "Skip for Now" to continue
               </p>
             </div>
           )}
@@ -371,8 +375,33 @@ const OnboardingStep5 = () => {
       </div>
 
       <div className="form-footer">
-        <div className="footer-actions">
+        <div className="footer-actions" style={{ width: '100%', justifyContent: 'space-between' }}>
           <span className="step-indicator">Step 5 of 6</span>
+          <button
+            className="skip-payment-button"
+            onClick={handleSkipPayment}
+            style={{
+              padding: '12px 24px',
+              fontSize: '1rem',
+              fontWeight: '600',
+              color: '#4A5568',
+              background: 'transparent',
+              border: '2px solid #E2E8F0',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = '#F7FAFC';
+              e.target.style.borderColor = '#CBD5E0';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'transparent';
+              e.target.style.borderColor = '#E2E8F0';
+            }}
+          >
+            Skip for Now
+          </button>
         </div>
       </div>
     </OnboardingLayout>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Table from '../components/common/Table';
@@ -7,32 +7,101 @@ import EngagementValue from '../components/common/EngagementValue';
 import ActionButtons from '../components/common/ActionButtons';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
-import { mockCampaigns } from '../services/mockData';
+import campaignService from '../supabase/api/campaignService';
+import toast from 'react-hot-toast';
 import './History.css';
 
 const History = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [campaigns, setCampaigns] = useState(mockCampaigns);
+  const [campaigns, setCampaigns] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load campaigns on mount
+  useEffect(() => {
+    loadCampaigns();
+  }, []);
+
+  const loadCampaigns = async () => {
+    try {
+      setIsLoading(true);
+      const result = await campaignService.getCampaigns();
+
+      if (result.success) {
+        // Transform campaign data to match table format
+        const transformedCampaigns = result.campaigns.map(campaign => ({
+          id: campaign.id,
+          blastName: campaign.campaign_name || 'Untitled Campaign',
+          status: campaign.status || 'draft',
+          createdDate: campaign.created_at ? new Date(campaign.created_at).toLocaleDateString() : 'N/A',
+          sentDate: campaign.launched_at ? new Date(campaign.launched_at).toLocaleDateString() : '-',
+          recipients: campaign.total_recipients ? campaign.total_recipients.toLocaleString() : '0',
+          engagement: campaign.response_rate || 0,
+          // Keep original data for editing
+          _original: campaign
+        }));
+
+        setCampaigns(transformedCampaigns);
+      }
+    } catch (error) {
+      console.error('Error loading campaigns:', error);
+      toast.error('Failed to load campaigns');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCreateNewBlast = () => {
-    navigate('/create-blast');
+    // Clear any existing blast data
+    sessionStorage.removeItem('blastData');
+    navigate('/blast/step1');
   };
 
   const handleEditCampaign = (campaignId) => {
-    console.log('Edit campaign:', campaignId);
+    navigate(`/campaign/${campaignId}/edit`);
   };
 
-  const handleCopyCampaign = (campaignId) => {
-    console.log('Copy campaign:', campaignId);
+  const handleCopyCampaign = async (campaignId) => {
+    try {
+      toast.loading('Duplicating campaign...', { id: 'copy-campaign' });
+
+      const result = await campaignService.duplicateCampaign(campaignId);
+
+      if (result.success) {
+        toast.success('Campaign duplicated successfully!', { id: 'copy-campaign' });
+        // Reload campaigns to show the new copy
+        loadCampaigns();
+      }
+    } catch (error) {
+      console.error('Error copying campaign:', error);
+      toast.error('Failed to duplicate campaign', { id: 'copy-campaign' });
+    }
   };
 
-  const handleRefreshCampaign = (campaignId) => {
-    console.log('Refresh campaign:', campaignId);
+  const handleRefreshCampaign = () => {
+    loadCampaigns();
+    toast.success('Campaigns refreshed');
   };
 
-  const handleDeleteCampaign = (campaignId) => {
-    setCampaigns(campaigns.filter(campaign => campaign.id !== campaignId));
+  const handleDeleteCampaign = async (campaignId) => {
+    if (!window.confirm('Are you sure you want to delete this campaign? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      toast.loading('Deleting campaign...', { id: 'delete-campaign' });
+
+      const result = await campaignService.deleteCampaign(campaignId);
+
+      if (result.success) {
+        toast.success('Campaign deleted successfully', { id: 'delete-campaign' });
+        // Remove from local state
+        setCampaigns(campaigns.filter(campaign => campaign.id !== campaignId));
+      }
+    } catch (error) {
+      console.error('Error deleting campaign:', error);
+      toast.error('Failed to delete campaign', { id: 'delete-campaign' });
+    }
   };
 
 
@@ -117,7 +186,7 @@ const History = () => {
               >
                 Settings
               </Button>
-              <Button 
+              <Button
                 variant="primary"
                 onClick={handleCreateNewBlast}
                 icon={
@@ -126,7 +195,7 @@ const History = () => {
                   </svg>
                 }
               >
-                Create New Blast
+                New Blast
               </Button>
             </div>
           </div>
@@ -150,12 +219,117 @@ const History = () => {
           </div>
 
           {/* Data Table */}
-          <Table 
-            columns={columns}
-            data={filteredCampaigns}
-            className="history-table"
-          />
+          {isLoading ? (
+            <div className="loading-container">
+              <div>
+                <div className="spinner"></div>
+                <p>Loading campaigns...</p>
+              </div>
+            </div>
+          ) : campaigns.length === 0 ? (
+            <div className="empty-state">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                <rect x="8" y="16" width="48" height="32" rx="4" stroke="#CBD5E0" strokeWidth="2"/>
+                <circle cx="20" cy="28" r="4" fill="#E2E8F0"/>
+                <path d="M8 40L24 28L36 36L56 20" stroke="#CBD5E0" strokeWidth="2"/>
+              </svg>
+              <h3>No campaigns yet</h3>
+              <p>Create your first campaign to get started</p>
+              <Button variant="primary" onClick={handleCreateNewBlast}>
+                Create New Campaign
+              </Button>
+            </div>
+          ) : (
+            <Table
+              columns={columns}
+              data={filteredCampaigns}
+              className="history-table"
+            />
+          )}
       </div>
+
+      <style>{`
+        .loading-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: calc(100vh - 300px);
+          width: 100%;
+          padding: 40px 20px;
+        }
+
+        .loading-container > div {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 16px;
+          animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .spinner {
+          width: 40px;
+          height: 40px;
+          border: 4px solid #E2E8F0;
+          border-top-color: #20B2AA;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        .loading-container p {
+          color: #718096;
+          font-size: 14px;
+          margin: 0;
+        }
+
+        .empty-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: calc(100vh - 400px);
+          padding: 80px 20px;
+          gap: 20px;
+          text-align: center;
+          animation: fadeIn 0.4s ease-out;
+        }
+
+        .empty-state svg {
+          opacity: 0.6;
+          margin-bottom: 12px;
+        }
+
+        .empty-state h3 {
+          margin: 0;
+          font-size: 24px;
+          font-weight: 700;
+          color: #1A202C;
+        }
+
+        .empty-state p {
+          margin: 0;
+          font-size: 16px;
+          color: #718096;
+          line-height: 1.6;
+          max-width: 400px;
+          margin-bottom: 12px;
+        }
+      `}</style>
     </DashboardLayout>
   );
 };

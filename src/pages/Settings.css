@@ -112,33 +112,38 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .settings-page {
-    padding: 1rem;
+    padding: 1.5rem;
   }
-  
+
   .settings-header {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+    margin-bottom: 2rem;
   }
-  
+
   .settings-title {
     font-size: 1.5rem;
   }
-  
+
   .settings-search {
     max-width: 100%;
   }
-  
+
   .tab-content {
     padding: 1.5rem;
   }
 }
 
 @media (max-width: 480px) {
+  .settings-page {
+    padding: 1rem;
+  }
+
   .settings-title {
     font-size: 1.25rem;
   }
-  
+
   .tab-content {
     padding: 1rem;
   }

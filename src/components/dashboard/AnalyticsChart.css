@@ -46,6 +46,37 @@
   font-weight: 500;
 }
 
+/* Empty State */
+.chart-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+  border-radius: 0.75rem;
+  min-height: 300px;
+}
+
+.empty-state-text {
+  margin-top: 1.5rem;
+}
+
+.empty-state-text h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-state-text p {
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin: 0;
+  max-width: 400px;
+}
+
 /* Responsive Chart */
 @media (max-width: 1200px) {
   .chart-labels {

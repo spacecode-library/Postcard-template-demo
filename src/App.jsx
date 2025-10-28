@@ -109,6 +109,18 @@ import Login from './pages/auth/Login'
 import Onboarding from './pages/onboarding/Onboarding'
 import Dashboard from './pages/Dashboard'
 import CreateCampaign from './pages/CreateCampaign'
+import CampaignStep1 from './pages/campaign/CampaignStep1'
+import CampaignStep2 from './pages/campaign/CampaignStep2'
+import CampaignStep3 from './pages/campaign/CampaignStep3'
+import CampaignStep4 from './pages/campaign/CampaignStep4'
+import CampaignStep5 from './pages/campaign/CampaignStep5'
+import CampaignEdit from './pages/CampaignEdit'
+import CampaignDetails from './pages/CampaignDetails'
+import BlastStep1 from './pages/blast/BlastStep1'
+import BlastStep2 from './pages/blast/BlastStep2'
+import BlastStep3 from './pages/blast/BlastStep3'
+import BlastStep4 from './pages/blast/BlastStep4'
+import BlastStep5 from './pages/blast/BlastStep5'
 import CreateBlast from './pages/CreateBlast'
 import History from './pages/History'
 import Settings from './pages/Settings'
@@ -134,7 +146,7 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute requireOnboarding>
+            <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -142,15 +154,111 @@ function App() {
         <Route
           path="/create-campaign"
           element={
-            <ProtectedRoute requireOnboarding>
-              <CreateCampaign />
+            <ProtectedRoute>
+              <CampaignStep1 />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/campaign/step1"
+          element={
+            <ProtectedRoute>
+              <CampaignStep1 />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/campaign/step2"
+          element={
+            <ProtectedRoute>
+              <CampaignStep2 />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/campaign/step3"
+          element={
+            <ProtectedRoute>
+              <CampaignStep3 />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/campaign/step4"
+          element={
+            <ProtectedRoute>
+              <CampaignStep4 />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/campaign/step5"
+          element={
+            <ProtectedRoute>
+              <CampaignStep5 />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/campaign/:campaignId/edit"
+          element={
+            <ProtectedRoute>
+              <CampaignEdit />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/campaign/:campaignId/details"
+          element={
+            <ProtectedRoute>
+              <CampaignDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/blast/step1"
+          element={
+            <ProtectedRoute>
+              <BlastStep1 />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/blast/step2"
+          element={
+            <ProtectedRoute>
+              <BlastStep2 />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/blast/step3"
+          element={
+            <ProtectedRoute>
+              <BlastStep3 />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/blast/step4"
+          element={
+            <ProtectedRoute>
+              <BlastStep4 />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/blast/step5"
+          element={
+            <ProtectedRoute>
+              <BlastStep5 />
             </ProtectedRoute>
           }
         />
         <Route
           path="/create-blast"
           element={
-            <ProtectedRoute requireOnboarding>
+            <ProtectedRoute>
               <CreateBlast />
             </ProtectedRoute>
           }
@@ -158,7 +266,7 @@ function App() {
         <Route
           path="/history"
           element={
-            <ProtectedRoute requireOnboarding>
+            <ProtectedRoute>
               <History />
             </ProtectedRoute>
           }
@@ -166,7 +274,7 @@ function App() {
         <Route
           path="/settings"
           element={
-            <ProtectedRoute requireOnboarding>
+            <ProtectedRoute>
               <Settings />
             </ProtectedRoute>
           }
@@ -174,7 +282,7 @@ function App() {
         <Route
           path="/profile"
           element={
-            <ProtectedRoute requireOnboarding>
+            <ProtectedRoute>
               <Profile />
             </ProtectedRoute>
           }

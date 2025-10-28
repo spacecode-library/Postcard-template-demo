@@ -1,31 +1,58 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Home, Clock, Settings, Search, ChevronDown, LogOut } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import Avatar from '../ui/Avatar';
+import { cn } from '../../utils/cn';
 import './Sidebar.css';
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+  const { user, logout } = useAuth();
+
   const isActive = (path) => {
     return location.pathname === path;
+  };
+
+  const navigationItems = [
+    {
+      path: '/dashboard',
+      label: 'Dashboard',
+      icon: Home,
+    },
+    {
+      path: '/history',
+      label: 'History',
+      icon: Clock,
+    },
+  ];
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
   };
 
   return (
     <div className="sidebar">
       {/* Logo Section */}
       <div className="sidebar-header">
-        <div className="logo-placeholder">
-          [Logo Placeholder]
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
+            <span className="text-white font-bold text-sm">MP</span>
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-gray-900">MovePost</h1>
+            <p className="text-xs text-gray-500 font-medium">Postcard Platform</p>
+          </div>
         </div>
       </div>
-      
+
       {/* Search Section */}
       <div className="search-section">
         <div className="search-input-wrapper">
-          <svg className="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="8.5" cy="8.5" r="6" stroke="#9CA3AF" strokeWidth="1.5"/>
-            <path d="M13.5 13.5L17.5 17.5" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
+          <Search className="search-icon" size={20} />
           <input type="text" placeholder="Search" className="search-input" />
           <kbd className="search-shortcut">⌘K</kbd>
         </div>
@@ -33,62 +60,74 @@ const Sidebar = () => {
 
       {/* Navigation Menu */}
       <nav className="nav-menu">
-        {/* Dashboard */}
-        <div 
-          className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`}
-          onClick={() => navigate('/dashboard')}
-        >
-          <svg className="nav-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M3 7.5L10 2.5L17 7.5V16.5C17 17.0523 16.5523 17.5 16 17.5H4C3.44772 17.5 3 17.0523 3 16.5V7.5Z" 
-              stroke="currentColor" strokeWidth="1.5"/>
-          </svg>
-          <span className="nav-label">Dashboard</span>
-          <svg className="dropdown-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
+        {navigationItems.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.path);
 
-        {/* History */}
-        <div 
-          className={`nav-item ${isActive('/history') ? 'active' : ''}`}
-          onClick={() => navigate('/history')}
-        >
-          <svg className="nav-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="10" r="7.5" stroke="currentColor" strokeWidth="1.5"/>
-            <path d="M10 5V10L13.5 13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          <span className="nav-label">History</span>
-        </div>
+          return (
+            <motion.div
+              key={item.path}
+              className={cn(
+                'nav-item',
+                active && 'active'
+              )}
+              onClick={() => navigate(item.path)}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Icon
+                className={cn(
+                  'nav-icon',
+                  active ? 'text-primary-700' : 'text-gray-400'
+                )}
+                size={20}
+              />
+              <span className="nav-label">{item.label}</span>
+            </motion.div>
+          );
+        })}
       </nav>
 
       {/* Footer Section */}
       <div className="sidebar-footer">
         {/* Settings */}
-        <div 
-          className={`nav-item ${isActive('/settings') ? 'active' : ''}`}
+        <motion.div
+          className={cn(
+            'nav-item',
+            isActive('/settings') && 'active'
+          )}
           onClick={() => navigate('/settings')}
+          whileHover={{ x: 4 }}
+          whileTap={{ scale: 0.98 }}
         >
-          <svg className="nav-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.5"/>
-            <path d="M10 1V3M10 17V19M3.5 3.5L5.5 5.5M14.5 14.5L16.5 16.5M1 10H3M17 10H19M3.5 16.5L5.5 14.5M14.5 5.5L16.5 3.5" 
-              stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
+          <Settings
+            className={cn(
+              'nav-icon',
+              isActive('/settings') ? 'text-primary-700' : 'text-gray-400'
+            )}
+            size={20}
+          />
           <span className="nav-label">Settings</span>
-        </div>
-        
+        </motion.div>
+
         {/* User Profile */}
-        <div className="user-profile" onClick={() => navigate('/profile')}>
-          <div className="user-avatar">
-            <div className="avatar-initials">OR</div>
-            <div className="status-indicator"></div>
+        <div className="user-profile">
+          <div className="flex items-center space-x-3 flex-1 min-w-0">
+            <Avatar user={user} size="md" />
+            <div className="user-info">
+              <div className="user-name">{user?.name || user?.email?.split('@')[0] || 'User'}</div>
+              <div className="user-email">{user?.email || 'user@company.com'}</div>
+            </div>
           </div>
-          <div className="user-info">
-            <div className="user-name">Olivia Rhye</div>
-            <div className="user-email">user@company.com</div>
-          </div>
-          <svg className="dropdown-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M3 4.5L6 7.5L9 4.5" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <motion.button
+            className="logout-button"
+            onClick={handleLogout}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            title="Logout"
+          >
+            <LogOut size={18} className="text-gray-400 hover:text-red-600" />
+          </motion.button>
         </div>
       </div>
     </div>
