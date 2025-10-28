@@ -364,9 +364,11 @@ const CampaignDetails = () => {
                     Targeting
                   </span>
                   <span className="info-value">
-                    {campaign.targeting_type === 'zip_codes'
-                      ? `${campaign.target_zip_codes?.length || 0} ZIP Codes`
-                      : `${campaign.target_radius} mile radius`}
+                    {campaign.target_zip_codes && campaign.target_zip_codes.length > 0
+                      ? `${campaign.target_zip_codes.length} ZIP Code${campaign.target_zip_codes.length !== 1 ? 's' : ''}`
+                      : campaign.target_radius
+                      ? `${campaign.target_radius} mile radius`
+                      : 'Not specified'}
                   </span>
                 </div>
 
@@ -460,17 +462,15 @@ const CampaignDetails = () => {
                     <table className="addresses-table">
                       <thead>
                         <tr>
-                          <th>Name</th>
                           <th>Address</th>
                           <th>City, State ZIP</th>
                           <th>Move Date</th>
-                          <th>Phone</th>
+                          <th>Sent</th>
                         </tr>
                       </thead>
                       <tbody>
                         {newMovers.map((mover, index) => (
                           <tr key={mover.id || index}>
-                            <td className="name-cell">{mover.full_name || 'N/A'}</td>
                             <td className="address-cell">{mover.address_line || 'N/A'}</td>
                             <td className="location-cell">
                               {mover.city}, {mover.state} {mover.zip_code}
@@ -480,7 +480,7 @@ const CampaignDetails = () => {
                                 ? new Date(mover.move_effective_date).toLocaleDateString()
                                 : 'N/A'}
                             </td>
-                            <td className="phone-cell">{mover.phone_number || 'N/A'}</td>
+                            <td className="sent-cell">No</td>
                           </tr>
                         ))}
                       </tbody>

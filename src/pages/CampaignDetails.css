@@ -96,54 +96,85 @@
 
 .campaign-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 1rem;
   flex-wrap: wrap;
+  margin-top: 1.5rem;
 }
 
 .action-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  border-radius: 8px;
+  gap: 0.625rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  border: 1.5px solid transparent;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  min-width: 120px;
+  justify-content: center;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .action-btn.edit {
   background: #20B2AA;
   color: white;
+  border-color: #20B2AA;
+  box-shadow: 0 2px 8px rgba(32, 178, 170, 0.25);
 }
 
 .action-btn.edit:hover {
   background: #1A9B93;
+  border-color: #1A9B93;
+  box-shadow: 0 4px 16px rgba(32, 178, 170, 0.35);
 }
 
-.action-btn.duplicate,
-.action-btn.toggle {
+.action-btn.duplicate {
   background: white;
   color: #4A5568;
-  border-color: #E2E8F0;
+  border-color: #CBD5E0;
 }
 
-.action-btn.duplicate:hover,
-.action-btn.toggle:hover {
+.action-btn.duplicate:hover {
+  background: #F7FAFC;
   border-color: #20B2AA;
   color: #20B2AA;
+}
+
+.action-btn.toggle {
+  background: #F0FDFA;
+  color: #0D9488;
+  border-color: #99F6E4;
+}
+
+.action-btn.toggle:hover {
+  background: #CCFBF1;
+  border-color: #5EEAD4;
+  color: #0F766E;
 }
 
 .action-btn.delete {
   background: white;
   color: #EF4444;
-  border-color: #FEE2E2;
+  border-color: #FCA5A5;
 }
 
 .action-btn.delete:hover {
-  background: #FEF2F2;
+  background: #FEE2E2;
   border-color: #EF4444;
+  color: #DC2626;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
 }
 
 /* Main Grid */
@@ -513,13 +544,9 @@
   color: #1A202C;
 }
 
-.name-cell {
+.address-cell {
   font-weight: 600;
   color: #1A202C;
-}
-
-.address-cell {
-  color: #4A5568;
 }
 
 .location-cell {
@@ -532,9 +559,11 @@
   font-weight: 500;
 }
 
-.phone-cell {
-  color: #4A5568;
-  font-family: monospace;
+.sent-cell {
+  color: #9CA3AF;
+  font-weight: 500;
+  text-align: center;
+  font-size: 0.875rem;
 }
 
 .showing-count {
