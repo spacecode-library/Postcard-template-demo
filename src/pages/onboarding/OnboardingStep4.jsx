@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ChevronLeft, MapPin, CheckSquare, Trash2, CheckCircle, AlertCircle, DollarSign, XCircle } from 'lucide-react';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
-import OnboardingFooter from '../../components/onboarding/OnboardingFooter';
 import newMoverService from '../../supabase/api/newMoverService';
 import { parseMultipleZipCodes } from '../../utils/zipCode';
 import { calculatePostcardCost, formatPrice } from '../../utils/pricing';
@@ -136,7 +135,14 @@ const OnboardingStep4 = () => {
   };
 
   return (
-    <OnboardingLayout steps={steps} currentStep={4}>
+    <OnboardingLayout
+      steps={steps}
+      currentStep={4}
+      footerMessage="Please select the option or range area for your postcard package first, before continue to the next step"
+      onContinue={handleContinue}
+      continueDisabled={!canContinue() || loading}
+      continueText={loading ? 'Processing...' : 'Continue'}
+    >
       <div className="main-content">
         <motion.button
           className="back-button"
@@ -303,15 +309,6 @@ const OnboardingStep4 = () => {
             )}
           </div>
       </div>
-
-      <OnboardingFooter
-        message="Please select the option or range area for your postcard package first, before continue to the next step"
-        currentStep={4}
-        totalSteps={6}
-        onContinue={handleContinue}
-        continueDisabled={!canContinue() || loading}
-        continueText={loading ? 'Processing...' : 'Continue'}
-      />
 
       <style>{`
         /* ZIP Input Section */

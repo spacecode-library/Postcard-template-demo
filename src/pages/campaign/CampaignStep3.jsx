@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProcessLayout from '../../components/process/ProcessLayout';
-import PostcardEditorNew from '../../components/PostcardEditor/PostcardEditorNew';
+import FabricEditor from '../../components/PostcardEditor/FabricEditor';
 
 const CampaignStep3 = () => {
   const navigate = useNavigate();
@@ -9,6 +9,12 @@ const CampaignStep3 = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [campaignId, setCampaignId] = useState(null);
+
+  // Editor state (lifted up for ProcessLayout integration)
+  const [editorMode, setEditorMode] = useState('simple');
+  const [currentPage, setCurrentPage] = useState('front');
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDoubleSided, setIsDoubleSided] = useState(false);
 
   const totalSteps = 5;
 
@@ -72,16 +78,36 @@ const CampaignStep3 = () => {
     navigate('/campaign/step4');
   };
 
-  const handleEditorBack = () => {
-    handleBack();
+  const handleSaveDesign = async (designData) => {
+    setIsSaving(true);
+    try {
+      console.log('Design saved:', designData);
+      // Design URLs are already saved to database by FabricEditor
+      // Just store them in localStorage for Step 5
+      if (designData) {
+        localStorage.setItem('campaignDesignUrl', designData.designUrl);
+        localStorage.setItem('campaignPreviewUrl', designData.previewUrl);
+      }
+    } catch (error) {
+      console.error('Error saving design:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleSaveDesign = (designData) => {
-    console.log('Design saved:', designData);
-    // Design URLs are already saved to database by PostcardEditorNew
-    // Just store them in localStorage for Step 5
-    localStorage.setItem('campaignDesignUrl', designData.designUrl);
-    localStorage.setItem('campaignPreviewUrl', designData.previewUrl);
+  const handleModeChange = (mode) => {
+    setEditorMode(mode);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePSDAnalysis = (analysisResult) => {
+    if (analysisResult && analysisResult.isDoubleSided !== undefined) {
+      console.log('PSD Analysis received:', analysisResult);
+      setIsDoubleSided(analysisResult.isDoubleSided);
+    }
   };
 
   if (loading) {
@@ -149,13 +175,24 @@ const CampaignStep3 = () => {
       continueDisabled={false}
       onSkip={() => navigate('/dashboard')}
       skipText="Cancel"
+      // Editor controls integrated into topbar
+      editorMode={editorMode}
+      onModeChange={handleModeChange}
+      isDoubleSided={isDoubleSided}
+      currentPage={currentPage}
+      onPageChange={handlePageChange}
+      onSave={() => handleSaveDesign()}
+      isSaving={isSaving}
+      templateName={selectedTemplate?.name}
     >
       <div className="step3-editor-container">
-        <PostcardEditorNew
+        <FabricEditor
           selectedTemplate={selectedTemplate}
-          onBack={handleEditorBack}
           onSave={handleSaveDesign}
           campaignId={campaignId}
+          mode={editorMode}
+          currentPage={currentPage}
+          onPSDAnalysis={handlePSDAnalysis}
         />
       </div>
 
@@ -328,10 +365,9 @@ const CampaignStep3 = () => {
         .step3-editor-container {
           width: 100%;
           height: 100%;
-          flex: 1;
-          min-height: 600px;
           position: relative;
           overflow: hidden;
+          display: flex;
         }
 
         .step3-editor-container :global(.postcard-editor) {

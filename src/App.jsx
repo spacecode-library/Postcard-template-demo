@@ -106,6 +106,7 @@ import { Toaster } from 'react-hot-toast'
 import ProtectedRoute from './components/ProtectedRoute'
 import SignUp from './pages/auth/SignUp'
 import Login from './pages/auth/Login'
+import EmailVerification from './pages/auth/EmailVerification'
 import Onboarding from './pages/onboarding/Onboarding'
 import Dashboard from './pages/Dashboard'
 import CreateCampaign from './pages/CreateCampaign'
@@ -132,29 +133,45 @@ function App() {
   return (
     <>
       <Routes>
+        {/* Public routes */}
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
         <Route path="/sidebar-test" element={<SidebarTest />} />
+
+        {/* Email verification - requires authentication only */}
+        <Route
+          path="/verify-email"
+          element={
+            <ProtectedRoute>
+              <EmailVerification />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Onboarding - requires authentication + email verification */}
         <Route
           path="/onboarding/*"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification>
               <Onboarding />
             </ProtectedRoute>
           }
         />
+
+        {/* Dashboard - requires authentication + email verification + onboarding */}
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <Dashboard />
             </ProtectedRoute>
           }
         />
+        {/* Campaign routes - require authentication + email verification + onboarding */}
         <Route
           path="/create-campaign"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <CampaignStep1 />
             </ProtectedRoute>
           }
@@ -162,7 +179,7 @@ function App() {
         <Route
           path="/campaign/step1"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <CampaignStep1 />
             </ProtectedRoute>
           }
@@ -170,7 +187,7 @@ function App() {
         <Route
           path="/campaign/step2"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <CampaignStep2 />
             </ProtectedRoute>
           }
@@ -178,7 +195,7 @@ function App() {
         <Route
           path="/campaign/step3"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <CampaignStep3 />
             </ProtectedRoute>
           }
@@ -186,7 +203,7 @@ function App() {
         <Route
           path="/campaign/step4"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <CampaignStep4 />
             </ProtectedRoute>
           }
@@ -194,7 +211,7 @@ function App() {
         <Route
           path="/campaign/step5"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <CampaignStep5 />
             </ProtectedRoute>
           }
@@ -202,7 +219,7 @@ function App() {
         <Route
           path="/campaign/:campaignId/edit"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <CampaignEdit />
             </ProtectedRoute>
           }
@@ -210,15 +227,17 @@ function App() {
         <Route
           path="/campaign/:campaignId/details"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <CampaignDetails />
             </ProtectedRoute>
           }
         />
+
+        {/* Blast routes - require authentication + email verification + onboarding */}
         <Route
           path="/blast/step1"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <BlastStep1 />
             </ProtectedRoute>
           }
@@ -226,7 +245,7 @@ function App() {
         <Route
           path="/blast/step2"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <BlastStep2 />
             </ProtectedRoute>
           }
@@ -234,7 +253,7 @@ function App() {
         <Route
           path="/blast/step3"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <BlastStep3 />
             </ProtectedRoute>
           }
@@ -242,7 +261,7 @@ function App() {
         <Route
           path="/blast/step4"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <BlastStep4 />
             </ProtectedRoute>
           }
@@ -250,7 +269,7 @@ function App() {
         <Route
           path="/blast/step5"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <BlastStep5 />
             </ProtectedRoute>
           }
@@ -258,15 +277,17 @@ function App() {
         <Route
           path="/create-blast"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <CreateBlast />
             </ProtectedRoute>
           }
         />
+
+        {/* Other app routes - require authentication + email verification + onboarding */}
         <Route
           path="/history"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <History />
             </ProtectedRoute>
           }
@@ -274,7 +295,7 @@ function App() {
         <Route
           path="/settings"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <Settings />
             </ProtectedRoute>
           }
@@ -282,7 +303,7 @@ function App() {
         <Route
           path="/profile"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireEmailVerification requireOnboarding>
               <Profile />
             </ProtectedRoute>
           }

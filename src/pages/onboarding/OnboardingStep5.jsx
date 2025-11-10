@@ -305,7 +305,14 @@ const OnboardingStep5 = () => {
   };
 
   return (
-    <OnboardingLayout steps={steps} currentStep={5}>
+    <OnboardingLayout
+      steps={steps}
+      currentStep={5}
+      footerMessage="Enter your email address above to add payment details, or click 'Skip for Now' to continue"
+      onContinue={handleSkipPayment}
+      continueText="Skip for Now"
+      continueDisabled={false}
+    >
       <div className="main-content">
         <button className="back-button" onClick={handleBack}>
           <ChevronLeft size={18} />
@@ -371,37 +378,6 @@ const OnboardingStep5 = () => {
               </p>
             </div>
           )}
-        </div>
-      </div>
-
-      <div className="form-footer">
-        <div className="footer-actions" style={{ width: '100%', justifyContent: 'space-between' }}>
-          <span className="step-indicator">Step 5 of 6</span>
-          <button
-            className="skip-payment-button"
-            onClick={handleSkipPayment}
-            style={{
-              padding: '12px 24px',
-              fontSize: '1rem',
-              fontWeight: '600',
-              color: '#4A5568',
-              background: 'transparent',
-              border: '2px solid #E2E8F0',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.background = '#F7FAFC';
-              e.target.style.borderColor = '#CBD5E0';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'transparent';
-              e.target.style.borderColor = '#E2E8F0';
-            }}
-          >
-            Skip for Now
-          </button>
         </div>
       </div>
     </OnboardingLayout>

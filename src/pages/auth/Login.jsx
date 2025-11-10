@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthLayout from '../../components/auth/AuthLayout';
 import Logo from '../../components/common/Logo';
+import toast from 'react-hot-toast';
 import './Login.css';
 import './auth-errors.css'
 
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, googleLogin, resetPassword, loading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { login, googleLogin, resetPassword, loading, onboardingCompleted, currentOnboardingStep, checkOnboardingStatus } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -20,6 +22,16 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
    const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Show success message if user just verified their email
+  useEffect(() => {
+    const verified = searchParams.get('verified');
+    if (verified === 'true') {
+      toast.success('Email verified successfully! Please log in to continue.', {
+        duration: 4000
+      });
+    }
+  }, [searchParams]);
 
   const testimonial = {
     text: "We've been using 0 to kick start every new project and can't imagine working without it. It's incredible.",
@@ -68,12 +80,41 @@ const Login = () => {
     }
 
     setIsSubmitting(true);
-  
+
     try {
-      await login(formData.email, formData.password);
-      
-      // Navigate to dashboard after successful login
-      navigate('/dashboard');
+      const response = await login(formData.email, formData.password);
+
+      // Smart redirect logic based on user status
+      // Wait a moment for auth state and onboarding status to load
+      setTimeout(async () => {
+        try {
+          // Refresh onboarding status to get latest data
+          const onboardingStatus = await checkOnboardingStatus();
+
+          // Check if email is verified (if confirmation is enabled)
+          if (response && response.user && !response.user.email_confirmed_at) {
+            toast('Please verify your email to continue');
+            navigate('/verify-email');
+            return;
+          }
+
+          // Check onboarding completion
+          if (onboardingStatus && !onboardingStatus.onboardingCompleted) {
+            // User hasn't completed onboarding - redirect to their current step
+            const step = onboardingStatus.currentStep || 1;
+            toast(`Continuing your onboarding from Step ${step}`);
+            navigate(`/onboarding/step${step}`);
+          } else {
+            // User has completed onboarding - go to dashboard
+            navigate('/dashboard');
+          }
+        } catch (error) {
+          console.error('Error during redirect logic:', error);
+          // Fallback to dashboard if there's an error
+          navigate('/dashboard');
+        }
+      }, 500);
+
     } catch (error) {
       console.error('Login error:', error);
       // Error is already handled by AuthContext with toast

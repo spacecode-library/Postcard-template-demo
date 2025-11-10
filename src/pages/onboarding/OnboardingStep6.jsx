@@ -6,36 +6,62 @@ import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 import { formatPrice } from '../../utils/pricing';
 import campaignService from '../../supabase/api/campaignService';
 import { paymentService } from '../../supabase/api/paymentService';
+import onboardingService from '../../supabase/api/onboardingService';
 import toast from 'react-hot-toast';
 
 const OnboardingStep6 = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, checkOnboardingStatus } = useAuth();
   const [isLaunched, setIsLaunched] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [targetingData, setTargetingData] = useState(null);
   const [companyData, setCompanyData] = useState(null);
+  const [campaignId, setCampaignId] = useState(null);
+  const [hasPaymentMethod, setHasPaymentMethod] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
 
   // Load data from localStorage and sessionStorage
   useEffect(() => {
-    // Load selected template
-    const savedTemplate = localStorage.getItem('selectedTemplate');
-    if (savedTemplate) {
-      setSelectedTemplate(JSON.parse(savedTemplate));
-    }
+    const loadData = async () => {
+      // Load selected template
+      const savedTemplate = localStorage.getItem('selectedTemplate');
+      if (savedTemplate) {
+        setSelectedTemplate(JSON.parse(savedTemplate));
+      }
 
-    // Load targeting data (includes pricing)
-    const savedTargeting = sessionStorage.getItem('targetingData');
-    if (savedTargeting) {
-      setTargetingData(JSON.parse(savedTargeting));
-    }
+      // Load targeting data (includes pricing)
+      const savedTargeting = sessionStorage.getItem('targetingData');
+      if (savedTargeting) {
+        setTargetingData(JSON.parse(savedTargeting));
+      }
 
-    // Load company data
-    const savedCompanyData = localStorage.getItem('onboardingStep1');
-    if (savedCompanyData) {
-      setCompanyData(JSON.parse(savedCompanyData));
-    }
+      // Load company data and campaignId
+      const savedCompanyData = localStorage.getItem('onboardingStep1');
+      if (savedCompanyData) {
+        const data = JSON.parse(savedCompanyData);
+        setCompanyData(data);
+
+        if (data.campaignId) {
+          setCampaignId(data.campaignId);
+          console.log('Loaded campaignId:', data.campaignId);
+        } else {
+          console.warn('No campaignId found in localStorage');
+        }
+      }
+
+      // Check if user has payment methods
+      try {
+        const paymentMethods = await paymentService.getPaymentMethods();
+        const hasPayment = paymentMethods && paymentMethods.length > 0;
+        setHasPaymentMethod(hasPayment);
+        console.log('Has payment method:', hasPayment);
+      } catch (error) {
+        console.error('Error checking payment methods:', error);
+        setHasPaymentMethod(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   const steps = [
@@ -57,41 +83,59 @@ const OnboardingStep6 = () => {
       return;
     }
 
+    if (!campaignId) {
+      toast.error('Campaign ID not found. Please restart onboarding.');
+      return;
+    }
+
+    // Check if payment method exists
+    if (!hasPaymentMethod) {
+      toast.error('Please add a payment method to activate your campaign. You can add it in Settings → Billing after onboarding.');
+      return;
+    }
+
     setIsActivating(true);
 
     try {
-      toast.loading('Creating your campaign...', { id: 'activate-campaign' });
+      toast.loading('Activating your campaign...', { id: 'activate-campaign' });
 
-      // Prepare campaign data
+      // Update campaign with targeting data and active status
       const campaignData = {
-        name: `${companyData?.companyData?.name || 'Business'} Campaign - ${new Date().toLocaleDateString()}`,
-        status: 'active', // Start as active since payment will be processed
-        template_id: selectedTemplate?.id || null,
-        template_name: selectedTemplate?.name || null,
-        postcard_preview_url: selectedTemplate?.preview || null,
+        campaign_name: `${companyData?.companyData?.name || 'Business'} Campaign`,
+        status: 'active', // Set to active since payment exists
         targeting_type: targetingData.option || 'zip_codes',
         target_zip_codes: targetingData.zipCodes || [],
         validated_zips: targetingData.validatedZips || [],
         zips_with_data: targetingData.zipsWithData || 0,
-        postcards_sent: 0, // Will be updated when postcards are actually sent
+        postcards_sent: 0,
         price_per_postcard: targetingData.flatRate || 3.00,
-        payment_status: 'pending' // Will be updated after payment
+        payment_status: 'paid' // Mark as paid since payment method exists
       };
 
-      // Create campaign in database
-      const campaignResult = await campaignService.createCampaign(campaignData);
+      const updateResult = await campaignService.updateCampaign(campaignId, campaignData);
 
-      if (!campaignResult.success) {
-        throw new Error('Failed to create campaign');
+      if (!updateResult.success) {
+        throw new Error('Failed to update campaign');
       }
 
-      const campaign = campaignResult.campaign;
-      console.log('Campaign created:', campaign);
+      console.log('Campaign activated:', updateResult.campaign);
 
-      toast.success('Campaign setup complete!', { id: 'activate-campaign' });
+      // Mark onboarding as complete
+      await onboardingService.completeOnboarding(campaignId);
+      console.log('Onboarding marked as complete!');
 
-      // Note: Payment will be processed when postcards are actually sent
+      // Refresh onboarding status in context
+      await checkOnboardingStatus();
+
+      toast.success('Campaign activated! Your onboarding is complete!', { id: 'activate-campaign' });
+
+      // Show success screen with manual button (user's preference)
       setIsLaunched(true);
+
+      // Clear onboarding data from localStorage
+      localStorage.removeItem('onboardingStep1');
+      localStorage.removeItem('selectedTemplate');
+      sessionStorage.removeItem('targetingData');
 
     } catch (error) {
       console.error('Error activating campaign:', error);
@@ -110,16 +154,18 @@ const OnboardingStep6 = () => {
       return;
     }
 
+    if (!campaignId) {
+      toast.error('Campaign ID not found. Please restart onboarding.');
+      return;
+    }
+
     try {
       toast.loading('Saving campaign as draft...', { id: 'pay-later' });
 
-      // Create campaign with draft status
+      // Update campaign with targeting data and draft status
       const campaignData = {
-        name: `${companyData?.companyData?.name || 'Business'} Campaign - ${new Date().toLocaleDateString()}`,
-        status: 'draft',
-        template_id: selectedTemplate?.id || null,
-        template_name: selectedTemplate?.name || null,
-        postcard_preview_url: selectedTemplate?.preview || null,
+        campaign_name: `${companyData?.companyData?.name || 'Business'} Campaign`,
+        status: 'draft', // Keep as draft until payment added
         targeting_type: targetingData.option || 'zip_codes',
         target_zip_codes: targetingData.zipCodes || [],
         validated_zips: targetingData.validatedZips || [],
@@ -129,10 +175,22 @@ const OnboardingStep6 = () => {
         payment_status: 'pending'
       };
 
-      const result = await campaignService.createCampaign(campaignData);
+      const result = await campaignService.updateCampaign(campaignId, campaignData);
 
       if (result.success) {
-        toast.success('Campaign saved as draft!', { id: 'pay-later' });
+        // Mark onboarding as complete even for draft campaigns
+        await onboardingService.completeOnboarding(campaignId);
+        console.log('Onboarding marked as complete (draft campaign)!');
+
+        // Refresh onboarding status in context
+        await checkOnboardingStatus();
+
+        // Clear onboarding data from localStorage
+        localStorage.removeItem('onboardingStep1');
+        localStorage.removeItem('selectedTemplate');
+        sessionStorage.removeItem('targetingData');
+
+        toast.success('Campaign saved as draft! Add payment in Settings → Billing to activate.', { id: 'pay-later', duration: 4000 });
         setTimeout(() => {
           navigate('/dashboard');
         }, 1500);
@@ -150,7 +208,11 @@ const OnboardingStep6 = () => {
 
   if (isLaunched) {
     return (
-      <OnboardingLayout steps={steps} currentStep={6}>
+      <OnboardingLayout
+        steps={steps}
+        currentStep={6}
+        showFooter={false}
+      >
         <div className="success-content">
           <h1 className="success-title">Campaign successfully launched!</h1>
           <button className="dashboard-button" onClick={handleGoToDashboard}>
@@ -162,7 +224,19 @@ const OnboardingStep6 = () => {
   }
 
   return (
-    <OnboardingLayout steps={steps} currentStep={6}>
+    <OnboardingLayout
+      steps={steps}
+      currentStep={6}
+      footerMessage={targetingData?.zipsWithData > 0
+        ? `Your postcards will be sent to new movers in ${targetingData.zipsWithData} ZIP code${targetingData.zipsWithData !== 1 ? 's' : ''} at $${targetingData?.flatRate?.toFixed(2) || '3.00'} per postcard`
+        : 'Ready to launch your campaign'}
+      onContinue={handleActivate}
+      continueText={isActivating ? 'Processing...' : 'Activate'}
+      continueDisabled={isActivating}
+      secondaryAction={handlePayLater}
+      secondaryText="Pay Later"
+      secondaryDisabled={isActivating}
+    >
         <div className="main-content launch-content">
           <button className="back-button" onClick={handleBack}>
             <ChevronLeft size={18} />
@@ -231,32 +305,35 @@ const OnboardingStep6 = () => {
             </div>
           </div>
 
+          {/* Payment Warning */}
+          {!hasPaymentMethod && (
+            <div className="payment-warning-banner" style={{
+              backgroundColor: '#FFF3CD',
+              border: '1px solid #FFC107',
+              borderRadius: '8px',
+              padding: '16px',
+              margin: '24px 0',
+              display: 'flex',
+              alignItems: 'start',
+              gap: '12px'
+            }}>
+              <span style={{ fontSize: '20px', flexShrink: 0 }}>⚠️</span>
+              <div>
+                <strong style={{ display: 'block', marginBottom: '4px', color: '#856404' }}>
+                  Payment Method Required
+                </strong>
+                <p style={{ margin: 0, color: '#856404', fontSize: '14px' }}>
+                  Your campaign will remain inactive until you add a payment method.
+                  You can add payment details in <strong>Settings → Billing</strong> after completing onboarding.
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="campaign-note">
             {targetingData?.zipsWithData > 0
               ? `Your postcards will be sent to new movers in ${targetingData.zipsWithData} ZIP code${targetingData.zipsWithData !== 1 ? 's' : ''} at $${targetingData?.flatRate?.toFixed(2) || '3.00'} per postcard`
               : 'No targeting data available'}
-          </div>
-        </div>
-        
-        <div className="form-footer">
-          <div className="footer-actions" style={{width: '100%', justifyContent: 'space-between'}}>
-            <span className="step-indicator">Step 6 of 6</span>
-            <div className="final-actions">
-              <button
-                className="pay-later-button"
-                onClick={handlePayLater}
-                disabled={isActivating}
-              >
-                Pay Later
-              </button>
-              <button
-                className="activate-button"
-                onClick={handleActivate}
-                disabled={isActivating}
-              >
-                {isActivating ? 'Processing...' : 'Activate'}
-              </button>
-            </div>
           </div>
         </div>
 

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 import LoadingScreen from '../../components/onboarding/LoadingScreen';
-import OnboardingFooter from '../../components/onboarding/OnboardingFooter';
 import TemplateCardSkeleton from '../../components/common/TemplateCardSkeleton';
 import supabaseCompanyService from '../../supabase/api/companyService';
+import campaignService from '../../supabase/api/campaignService';
+import toast from 'react-hot-toast';
 import './onboarding-step2-redesign.css';
 
 // Import preview generators for browser console access
@@ -58,14 +59,29 @@ const OnboardingStep2Enhanced = () => {
 
         // Load business data from Step 1 localStorage
         const step1Data = localStorage.getItem('onboardingStep1');
-        if (step1Data) {
-          const parsedData = JSON.parse(step1Data);
-          setBusinessData(prevData => ({
-            ...prevData,
-            name: parsedData.companyData?.name || 'Your Business',
-            website: parsedData.website || prevData.website
-          }));
+
+        // VALIDATE: campaignId must exist from Step 1
+        if (!step1Data) {
+          toast.error('Please complete Step 1 first');
+          navigate('/onboarding/step1');
+          return;
         }
+
+        const parsedData = JSON.parse(step1Data);
+
+        if (!parsedData.campaignId) {
+          toast.error('Campaign not found. Please restart from Step 1.');
+          navigate('/onboarding/step1');
+          return;
+        }
+
+        console.log('✅ Campaign ID validated:', parsedData.campaignId);
+
+        setBusinessData(prevData => ({
+          ...prevData,
+          name: parsedData.companyData?.name || 'Your Business',
+          website: parsedData.website || prevData.website
+        }));
 
         // Load brand colors from Supabase
         try {
@@ -162,11 +178,29 @@ const OnboardingStep2Enhanced = () => {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (selectedTemplate) {
-      // Store the enhanced template data for Step 3
-      localStorage.setItem('selectedTemplate', JSON.stringify(selectedTemplate));
-      navigate('/onboarding/step3');
+      try {
+        // Update campaign with template selection
+        const step1Data = JSON.parse(localStorage.getItem('onboardingStep1'));
+        if (step1Data?.campaignId) {
+          toast.loading('Saving template selection...', { id: 'template-save' });
+
+          await campaignService.updateCampaign(step1Data.campaignId, {
+            template_id: selectedTemplate.id,
+            template_name: selectedTemplate.name
+          });
+
+          toast.success('Template saved!', { id: 'template-save' });
+        }
+
+        // Store the enhanced template data for Step 3
+        localStorage.setItem('selectedTemplate', JSON.stringify(selectedTemplate));
+        navigate('/onboarding/step3');
+      } catch (error) {
+        console.error('Error saving template:', error);
+        toast.error('Failed to save template selection');
+      }
     }
   };
 
@@ -211,8 +245,12 @@ const OnboardingStep2Enhanced = () => {
   // Loading state
   if (isLoading) {
     return (
-      <OnboardingLayout steps={steps} currentStep={2}>
-        <LoadingScreen 
+      <OnboardingLayout
+        steps={steps}
+        currentStep={2}
+        showFooter={false}
+      >
+        <LoadingScreen
           title="Loading your postcard templates..."
           subtitle="Setting up professional PSD templates with full editing capabilities..."
         />
@@ -223,7 +261,11 @@ const OnboardingStep2Enhanced = () => {
   // Error state
   if (error) {
     return (
-      <OnboardingLayout steps={steps} currentStep={2}>
+      <OnboardingLayout
+        steps={steps}
+        currentStep={2}
+        showFooter={false}
+      >
         <div className="step2-error-state">
           <div className="error-icon">⚠️</div>
           <h2>Unable to load templates</h2>
@@ -242,7 +284,17 @@ const OnboardingStep2Enhanced = () => {
   }
 
   return (
-    <OnboardingLayout steps={steps} currentStep={2}>
+    <OnboardingLayout
+      steps={steps}
+      currentStep={2}
+      footerMessage={
+        selectedTemplate
+          ? `Continue with ${selectedTemplate.name} template`
+          : "Please select a template before continuing to the editor"
+      }
+      onContinue={handleContinue}
+      continueDisabled={!selectedTemplate}
+    >
       <div className="step2-main-content">
         <button className="step2-back-button" onClick={handleBack}>
           ← Back
@@ -507,19 +559,7 @@ const OnboardingStep2Enhanced = () => {
           </details>
         </div>
       </div>
-      
-      <OnboardingFooter
-        message={
-          selectedTemplate 
-            ? `Continue with ${selectedTemplate.name} template` 
-            : "Please select a template before continuing to the editor"
-        }
-        currentStep={2}
-        totalSteps={6}
-        onContinue={handleContinue}
-        continueDisabled={!selectedTemplate}
-      />
-      
+
       {/* Leave Modal */}
       {showLeaveModal && (
         <div className="step2-modal-overlay" onClick={() => setShowLeaveModal(false)}>

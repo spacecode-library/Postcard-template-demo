@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ChevronLeft, Edit3, CheckCircle } from 'lucide-react';
 import ProcessLayout from '../../components/process/ProcessLayout';
-import PostcardEditorNew from '../../components/PostcardEditor/PostcardEditorNew';
+import FabricEditor from '../../components/PostcardEditor/FabricEditor';
 import toast from 'react-hot-toast';
 
 const BlastStep2 = () => {
@@ -102,7 +102,7 @@ const BlastStep2 = () => {
 
     return (
       <div className="blast-editor-fullscreen">
-        <PostcardEditorNew
+        <FabricEditor
           selectedTemplate={templateData}
           onBack={handleCloseEditor}
           onSave={handleSavePostcard}

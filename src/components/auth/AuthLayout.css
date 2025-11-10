@@ -14,12 +14,16 @@
   padding: 2rem;
   background-color: #FFFFFF;
   overflow-y: auto;
+  /* Ensure proper scroll behavior */
+  max-height: 100vh;
 }
 
 .auth-content-wrapper {
   width: 100%;
   max-width: 400px;
   padding: 2rem 0;
+  /* Ensure content is always visible */
+  min-height: min-content;
 }
 
 /* Right Side - Image & Testimonial */
@@ -147,7 +151,9 @@
   outline-offset: 2px;
 }
 
-/* Responsive Design with Intermediate Breakpoints */
+/* Responsive Design - Desktop First Approach */
+
+/* Large tablets and medium desktops */
 @media (max-width: 1200px) {
   .testimonial-card {
     bottom: 1.5rem;
@@ -162,6 +168,7 @@
   }
 }
 
+/* Tablets - Stack layout */
 @media (max-width: 1024px) {
   .auth-container {
     flex-direction: column;
@@ -169,7 +176,7 @@
 
   .auth-left {
     min-height: auto;
-    overflow-y: visible;
+    padding: 2rem 1.5rem;
   }
 
   .auth-right {
@@ -180,91 +187,58 @@
   }
 }
 
+/* Mobile devices */
 @media (max-width: 768px) {
   .auth-right {
-    display: none; /* Hide testimonial on mobile */
+    display: none; /* Hide testimonial on mobile for better form visibility */
   }
 
   .auth-left {
     min-height: 100vh;
     padding: 1.5rem;
-    overflow-y: auto; /* Keep auto for scrolling */
-    align-items: flex-start; /* Align to top so form can scroll properly */
+    overflow-y: auto;
+    align-items: flex-start; /* Align to top for better scroll experience */
   }
 
   .auth-content-wrapper {
     padding: 1rem 0;
-  }
-
-  .testimonial-card {
-    bottom: 1.5rem;
-    width: calc(100% - 3rem);
-    padding: 1.25rem;
-  }
-
-  .testimonial-text {
-    font-size: 0.9375rem;
+    max-width: 100%;
   }
 }
 
-@media (max-width: 640px) {
+/* Small mobile devices */
+@media (max-width: 480px) {
   .auth-left {
     padding: 1rem;
-    overflow-y: auto; /* Keep auto for scrolling */
-    align-items: flex-start; /* Align to top so form can scroll properly */
   }
 
   .auth-content-wrapper {
-    max-width: 100%;
+    padding: 0.75rem 0;
+  }
+}
+
+/* Short screens (vertical space constraint) - applies across all widths */
+@media (max-height: 700px) {
+  .auth-left {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    align-items: flex-start; /* Important: allows scrolling from top */
+  }
+
+  .auth-content-wrapper {
     padding: 0.5rem 0;
   }
 }
 
-@media (max-width: 480px) {
-  .auth-left {
-    padding: 0.5rem;
-    align-items: flex-start; /* Align to top so form can scroll properly */
-  }
-
-  .auth-content-wrapper {
-    padding: 0.25rem 0;
-  }
-}
-
-/* Viewport height media queries for very short screens */
-@media (max-height: 700px) {
+/* Very short screens */
+@media (max-height: 600px) {
   .auth-left {
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
-    align-items: flex-start; /* Align to top so form can scroll properly */
   }
 
   .auth-content-wrapper {
     padding: 0.25rem 0;
-  }
-}
-
-@media (max-height: 600px) {
-  .auth-left {
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    align-items: flex-start; /* Align to top so form can scroll properly */
-  }
-
-  .auth-content-wrapper {
-    padding: 0.15rem 0;
-  }
-}
-
-/* Extreme case: very small screens */
-@media (max-height: 550px) {
-  .auth-left {
-    padding: 0.5rem;
-    align-items: flex-start;
-  }
-
-  .auth-content-wrapper {
-    padding: 0.15rem 0;
   }
 }
 

@@ -57,8 +57,11 @@
     "psdFile": "39690114_8731898.psd",
     "psdFileSize": 6790281,
     "available": true,
-    "sides": 1,
+    "sides": 2,
+    "hasBack": true,
+    "isDoubleSided": true,
     "frontPageIndex": 0,
+    "backPageIndex": 1,
     "features": [
       "Clean Design",
       "Flexible Layout",

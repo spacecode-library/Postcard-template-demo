@@ -13,7 +13,16 @@ const ProcessLayout = ({
   continueText = 'Continue',
   showFooter = true,
   onSkip,
-  skipText = 'Cancel'
+  skipText = 'Cancel',
+  // Editor-specific props
+  editorMode,
+  onModeChange,
+  isDoubleSided,
+  currentPage,
+  onPageChange,
+  onSave,
+  isSaving,
+  templateName
 }) => {
   return (
     <div className="process-container">
@@ -23,6 +32,15 @@ const ProcessLayout = ({
         totalSteps={totalSteps}
         onSkip={onSkip}
         skipText={skipText}
+        // Pass editor props
+        editorMode={editorMode}
+        onModeChange={onModeChange}
+        isDoubleSided={isDoubleSided}
+        currentPage={currentPage}
+        onPageChange={onPageChange}
+        onSave={onSave}
+        isSaving={isSaving}
+        templateName={templateName}
       />
 
       {/* Main Content Area */}

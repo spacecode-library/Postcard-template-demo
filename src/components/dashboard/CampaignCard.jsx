@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Trash2, Copy, Edit, CheckCircle, Clock, XCircle, FileEdit, Eye } from 'lucide-react';
+import { Trash2, Copy, Edit, CheckCircle, Clock, XCircle, FileEdit, Eye, AlertCircle } from 'lucide-react';
 import './CampaignCard.css';
 
 const CampaignCard = ({ campaign, onToggleStatus, onEdit, onDelete, onDuplicate }) => {
@@ -62,12 +62,19 @@ const CampaignCard = ({ campaign, onToggleStatus, onEdit, onDelete, onDuplicate 
       <h3 className="campaign-title">{campaign.name}</h3>
 
       <div className="campaign-image-container">
-        <img 
-          src={campaign.image} 
+        <img
+          src={campaign.image}
           alt={campaign.name}
           className="campaign-image"
         />
       </div>
+
+      {campaign.status === 'draft' && campaign.paymentStatus === 'pending' && (
+        <div className="campaign-payment-warning">
+          <AlertCircle size={14} />
+          <span>Payment Required to Activate</span>
+        </div>
+      )}
 
       <div className="campaign-details">
         <div className="detail-item">

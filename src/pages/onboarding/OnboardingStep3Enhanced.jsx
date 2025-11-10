@@ -1,14 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
-import OnboardingFooter from '../../components/onboarding/OnboardingFooter';
-import PostcardEditorNew from '../../components/PostcardEditor/PostcardEditorNew';
+import FabricEditor from '../../components/PostcardEditor/FabricEditor';
+import campaignService from '../../supabase/api/campaignService';
+import toast from 'react-hot-toast';
 
 const OnboardingStep3Enhanced = () => {
   const navigate = useNavigate();
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [campaignId, setCampaignId] = useState(null);
+  const fabricEditorRef = useRef(null);
+
+  // Editor control states
+  const [editorMode, setEditorMode] = useState('simple');
+  const [currentPage, setCurrentPage] = useState('front');
+  const [isSaving, setIsSaving] = useState(false);
 
   const steps = [
     { number: 1, title: 'Business URL', subtitle: 'Please provide email' },
@@ -19,12 +27,45 @@ const OnboardingStep3Enhanced = () => {
     { number: 6, title: 'Launch Campaign', subtitle: 'Finish your website setup' }
   ];
 
-  // Load selected template from localStorage (already enhanced from Step 2)
+  // Load selected template and campaignId from localStorage
   useEffect(() => {
     const loadTemplateData = async () => {
       try {
         setLoading(true);
-        
+
+        // Load campaignId from Step 1 localStorage
+        const step1Data = JSON.parse(localStorage.getItem('onboardingStep1'));
+        let loadedCampaignId = step1Data?.campaignId;
+
+        if (loadedCampaignId) {
+          console.log('✅ Loaded campaignId from localStorage:', loadedCampaignId);
+        } else {
+          // FALLBACK: Query database for most recent draft campaign
+          console.warn('⚠️  No campaignId in localStorage, checking database...');
+          try {
+            const campaignResult = await campaignService.getMostRecentDraftCampaign();
+            if (campaignResult.success && campaignResult.campaign) {
+              loadedCampaignId = campaignResult.campaign.id;
+              console.log('✅ Recovered campaignId from database:', loadedCampaignId);
+
+              // Update localStorage with recovered campaign ID
+              if (step1Data) {
+                step1Data.campaignId = loadedCampaignId;
+                localStorage.setItem('onboardingStep1', JSON.stringify(step1Data));
+              }
+            } else {
+              throw new Error('No draft campaign found. Please restart from Step 1.');
+            }
+          } catch (dbError) {
+            console.error('Failed to recover campaignId:', dbError);
+            setError('Campaign not found. Please restart from Step 1.');
+            setTimeout(() => navigate('/onboarding/step1'), 2000);
+            return;
+          }
+        }
+
+        setCampaignId(loadedCampaignId);
+
         // Load the selected template from Step 2
         const savedTemplate = localStorage.getItem('selectedTemplate');
         if (!savedTemplate) {
@@ -67,18 +108,72 @@ const OnboardingStep3Enhanced = () => {
     navigate('/onboarding/step2');
   };
 
-  const handleContinue = () => {
-    // Save any editor data if needed
-    navigate('/onboarding/step4');
+  const handleContinue = async () => {
+    // Save design before continuing
+    const saved = await handleSave();
+    if (saved) {
+      navigate('/onboarding/step4');
+    }
   };
 
   const handleEditorBack = () => {
     handleBack();
   };
 
+  // Editor control handlers
+  const handleModeChange = (mode) => {
+    setEditorMode(mode);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      console.log('Saving postcard design to Cloudinary...');
+
+      if (!campaignId) {
+        toast.error('Campaign ID not found. Cannot save design.');
+        return false;
+      }
+
+      if (!fabricEditorRef.current) {
+        toast.error('Editor not ready. Please try again.');
+        return false;
+      }
+
+      // Call FabricEditor's save function
+      const saveResult = await fabricEditorRef.current.saveDesign();
+
+      if (saveResult) {
+        toast.success('Design saved successfully!');
+        console.log('Design saved:', saveResult);
+        return true;
+      } else {
+        toast.error('Failed to save design. Please try again.');
+        return false;
+      }
+    } catch (err) {
+      console.error('Failed to save design:', err);
+      toast.error('Failed to save design. Please try again.');
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Check if template is double-sided
+  const isDoubleSided = selectedTemplate?.hasBack || selectedTemplate?.isDoubleSided || false;
+
   if (loading) {
     return (
-      <OnboardingLayout steps={steps} currentStep={3}>
+      <OnboardingLayout
+        steps={steps}
+        currentStep={3}
+        showFooter={false}
+      >
         <div className="step3-loading">
           <div className="loading-spinner"></div>
           <h2>Setting up your postcard editor...</h2>
@@ -90,7 +185,13 @@ const OnboardingStep3Enhanced = () => {
 
   if (error) {
     return (
-      <OnboardingLayout steps={steps} currentStep={3}>
+      <OnboardingLayout
+        steps={steps}
+        currentStep={3}
+        footerMessage="Please resolve the error to continue"
+        onContinue={handleContinue}
+        continueDisabled={true}
+      >
         <div className="step3-error">
           <div className="error-icon">⚠️</div>
           <h2>Unable to load editor</h2>
@@ -104,22 +205,17 @@ const OnboardingStep3Enhanced = () => {
             </button>
           </div>
         </div>
-
-        <OnboardingFooter
-          message="Please resolve the error to continue"
-          currentStep={3}
-          totalSteps={6}
-          onContinue={handleContinue}
-          continueDisabled={true}
-          showBackButton={false}
-        />
       </OnboardingLayout>
     );
   }
 
   if (!selectedTemplate) {
     return (
-      <OnboardingLayout steps={steps} currentStep={3}>
+      <OnboardingLayout
+        steps={steps}
+        currentStep={3}
+        showFooter={false}
+      >
         <div className="step3-no-template">
           <h2>No template selected</h2>
           <p>Please go back and select a template to continue.</p>
@@ -132,24 +228,33 @@ const OnboardingStep3Enhanced = () => {
   }
 
   return (
-    <OnboardingLayout steps={steps} currentStep={3}>
+    <OnboardingLayout
+      steps={steps}
+      currentStep={3}
+      editorMode={editorMode}
+      onModeChange={handleModeChange}
+      isDoubleSided={isDoubleSided}
+      currentPage={currentPage}
+      onPageChange={handlePageChange}
+      onSave={handleSave}
+      isSaving={isSaving}
+      templateName={selectedTemplate?.name}
+      footerMessage="Complete your postcard design and continue to targeting"
+      onContinue={handleContinue}
+      continueDisabled={false}
+    >
       <div className="step3-editor-container">
-        <PostcardEditorNew 
+        <FabricEditor
+          ref={fabricEditorRef}
           selectedTemplate={selectedTemplate}
           onBack={handleEditorBack}
+          editorMode={editorMode}
+          currentPage={currentPage}
+          campaignId={campaignId}
         />
       </div>
 
-      <OnboardingFooter
-        message="Complete your postcard design and continue to targeting"
-        currentStep={3}
-        totalSteps={6}
-        onContinue={handleContinue}
-        continueDisabled={false}
-        showBackButton={false} // PostcardEditor has its own back button
-      />
-
-      <style jsx>{`
+      <style>{`
         .step3-loading {
           display: flex;
           flex-direction: column;
@@ -268,18 +373,35 @@ const OnboardingStep3Enhanced = () => {
         }
 
         .step3-editor-container {
-          /* Fill available space - footer is position:fixed so excluded from layout */
+          /* Fill available space - footer is sticky at bottom */
           width: 100%;
           height: 100%;
           flex: 1;
-          min-height: 600px;
+          min-height: calc(100vh - 80px - 80px); /* Progress bar (80px) + Footer (~80px with padding) */
+          max-height: calc(100vh - 80px - 80px); /* Ensure perfect fit */
           position: relative;
           overflow: hidden;
+          display: flex;
         }
 
         /* Ensure the editor fills the available space */
         .step3-editor-container :global(.postcard-editor) {
           height: 100%;
+        }
+
+        /* Mobile responsiveness for editor container */
+        @media (max-width: 768px) {
+          .step3-editor-container {
+            min-height: calc(100vh - 80px - 80px); /* Mobile: 80px progress + 80px footer */
+            max-height: calc(100vh - 80px - 80px);
+          }
+        }
+
+        @media (max-width: 480px) {
+          .step3-editor-container {
+            min-height: calc(100vh - 70px - 80px); /* Small mobile: 70px progress + 80px footer */
+            max-height: calc(100vh - 70px - 80px);
+          }
         }
       `}</style>
     </OnboardingLayout>

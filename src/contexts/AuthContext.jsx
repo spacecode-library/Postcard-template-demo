@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import supabaseAuthService from '../supabase/api/authService'
+import supabaseOnboardingService from '../supabase/api/onboardingService'
 
 const AuthContext = createContext(null)
 
@@ -18,7 +19,28 @@ export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [onboardingCompleted, setOnboardingCompleted] = useState(false)
+  const [currentOnboardingStep, setCurrentOnboardingStep] = useState(1)
+  const [onboardingLoading, setOnboardingLoading] = useState(false)
   const navigate = useNavigate()
+
+  // Check onboarding status
+  const checkOnboardingStatus = async () => {
+    try {
+      setOnboardingLoading(true)
+      const status = await supabaseOnboardingService.getOnboardingStatus()
+
+      setOnboardingCompleted(status.onboardingCompleted)
+      setCurrentOnboardingStep(status.currentStep)
+
+      return status
+    } catch (error) {
+      console.error('Error checking onboarding status:', error)
+      return null
+    } finally {
+      setOnboardingLoading(false)
+    }
+  }
 
   // Initialize auth state
   useEffect(() => {
@@ -26,11 +48,14 @@ export const AuthProvider = ({ children }) => {
     const initializeAuth = async () => {
       try {
         const currentSession = await supabaseAuthService.getSession()
-        
+
         if (currentSession) {
           setSession(currentSession)
           setUser(currentSession.user)
           setIsAuthenticated(true)
+
+          // Load onboarding status for authenticated user
+          await checkOnboardingStatus()
         }
       } catch (error) {
         console.error('Error initializing auth:', error)
@@ -45,17 +70,22 @@ export const AuthProvider = ({ children }) => {
     const { data: { subscription } } = supabaseAuthService.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state change:', event, session)
-        
+
         if (session) {
           setSession(session)
           setUser(session.user)
           setIsAuthenticated(true)
+
+          // Load onboarding status when user logs in
+          await checkOnboardingStatus()
         } else {
           setSession(null)
           setUser(null)
           setIsAuthenticated(false)
+          setOnboardingCompleted(false)
+          setCurrentOnboardingStep(1)
         }
-        
+
         setLoading(false)
       }
     )
@@ -206,13 +236,17 @@ export const AuthProvider = ({ children }) => {
     session,
     loading,
     isAuthenticated,
+    onboardingCompleted,
+    currentOnboardingStep,
+    onboardingLoading,
     register,
     login,
     googleLogin,
     logout,
     updateProfile,
     resetPassword,
-    updatePassword
+    updatePassword,
+    checkOnboardingStatus
   }
 
   return (

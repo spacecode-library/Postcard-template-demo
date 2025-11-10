@@ -19,32 +19,62 @@ const supabaseAuthService = {
           data: {
             full_name: name,
             name: name
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/login?verified=true`
         }
       })
       if (signUpError) {
-            throw signUpError
+        // Handle specific signup errors
+        if (signUpError.message?.includes('already registered')) {
+          throw {
+            message: 'This email is already registered. Please login instead.',
+            code: 'EMAIL_EXISTS'
+          }
+        }
+        throw signUpError
       }
 
-      const { error } = await supabase.from('profile').insert({ user_id:authData.user.id,full_name:name, email:email });
+      // Insert profile - handle duplicate gracefully
+      const { error: profileError } = await supabase
+        .from('profile')
+        .insert({
+          user_id: authData.user.id,
+          full_name: name,
+          email: email
+        });
 
-      if(error){
-        throw error
+      if (profileError) {
+        // Handle duplicate profile (user might have been created before)
+        if (profileError.code === '23505' || profileError.message?.includes('duplicate key')) {
+          console.warn('Profile already exists, continuing with registration');
+          // Don't throw error - user can still proceed
+        } else {
+          throw profileError
+        }
       }
-
-    
 
       // Return user data
       return {
         user: authData.user,
         session: authData.session,
-        message: 'Registration successful! Please check your email to verify your account.'
+        message: 'Registration successful! Welcome aboard.'
       }
     } catch (error) {
       console.error('Registration error:', error)
+
+      // Provide user-friendly error messages
+      let errorMessage = error.message || 'Registration failed'
+
+      if (error.code === '23505' || errorMessage.includes('duplicate key')) {
+        errorMessage = 'This email is already registered. Please login instead.'
+      } else if (errorMessage.includes('rate limit')) {
+        errorMessage = 'Too many registration attempts. Please wait a moment and try again.'
+      }
+
       throw {
-        error: error.message || 'Registration failed',
-        statusCode: error.status || 400
+        error: errorMessage,
+        statusCode: error.status || 400,
+        code: error.code || 'REGISTRATION_ERROR'
       }
     }
   },
@@ -89,11 +119,32 @@ const supabaseAuthService = {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/onboarding`
+          redirectTo: `${window.location.origin}/onboarding`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent'
+          }
         }
       })
 
       if (error) {
+        // Handle specific error cases
+        if (error.message?.includes('provider') && error.message?.includes('not enabled')) {
+          throw {
+            message: 'Google authentication is not configured. Please use email signup or contact support.',
+            code: 'PROVIDER_NOT_ENABLED',
+            originalError: error
+          }
+        }
+
+        if (error.message?.includes('validation_failed')) {
+          throw {
+            message: 'Google authentication configuration error. Please use email signup.',
+            code: 'VALIDATION_FAILED',
+            originalError: error
+          }
+        }
+
         throw error
       }
 
@@ -103,9 +154,15 @@ const supabaseAuthService = {
       }
     } catch (error) {
       console.error('Google login error:', error)
+
+      // Provide user-friendly error messages
+      const errorMessage = error.message || error.error || 'Google login failed'
+      const errorCode = error.code || error.error_code || 'UNKNOWN_ERROR'
+
       throw {
-        error: error.message || 'Google login failed',
-        statusCode: error.status || 400
+        error: errorMessage,
+        statusCode: error.status || 400,
+        code: errorCode
       }
     }
   },
@@ -159,8 +216,16 @@ const supabaseAuthService = {
    */
   async getCurrentUser() {
     try {
+      // First check if session exists to avoid AuthSessionMissingError
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session) {
+        // No session available, return null silently
+        return null
+      }
+
       const { data: { user }, error } = await supabase.auth.getUser()
-      
+
       if (error) {
         throw error
       }
@@ -249,6 +314,37 @@ const supabaseAuthService = {
       console.error('Update password error:', error)
       throw {
         error: error.message || 'Password update failed',
+        statusCode: error.status || 400
+      }
+    }
+  },
+
+  /**
+   * Resend verification email
+   * @param {string} email - User email address
+   * @returns {Promise<Object>} Response
+   */
+  async resendVerificationEmail(email) {
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/login?verified=true`
+        }
+      })
+
+      if (error) {
+        throw error
+      }
+
+      return {
+        message: 'Verification email sent! Please check your inbox.'
+      }
+    } catch (error) {
+      console.error('Resend verification error:', error)
+      throw {
+        error: error.message || 'Failed to resend verification email',
         statusCode: error.status || 400
       }
     }

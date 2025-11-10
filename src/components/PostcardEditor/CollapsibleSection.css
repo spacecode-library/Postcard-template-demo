@@ -1,0 +1,56 @@
+.collapsible-section {
+  margin-bottom: 16px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #2d3748;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+  transition: color 0.2s ease;
+}
+
+.section-header:hover {
+  color: #2563eb;
+}
+
+.section-header:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.section-header svg {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.section-content {
+  margin-top: 8px;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ChevronLeft, Check, Palette } from 'lucide-react';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 import brandfetchService from '../../supabase/api/brandFetchService';
 import supabaseCompanyService from '../../supabase/api/companyService';
-import toast from 'react-hot-toast'
+import campaignService from '../../supabase/api/campaignService';
+import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 
 const OnboardingStep1 = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     website: '',
     businessCategory: ''
@@ -17,6 +20,14 @@ const OnboardingStep1 = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingBrand, setIsFetchingBrand] = useState(false);
   const [brandPreview, setBrandPreview] = useState(null);
+
+  // Check authentication on mount
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      toast.error('Please login to continue');
+      navigate('/login');
+    }
+  }, [authLoading, isAuthenticated, navigate]);
 
   const steps = [
     { number: 1, title: 'Business URL', subtitle: 'Please provide email' },
@@ -54,9 +65,16 @@ const OnboardingStep1 = () => {
 
   const handleContinue = async (e) => {
     e.preventDefault();
-    
+
     if (!isFormValid()) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    // Check authentication before proceeding
+    if (!isAuthenticated || !user) {
+      toast.error('Please login to continue with onboarding');
+      navigate('/login');
       return;
     }
 
@@ -114,15 +132,46 @@ const OnboardingStep1 = () => {
       // toast.loading('Saving your company information...', { id: 'company-save' });
       
       const saveResult = await supabaseCompanyService.saveCompanyInfo(companyData);
-      
+
       toast.success('Company information saved!', { id: 'company-save' });
+
+      // Step 3.5: Create draft campaign with ALL Step 1 data
+      toast.loading('Creating your campaign...', { id: 'campaign-create' });
+
+      const campaignResult = await campaignService.createCampaign({
+        campaign_name: `${companyData.name} Campaign`,
+        company_id: saveResult.company.id,
+        status: 'draft',
+        payment_status: 'pending',
+        // Step 1 data - Save to campaign
+        website_url: formData.website,
+        business_category: formData.businessCategory,
+        brandfetch_data: brandData,
+        // Template & Design (will be added in later steps)
+        template_id: null,
+        template_name: null,
+        postcard_design_url: null,
+        postcard_preview_url: null
+      });
+
+      // Validate campaign was created successfully
+      if (!campaignResult || !campaignResult.success || !campaignResult.campaign || !campaignResult.campaign.id) {
+        throw new Error('Failed to create campaign. Please try again.');
+      }
+
+      const draftCampaign = campaignResult.campaign;
+
+      toast.success('Campaign created!', { id: 'campaign-create' });
 
       // Step 4: Store in localStorage for use in next steps
       localStorage.setItem('onboardingStep1', JSON.stringify({
         ...formData,
         companyData: companyData,
-        companyId: saveResult.company.id
+        companyId: saveResult.company.id,
+        campaignId: draftCampaign.id
       }));
+
+      console.log('✅ Campaign created with ID:', draftCampaign.id);
 
       // Step 5: Navigate to next step
       navigate('/onboarding/step2');
@@ -164,8 +213,32 @@ const OnboardingStep1 = () => {
     }
   };
 
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <OnboardingLayout
+        steps={steps}
+        currentStep={1}
+        showFooter={false}
+      >
+        <div className="main-content" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div className="spinner" style={{ margin: '0 auto 1rem' }}></div>
+            <p style={{ color: '#718096' }}>Loading...</p>
+          </div>
+        </div>
+      </OnboardingLayout>
+    );
+  }
+
   return (
-    <OnboardingLayout steps={steps} currentStep={1}>
+    <OnboardingLayout
+      steps={steps}
+      currentStep={1}
+      footerMessage=""
+      onContinue={handleContinue}
+      continueDisabled={!isFormValid() || isLoading}
+    >
       <div className="main-content">
         <motion.button
           className="back-button"
@@ -326,24 +399,6 @@ const OnboardingStep1 = () => {
             </div>
           </motion.div>
         )}
-
-        <div className="footer-section">
-          <div className="footer-text">
-            Enter your website URL and select your business category to continue
-          </div>
-          <div className="footer-actions">
-            <span className="step-indicator">Step 1 of 6</span>
-            <motion.button
-              className="continue-button"
-              onClick={handleContinue}
-              disabled={!isFormValid() || isLoading}
-              whileHover={{ scale: 1.02, boxShadow: "0 6px 16px rgba(32, 178, 170, 0.25)" }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {isLoading ? 'Processing...' : 'Continue'}
-            </motion.button>
-          </div>
-        </div>
       </div>
     </OnboardingLayout>
   );

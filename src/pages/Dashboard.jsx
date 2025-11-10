@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LayoutGrid, CheckCircle, Mail, DollarSign, Plus, Calendar, SlidersHorizontal, Clock, AlertTriangle } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
@@ -183,6 +183,7 @@ const Dashboard = () => {
   // Check for campaigns with specific approval statuses
   const hasPendingCampaigns = campaigns.some(c => c.approvalStatus === 'pending_review');
   const hasRejectedCampaigns = campaigns.some(c => c.approvalStatus === 'rejected');
+  const hasDraftCampaignsNeedingPayment = campaigns.some(c => c.status === 'draft' && c.paymentStatus === 'pending');
 
   // Dashboard with campaigns
   return (
@@ -238,6 +239,28 @@ const Dashboard = () => {
                 <div className="banner-message">
                   One or more campaigns were rejected. Please review the feedback and make necessary changes.
                   Need help? Contact us at <a href="mailto:contact@movepost.co">contact@movepost.co</a>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {hasDraftCampaignsNeedingPayment && (
+            <motion.div
+              className="workflow-banner workflow-banner-payment"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            >
+              <div className="banner-icon">
+                <DollarSign size={24} />
+              </div>
+              <div className="banner-content">
+                <div className="banner-title">Payment Required to Activate</div>
+                <div className="banner-message">
+                  You have campaigns that need a payment method to activate.{' '}
+                  <Link to="/settings?tab=billing" style={{ color: '#20B2AA', textDecoration: 'none', fontWeight: 500 }}>
+                    Add payment method →
+                  </Link>
                 </div>
               </div>
             </motion.div>
@@ -418,6 +441,11 @@ const Dashboard = () => {
         .workflow-banner-rejected {
           background-color: #FEF2F2;
           border-left-color: #EF4444;
+        }
+
+        .workflow-banner-payment {
+          background-color: #FFF3CD;
+          border-left-color: #FFC107;
         }
 
         .banner-icon {

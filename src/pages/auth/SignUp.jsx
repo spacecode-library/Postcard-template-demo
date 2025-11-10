@@ -72,7 +72,7 @@ const SignUp = () => {
 
 const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -80,17 +80,40 @@ const handleSubmit = async (e) => {
     setIsSubmitting(true);
 
     try {
-      await register({
+      const response = await register({
         email: formData.email,
         password: formData.password,
         name: formData.name
       });
-      
-      // Navigate to onboarding after successful registration
-      navigate('/onboarding');
+
+      // Store email for verification page
+      localStorage.setItem('pendingVerificationEmail', formData.email);
+
+      // Redirect to email verification page
+      // User is logged in but needs to verify email before accessing onboarding
+      if (response && response.user) {
+        setTimeout(() => {
+          navigate('/verify-email');
+        }, 500);
+      }
     } catch (error) {
       console.error('Registration error:', error);
-      // Error is already handled by AuthContext with toast
+
+      // Handle specific error cases with better messaging
+      const errorMessage = error.error || error.message || '';
+
+      if (errorMessage.includes('duplicate key') || errorMessage.includes('already exists')) {
+        setErrors({ email: 'This email is already registered. Please login instead.' });
+        toast.error('Email already registered. Try logging in!');
+      } else if (errorMessage.includes('after') && errorMessage.includes('seconds')) {
+        // Extract wait time from error message
+        const match = errorMessage.match(/after (\d+) seconds/);
+        const seconds = match ? match[1] : '60';
+        toast.error(`Please wait ${seconds} seconds before trying again`);
+      } else if (errorMessage.includes('rate')) {
+        toast.error('Too many attempts. Please wait a moment and try again.');
+      }
+      // Otherwise, error toast is already shown by AuthContext
     } finally {
       setIsSubmitting(false);
     }
@@ -102,7 +125,18 @@ const handleSubmit = async (e) => {
       // Redirect will happen automatically via OAuth
     } catch (error) {
       console.error('Google signup error:', error);
-      // Error is already handled by AuthContext with toast
+
+      // Handle specific Google OAuth errors
+      const errorMessage = error.error || error.message || '';
+
+      if (errorMessage.includes('provider') && errorMessage.includes('not enabled')) {
+        toast.error('Google sign-up is currently unavailable. Please use email signup or contact support.', {
+          duration: 5000
+        });
+      } else if (errorMessage.includes('validation_failed')) {
+        toast.error('Google authentication is not configured. Please use email signup.');
+      }
+      // Otherwise, error toast is already shown by AuthContext
     }
   };
 

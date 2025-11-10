@@ -30,8 +30,13 @@ const campaignService = {
       const campaignRecord = {
         user_id: user.id,
         company_id: company?.id || null,
-        campaign_name: campaignData.name || 'Untitled Campaign',
+        campaign_name: campaignData.campaign_name || campaignData.name || 'Untitled Campaign',
         status: campaignData.status || 'draft',
+
+        // Step 1 Data - Business Information
+        website_url: campaignData.website_url || null,
+        business_category: campaignData.business_category || null,
+        brandfetch_data: campaignData.brandfetch_data || null,
 
         // Template & Design
         template_id: campaignData.template_id || null,
@@ -42,6 +47,8 @@ const campaignService = {
         // Targeting
         targeting_type: campaignData.targeting_type || 'zip_codes',
         target_zip_codes: campaignData.target_zip_codes || [],
+        validated_zips: campaignData.validated_zips || [],
+        zips_with_data: campaignData.zips_with_data || 0,
         target_location: campaignData.target_location || null,
         target_radius: campaignData.target_radius || null,
 
@@ -175,6 +182,44 @@ const campaignService = {
       throw {
         error: error.message || 'Failed to fetch campaign',
         statusCode: error.statusCode || 404
+      };
+    }
+  },
+
+  /**
+   * Get user's most recent draft campaign (for recovery if localStorage is lost)
+   * @returns {Promise<Object>} Most recent draft campaign or null
+   */
+  async getMostRecentDraftCampaign() {
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        throw new Error('User not authenticated');
+      }
+
+      const { data, error } = await supabase
+        .from('campaigns')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'draft')
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        campaign: data || null
+      };
+    } catch (error) {
+      console.error('Error fetching most recent draft campaign:', error);
+      return {
+        success: false,
+        campaign: null,
+        error: error.message
       };
     }
   },

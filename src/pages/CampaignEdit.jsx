@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Edit3 } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Breadcrumb from '../components/common/Breadcrumb';
-import PostcardEditorNew from '../components/PostcardEditor/PostcardEditorNew';
+import FabricEditor from '../components/PostcardEditor/FabricEditor';
 import campaignService from '../supabase/api/campaignService';
 import toast from 'react-hot-toast';
 
@@ -162,8 +162,8 @@ const CampaignEdit = () => {
 
     return (
       <DashboardLayout>
-        <div className="campaign-edit-page" style={{ maxWidth: '100%', padding: 0 }}>
-          <PostcardEditorNew
+        <div className="campaign-edit-page-editor">
+          <FabricEditor
             selectedTemplate={templateData}
             onBack={handleCloseEditor}
             onSave={handleSavePostcard}
@@ -356,6 +356,15 @@ const CampaignEdit = () => {
           max-width: 900px;
           margin: 0 auto;
           padding: 24px;
+        }
+
+        .campaign-edit-page-editor {
+          width: 100%;
+          height: 100%;
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          min-height: calc(100vh - 80px);
         }
 
         .edit-header {

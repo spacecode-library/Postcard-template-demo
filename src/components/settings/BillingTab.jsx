@@ -1,26 +1,153 @@
 import React, { useState, useEffect } from 'react';
 import { Layers, Check, Download, CreditCard, Trash2, ChevronDown, X } from 'lucide-react';
-import { mockPaymentService } from '../../services/mockDataService';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { paymentService } from '../../supabase/api/paymentService';
 import toast from 'react-hot-toast';
 import './BillingTab.css';
+
+// Initialize Stripe
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
+// Stripe CardElement styling
+const CARD_ELEMENT_OPTIONS = {
+  style: {
+    base: {
+      color: '#1A202C',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      fontSmoothing: 'antialiased',
+      fontSize: '16px',
+      '::placeholder': {
+        color: '#A0AEC0',
+      },
+    },
+    invalid: {
+      color: '#E53E3E',
+      iconColor: '#E53E3E',
+    },
+  },
+};
+
+// Add Payment Method Form Component (uses Stripe hooks)
+const AddPaymentMethodForm = ({ onSuccess, onCancel }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [cardholderName, setCardholderName] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
+    if (!cardholderName.trim()) {
+      toast.error('Please enter cardholder name');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      toast.loading('Adding payment method...', { id: 'add-payment' });
+
+      // Step 1: Create SetupIntent on backend
+      const { data: { user } } = await import('../../supabase/integration/client').then(m => m.supabase.auth.getUser());
+
+      if (!user?.email) {
+        throw new Error('User email not found');
+      }
+
+      const setupIntentData = await paymentService.createSetupIntent(user.email);
+
+      // Step 2: Confirm card setup with Stripe
+      const cardElement = elements.getElement(CardElement);
+
+      const { setupIntent, error } = await stripe.confirmCardSetup(
+        setupIntentData.clientSecret,
+        {
+          payment_method: {
+            card: cardElement,
+            billing_details: {
+              name: cardholderName,
+              email: user.email,
+            },
+          },
+        }
+      );
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // Step 3: Save payment method to database
+      await paymentService.addPaymentMethod(setupIntent);
+
+      toast.success('Payment method added successfully!', { id: 'add-payment' });
+      onSuccess();
+    } catch (error) {
+      console.error('Error adding payment method:', error);
+      toast.error(error.message || 'Failed to add payment method', { id: 'add-payment' });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="modal-body">
+        <div className="modal-form-group">
+          <label>Cardholder Name *</label>
+          <input
+            type="text"
+            value={cardholderName}
+            onChange={(e) => setCardholderName(e.target.value)}
+            placeholder="John Doe"
+            className="modal-input"
+            disabled={isProcessing}
+          />
+        </div>
+
+        <div className="modal-form-group">
+          <label>Card Details *</label>
+          <div className="stripe-card-element">
+            <CardElement options={CARD_ELEMENT_OPTIONS} />
+          </div>
+        </div>
+      </div>
+
+      <div className="modal-footer">
+        <button
+          type="button"
+          className="modal-btn cancel-btn"
+          onClick={onCancel}
+          disabled={isProcessing}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="modal-btn add-btn"
+          disabled={!stripe || isProcessing}
+        >
+          {isProcessing ? 'Processing...' : 'Add Payment Method'}
+        </button>
+      </div>
+    </form>
+  );
+};
 
 const BillingTab = () => {
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [billingData, setBillingData] = useState({
-    streetAddress: '100 Smith Street',
-    city: 'Collingwood',
-    state: 'VIC',
-    postalCode: '3066',
-    country: 'Australia'
-  });
-  const [newCard, setNewCard] = useState({
-    cardNumber: '',
-    cardholderName: '',
-    expiryMonth: '',
-    expiryYear: '',
-    cvv: ''
+    streetAddress: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: 'United States'
   });
 
   useEffect(() => {
@@ -30,32 +157,19 @@ const BillingTab = () => {
   const loadPaymentMethods = async () => {
     try {
       setIsLoading(true);
-      const result = await mockPaymentService.getPaymentMethods();
-      if (result.success) {
-        setPaymentMethods(result.payment_methods);
-      }
+      const paymentMethodsData = await paymentService.getPaymentMethods();
+      setPaymentMethods(paymentMethodsData || []);
     } catch (error) {
       console.error('Error loading payment methods:', error);
       toast.error('Failed to load payment methods');
+      setPaymentMethods([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Sample billing history data
-  const billingHistory = [
-    { id: 1, invoice: 'Basic Plan - Dec 2025', period: 'Dec 1, 2025', amount: 'USD $10.00', status: 'Paid' },
-    { id: 2, invoice: 'Basic Plan - Nov 2025', period: 'Nov 1, 2025', amount: 'USD $10.00', status: 'Paid' },
-    { id: 3, invoice: 'Basic Plan - Oct 2025', period: 'Oct 1, 2025', amount: 'USD $10.00', status: 'Paid' },
-    { id: 4, invoice: 'Basic Plan - Sep 2025', period: 'Sep 1, 2025', amount: 'USD $10.00', status: 'Paid' },
-    { id: 5, invoice: 'Basic Plan - Aug 2025', period: 'Aug 1, 2025', amount: 'USD $10.00', status: 'Paid' },
-    { id: 6, invoice: 'Basic Plan - Jul 2025', period: 'Jul 1, 2025', amount: 'USD $10.00', status: 'Paid' },
-    { id: 7, invoice: 'Basic Plan - Jun 2025', period: 'Jun 1, 2025', amount: 'USD $10.00', status: 'Paid' }
-  ];
-
-  const handleDownload = (invoiceId) => {
-    console.log('Downloading invoice:', invoiceId);
-  };
+  // Billing history will be loaded from real data in future implementation
+  const billingHistory = [];
 
   const handleInputChange = (field, value) => {
     setBillingData(prev => ({ ...prev, [field]: value }));
@@ -64,7 +178,7 @@ const BillingTab = () => {
   const handleSetDefault = async (paymentMethodId) => {
     try {
       toast.loading('Setting default payment method...', { id: 'set-default' });
-      await mockPaymentService.setDefaultPaymentMethod(paymentMethodId);
+      await paymentService.setDefaultPaymentMethod(paymentMethodId);
       await loadPaymentMethods();
       toast.success('Default payment method updated', { id: 'set-default' });
     } catch (error) {
@@ -80,7 +194,7 @@ const BillingTab = () => {
 
     try {
       toast.loading('Removing payment method...', { id: 'remove-payment' });
-      await mockPaymentService.removePaymentMethod(paymentMethodId);
+      await paymentService.removePaymentMethod(paymentMethodId);
       await loadPaymentMethods();
       toast.success('Payment method removed', { id: 'remove-payment' });
     } catch (error) {
@@ -89,55 +203,9 @@ const BillingTab = () => {
     }
   };
 
-  const handleAddPaymentMethod = async () => {
-    // Validate card details
-    if (!newCard.cardNumber || !newCard.cardholderName || !newCard.expiryMonth || !newCard.expiryYear || !newCard.cvv) {
-      toast.error('Please fill in all card details');
-      return;
-    }
-
-    // Basic validation
-    if (newCard.cardNumber.replace(/\s/g, '').length !== 16) {
-      toast.error('Card number must be 16 digits');
-      return;
-    }
-
-    try {
-      toast.loading('Adding payment method...', { id: 'add-payment' });
-
-      // Extract last 4 digits and determine brand
-      const last4 = newCard.cardNumber.slice(-4);
-      const firstDigit = newCard.cardNumber.charAt(0);
-      let brand = 'visa';
-      if (firstDigit === '5') brand = 'mastercard';
-      else if (firstDigit === '3') brand = 'amex';
-
-      const paymentMethod = {
-        brand,
-        last4,
-        exp_month: parseInt(newCard.expiryMonth),
-        exp_year: parseInt(newCard.expiryYear),
-        cardholder_name: newCard.cardholderName
-      };
-
-      await mockPaymentService.addPaymentMethod(paymentMethod);
-      await loadPaymentMethods();
-
-      // Reset form and close modal
-      setNewCard({
-        cardNumber: '',
-        cardholderName: '',
-        expiryMonth: '',
-        expiryYear: '',
-        cvv: ''
-      });
-      setShowAddModal(false);
-
-      toast.success('Payment method added successfully', { id: 'add-payment' });
-    } catch (error) {
-      console.error('Error adding payment method:', error);
-      toast.error('Failed to add payment method', { id: 'add-payment' });
-    }
+  const handlePaymentSuccess = async () => {
+    setShowAddModal(false);
+    await loadPaymentMethods();
   };
 
   const getCardBrandName = (brand) => {
@@ -184,40 +252,49 @@ const BillingTab = () => {
       <div className="billing-history">
         <div className="billing-history-header">
           <h3>Billing history</h3>
-          <button className="download-all-btn">
-            <Download size={18} />
-            Download all
-          </button>
+          {billingHistory.length > 0 && (
+            <button className="download-all-btn">
+              <Download size={18} />
+              Download all
+            </button>
+          )}
         </div>
 
-        <div className="billing-table">
-          <div className="table-header">
-            <div className="table-cell invoice-cell">Invoice</div>
-            <div className="table-cell period-cell">Period</div>
-            <div className="table-cell amount-cell">Amount</div>
-            <div className="table-cell status-cell">Status</div>
-            <div className="table-cell action-cell"></div>
+        {billingHistory.length === 0 ? (
+          <div className="no-billing-history">
+            <p>No billing history available yet.</p>
+            <p className="no-billing-subtext">Your invoices and payment history will appear here.</p>
           </div>
-          
-          {billingHistory.map((item) => (
-            <div key={item.id} className="table-row">
-              <div className="table-cell invoice-cell">
-                <input type="checkbox" className="row-checkbox" />
-                <span>{item.invoice}</span>
-              </div>
-              <div className="table-cell period-cell">{item.period}</div>
-              <div className="table-cell amount-cell">{item.amount}</div>
-              <div className="table-cell status-cell">
-                <span className="status-badge paid">{item.status}</span>
-              </div>
-              <div className="table-cell action-cell">
-                <button className="download-btn" onClick={() => handleDownload(item.id)}>
-                  <Download size={18} />
-                </button>
-              </div>
+        ) : (
+          <div className="billing-table">
+            <div className="table-header">
+              <div className="table-cell invoice-cell">Invoice</div>
+              <div className="table-cell period-cell">Period</div>
+              <div className="table-cell amount-cell">Amount</div>
+              <div className="table-cell status-cell">Status</div>
+              <div className="table-cell action-cell"></div>
             </div>
-          ))}
-        </div>
+
+            {billingHistory.map((item) => (
+              <div key={item.id} className="table-row">
+                <div className="table-cell invoice-cell">
+                  <input type="checkbox" className="row-checkbox" />
+                  <span>{item.invoice}</span>
+                </div>
+                <div className="table-cell period-cell">{item.period}</div>
+                <div className="table-cell amount-cell">{item.amount}</div>
+                <div className="table-cell status-cell">
+                  <span className="status-badge paid">{item.status}</span>
+                </div>
+                <div className="table-cell action-cell">
+                  <button className="download-btn" onClick={() => handleDownload(item.id)}>
+                    <Download size={18} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Payment Method */}
@@ -363,97 +440,12 @@ const BillingTab = () => {
               </button>
             </div>
 
-            <div className="modal-body">
-              <div className="modal-form-group">
-                <label>Cardholder Name *</label>
-                <input
-                  type="text"
-                  value={newCard.cardholderName}
-                  onChange={(e) => setNewCard({ ...newCard, cardholderName: e.target.value })}
-                  placeholder="John Doe"
-                  className="modal-input"
-                />
-              </div>
-
-              <div className="modal-form-group">
-                <label>Card Number *</label>
-                <input
-                  type="text"
-                  value={newCard.cardNumber}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, '').slice(0, 16);
-                    setNewCard({ ...newCard, cardNumber: value });
-                  }}
-                  placeholder="1234 5678 9012 3456"
-                  className="modal-input"
-                  maxLength="16"
-                />
-              </div>
-
-              <div className="modal-form-row">
-                <div className="modal-form-group">
-                  <label>Expiry Month *</label>
-                  <input
-                    type="text"
-                    value={newCard.expiryMonth}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, '').slice(0, 2);
-                      if (value === '' || (parseInt(value) >= 1 && parseInt(value) <= 12)) {
-                        setNewCard({ ...newCard, expiryMonth: value });
-                      }
-                    }}
-                    placeholder="MM"
-                    className="modal-input"
-                    maxLength="2"
-                  />
-                </div>
-
-                <div className="modal-form-group">
-                  <label>Expiry Year *</label>
-                  <input
-                    type="text"
-                    value={newCard.expiryYear}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-                      setNewCard({ ...newCard, expiryYear: value });
-                    }}
-                    placeholder="YYYY"
-                    className="modal-input"
-                    maxLength="4"
-                  />
-                </div>
-
-                <div className="modal-form-group">
-                  <label>CVV *</label>
-                  <input
-                    type="text"
-                    value={newCard.cvv}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-                      setNewCard({ ...newCard, cvv: value });
-                    }}
-                    placeholder="123"
-                    className="modal-input"
-                    maxLength="4"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button
-                className="modal-btn cancel-btn"
-                onClick={() => setShowAddModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="modal-btn add-btn"
-                onClick={handleAddPaymentMethod}
-              >
-                Add Payment Method
-              </button>
-            </div>
+            <Elements stripe={stripePromise}>
+              <AddPaymentMethodForm
+                onSuccess={handlePaymentSuccess}
+                onCancel={() => setShowAddModal(false)}
+              />
+            </Elements>
           </div>
         </div>
       )}
@@ -483,6 +475,28 @@ const BillingTab = () => {
           padding: 20px;
           text-align: center;
           color: #718096;
+        }
+
+        .no-billing-history {
+          padding: 40px 20px;
+          text-align: center;
+          background: #F7FAFC;
+          border-radius: 8px;
+          margin-top: 16px;
+        }
+
+        .no-billing-history p {
+          margin: 0;
+          color: #4A5568;
+          font-size: 15px;
+          font-weight: 500;
+        }
+
+        .no-billing-subtext {
+          margin-top: 8px !important;
+          color: #718096 !important;
+          font-size: 14px !important;
+          font-weight: 400 !important;
         }
 
         .default-badge {
@@ -652,6 +666,23 @@ const BillingTab = () => {
         .add-btn:hover {
           background: #17a097;
           box-shadow: 0 4px 12px rgba(32, 178, 170, 0.3);
+        }
+
+        .stripe-card-element {
+          padding: 12px 16px;
+          border: 1.5px solid #E2E8F0;
+          border-radius: 8px;
+          transition: all 0.2s;
+          background: white;
+        }
+
+        .stripe-card-element:focus-within {
+          border-color: #20B2AA;
+          box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.1);
+        }
+
+        .stripe-card-element .StripeElement {
+          width: 100%;
         }
       `}</style>
     </div>

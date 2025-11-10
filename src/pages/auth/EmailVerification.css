@@ -1,0 +1,353 @@
+/* Email Verification Container */
+.email-verification-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  padding: 2rem;
+}
+
+.email-verification-card {
+  width: 100%;
+  max-width: 480px;
+  background: white;
+  padding: 3rem 2.5rem;
+  text-align: center;
+}
+
+.email-verification-card.success {
+  border: 2px solid #10B981;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1),
+              0 2px 4px -1px rgba(16, 185, 129, 0.06);
+}
+
+/* Icons */
+.mail-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 112px;
+  height: 112px;
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  border-radius: 50%;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);
+}
+
+.mail-icon {
+  color: white;
+}
+
+.mail-icon-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 32px;
+  height: 32px;
+  background: #F59E0B;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.pending-icon {
+  animation: spin 3s linear infinite;
+}
+
+.success-icon-wrapper {
+  display: inline-flex;
+  margin-bottom: 1.5rem;
+  width: 96px;
+  height: 96px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+}
+
+.success-icon {
+  color: white;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+/* Text */
+.verification-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
+}
+
+.verification-subtitle {
+  font-size: 1rem;
+  color: #6B7280;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.user-email {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #20B2AA;
+  margin-bottom: 2rem;
+  word-break: break-all;
+}
+
+/* Instructions */
+.verification-instructions {
+  background: #F9FAFB;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.verification-instructions ol {
+  list-style: none;
+  counter-reset: step-counter;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.verification-instructions li {
+  counter-increment: step-counter;
+  position: relative;
+  padding-left: 2.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.9375rem;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.verification-instructions li:last-child {
+  margin-bottom: 0;
+}
+
+.verification-instructions li::before {
+  content: counter(step-counter);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 28px;
+  height: 28px;
+  background: #20B2AA;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Actions */
+.verification-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.verification-button {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  outline: none;
+}
+
+.verification-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.verification-button.primary {
+  background: #20B2AA;
+  color: white;
+}
+
+.verification-button.primary:hover:not(:disabled) {
+  background: #15B79E;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(32, 178, 170, 0.3);
+}
+
+.verification-button.primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.verification-button.secondary {
+  background: white;
+  color: #20B2AA;
+  border: 2px solid #20B2AA;
+}
+
+.verification-button.secondary:hover:not(:disabled) {
+  background: #F0FDFA;
+}
+
+.verification-button.tertiary {
+  background: #F3F4F6;
+  color: #6B7280;
+  border: 1px solid #E5E7EB;
+}
+
+.verification-button.tertiary:hover:not(:disabled) {
+  background: #E5E7EB;
+  color: #374151;
+}
+
+/* Footer */
+.verification-footer {
+  padding-top: 1.5rem;
+  border-top: 1px solid #E5E7EB;
+}
+
+.help-text {
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.logout-link {
+  background: none;
+  border: none;
+  color: #20B2AA;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.logout-link:hover {
+  color: #15B79E;
+  text-decoration: underline;
+}
+
+/* Auto-check notice */
+.auto-check-notice {
+  margin-top: 1.5rem;
+  padding: 0.75rem;
+  background: #F0F9FF;
+  border: 1px solid #BAE6FD;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: #0369A1;
+}
+
+.auto-refresh-icon {
+  animation: spin 2s linear infinite;
+}
+
+/* Spinning animation */
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .email-verification-container {
+    padding: 1rem;
+  }
+
+  .email-verification-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .verification-title {
+    font-size: 1.5rem;
+  }
+
+  .user-email {
+    font-size: 1rem;
+  }
+
+  .mail-icon-wrapper {
+    width: 80px;
+    height: 80px;
+  }
+
+  .mail-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .verification-instructions {
+    padding: 1.25rem;
+  }
+
+  .verification-instructions li {
+    font-size: 0.875rem;
+    padding-left: 2.25rem;
+  }
+
+  .verification-instructions li::before {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .verification-title {
+    font-size: 1.375rem;
+  }
+
+  .verification-button {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9375rem;
+  }
+}
+
+/* Print styles - hide verification on print */
+@media print {
+  .email-verification-container {
+    display: none;
+  }
+}

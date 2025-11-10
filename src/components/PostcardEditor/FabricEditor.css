@@ -1,0 +1,325 @@
+.fabric-editor-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  position: relative;
+}
+
+/* Editor header styles removed - controls now in ProcessLayout topbar */
+
+.editor-workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.toolbar {
+  /* width is now controlled by inline style from useResizableSidebar hook */
+  flex: 0 0 auto; /* Don't grow, don't shrink, use specified width */
+  min-width: 0; /* Allow shrinking below content size if needed */
+  background: white;
+  border-right: 1px solid #e2e8f0;
+  padding: 12px;
+  padding-top: 16px; /* Extra top padding to prevent content hiding behind progress bar */
+  overflow-y: auto;
+  z-index: 20; /* Above canvas (5), below footer (40), BELOW progress bar (100) */
+  position: relative; /* Ensure z-index applies */
+}
+
+.toolbar h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: #2d3748;
+}
+
+.tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: left;
+  transition: all 0.2s ease;
+  color: #374151;
+}
+
+.tool-btn:hover {
+  border-color: #20B2AA;
+  background: rgba(32, 178, 170, 0.05);
+  color: #20B2AA;
+}
+
+.tool-btn.active {
+  border-color: #20B2AA;
+  background: rgba(32, 178, 170, 0.1);
+  color: #1a9d96;
+}
+
+.tool-btn.delete {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+.tool-btn.delete:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+/* Resize handle */
+.resize-handle {
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none; /* Prevent touch scrolling */
+}
+
+.resize-handle:hover {
+  background-color: rgba(32, 178, 170, 0.3);
+}
+
+.resize-handle:active {
+  background-color: #20B2AA;
+}
+
+/* Larger hit area for easier grabbing */
+.resize-handle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -4px;
+  right: -4px;
+  /* Creates 12px wide invisible hit area (4px + 8px padding) */
+}
+
+.canvas-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  overflow: auto;
+  position: relative;
+  background: #FFFFFF;
+  min-height: 0;
+  z-index: 5; /* Below sidebar (10), footer (40), and progress bar (9999) */
+}
+
+.canvas-container canvas {
+  box-shadow: none;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#fabric-canvas {
+  border: 1px solid #E5E7EB !important;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Ensure both Fabric.js canvas layers are visible */
+.canvas-container .lower-canvas,
+.canvas-container .upper-canvas {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.fabric-editor-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.fabric-editor-loading-overlay p {
+  pointer-events: all;
+}
+
+.fabric-editor-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 16px;
+}
+
+.fabric-editor-error button {
+  padding: 10px 20px;
+  background: #f56565;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.fabric-editor-error button:hover {
+  background: #e53e3e;
+}
+
+.properties-panel {
+  margin-top: 12px;
+  padding: 10px;
+  background: #f7fafc;
+  border-radius: 6px;
+}
+
+.property-label {
+  font-size: 12px;
+  color: #4a5568;
+  margin-bottom: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.property-group {
+  margin-top: 10px;
+}
+
+.property-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #2d3748;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.property-group textarea {
+  font-family: inherit;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.property-group textarea:focus {
+  outline: none;
+  border-color: #20B2AA;
+  box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.1);
+}
+
+.layers-list {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+}
+
+.layer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.layer-item:last-child {
+  border-bottom: none;
+}
+
+.layer-item:hover {
+  background: #f7fafc;
+}
+
+.layer-item.active {
+  background: rgba(32, 178, 170, 0.1);
+  border-left: 3px solid #20B2AA;
+}
+
+.layer-name {
+  font-size: 13px;
+  color: #2d3748;
+  font-weight: 500;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.layer-type {
+  font-size: 11px;
+  color: #718096;
+  background: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  margin-left: 8px;
+}
+
+/* Mode-specific toolbar styling */
+.toolbar.simple-mode {
+  /* Simple mode uses collapsible sections, no extra styling needed */
+}
+
+.toolbar.advanced-mode {
+  /* Advanced mode has more content, ensure proper spacing */
+}
+
+/* Add data attribute to container for mode indicator */
+.fabric-editor-container[data-mode="simple"],
+.fabric-editor-container[data-mode="advanced"] {
+  /* Placeholder for any future mode-specific container styles */
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .toolbar {
+    /* Width is controlled by inline style, just adjust defaults via hook */
+    padding: 10px;
+  }
+
+  .canvas-container {
+    padding: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .editor-workspace {
+    flex-direction: column;
+  }
+
+  .toolbar {
+    width: 100% !important; /* Override inline style on mobile */
+    max-height: 200px;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+    overflow-y: auto;
+  }
+
+  /* Hide resize handle on mobile */
+  .resize-handle {
+    display: none;
+  }
+
+  .canvas-container {
+    padding: 4px;
+  }
+}
