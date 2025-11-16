@@ -361,4 +361,57 @@ export const paymentService = {
       throw error;
     }
   },
+
+  /**
+   * Create a Stripe Customer Portal session
+   * @param {string} returnUrl - URL to return to after portal session
+   * @returns {Promise<Object>} Portal session URL
+   */
+  async createCustomerPortalSession(returnUrl) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      throw new Error('Not authenticated');
+    }
+
+    try {
+      // Get customer's Stripe ID
+      const { data: customer, error: customerError } = await supabase
+        .from('customers')
+        .select('stripe_customer_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (customerError || !customer || !customer.stripe_customer_id) {
+        throw new Error('Customer not found. Please complete onboarding first.');
+      }
+
+      // Get current session for authorization
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error('No active session');
+      }
+
+      // Call Edge Function to create portal session
+      const { data: response, error } = await supabase.functions.invoke('create-customer-portal-session', {
+        body: {
+          customerId: customer.stripe_customer_id,
+          returnUrl: returnUrl || window.location.href
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return response;
+    } catch (error) {
+      console.error('Error creating customer portal session:', error);
+      throw error;
+    }
+  },
 };

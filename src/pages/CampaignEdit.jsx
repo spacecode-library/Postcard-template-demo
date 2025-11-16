@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Edit3 } from 'lucide-react';
+import { Edit3, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Breadcrumb from '../components/common/Breadcrumb';
 import FabricEditor from '../components/PostcardEditor/FabricEditor';
 import campaignService from '../supabase/api/campaignService';
+import newMoverService from '../supabase/api/newMoverService';
 import toast from 'react-hot-toast';
 
 const CampaignEdit = () => {
@@ -15,6 +16,8 @@ const CampaignEdit = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditingPostcard, setIsEditingPostcard] = useState(false);
+  const [zipValidation, setZipValidation] = useState(null);
+  const [isValidatingZips, setIsValidatingZips] = useState(false);
 
   const [formData, setFormData] = useState({
     campaign_name: '',
@@ -55,10 +58,51 @@ const CampaignEdit = () => {
       ...prev,
       [name]: value
     }));
+
+    // Clear validation when ZIP codes are changed
+    if (name === 'target_zip_codes') {
+      setZipValidation(null);
+    }
+  };
+
+  const handleValidateZips = async () => {
+    try {
+      setIsValidatingZips(true);
+
+      const zipCodes = formData.target_zip_codes
+        .split(',')
+        .map(zip => zip.trim())
+        .filter(zip => zip.length > 0);
+
+      if (zipCodes.length === 0) {
+        toast.error('Please enter ZIP codes');
+        return;
+      }
+
+      const result = await newMoverService.validateZipCodes(zipCodes);
+      setZipValidation(result);
+
+      if (result.allValid) {
+        toast.success(`All ${result.validZips} ZIP codes are valid!`);
+      } else {
+        toast.error(`${result.invalidZips} invalid ZIP code(s). Please fix before saving.`);
+      }
+    } catch (error) {
+      console.error('Error validating ZIP codes:', error);
+      toast.error('Failed to validate ZIP codes');
+    } finally {
+      setIsValidatingZips(false);
+    }
   };
 
   const handleSaveChanges = async () => {
     try {
+      // Check if ZIP codes have been validated
+      if (!zipValidation || !zipValidation.allValid) {
+        toast.error('Please validate all ZIP codes before saving. All ZIP codes must be valid.');
+        return;
+      }
+
       setIsSaving(true);
 
       // Parse ZIP codes
@@ -212,6 +256,92 @@ const CampaignEdit = () => {
                   rows={4}
                 />
                 <p className="form-help">Separate multiple ZIP codes with commas</p>
+
+                {/* Validate ZIP Codes Button */}
+                <div className="validate-button-wrapper">
+                  <motion.button
+                    type="button"
+                    className="validate-zips-button"
+                    onClick={handleValidateZips}
+                    disabled={isValidatingZips || !formData.target_zip_codes.trim()}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {isValidatingZips ? (
+                      <>
+                        <div className="button-spinner"></div>
+                        Validating...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle size={18} />
+                        Validate ZIP Codes
+                      </>
+                    )}
+                  </motion.button>
+                </div>
+
+                {/* Validation Results */}
+                {zipValidation && (
+                  <motion.div
+                    className="validation-results"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="validation-summary">
+                      <div className={`summary-stat ${zipValidation.allValid ? 'success' : 'warning'}`}>
+                        <div className="stat-icon">
+                          {zipValidation.allValid ? (
+                            <CheckCircle size={20} />
+                          ) : (
+                            <AlertCircle size={20} />
+                          )}
+                        </div>
+                        <div className="stat-content">
+                          <div className="stat-label">Valid ZIP Codes</div>
+                          <div className="stat-value">{zipValidation.validZips} / {zipValidation.totalZipCodes}</div>
+                        </div>
+                      </div>
+
+                      {zipValidation.invalidZips > 0 && (
+                        <div className="summary-stat error">
+                          <div className="stat-icon">
+                            <XCircle size={20} />
+                          </div>
+                          <div className="stat-content">
+                            <div className="stat-label">Invalid ZIP Codes</div>
+                            <div className="stat-value">{zipValidation.invalidZips}</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Show invalid ZIPs */}
+                    {zipValidation.invalidZips > 0 && (
+                      <div className="invalid-zips-list">
+                        <p className="invalid-zips-title">Invalid ZIP Codes:</p>
+                        <div className="invalid-zips-items">
+                          {zipValidation.results
+                            .filter(r => !r.isValid)
+                            .map((result, index) => (
+                              <span key={index} className="invalid-zip-badge">
+                                {result.zipCode}
+                              </span>
+                            ))}
+                        </div>
+                        <p className="invalid-zips-help">Please remove or correct these ZIP codes before saving.</p>
+                      </div>
+                    )}
+
+                    {zipValidation.allValid && (
+                      <div className="validation-success-message">
+                        <CheckCircle size={16} />
+                        <span>All ZIP codes are valid and ready to save!</span>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
               </div>
             </div>
 
@@ -292,15 +422,20 @@ const CampaignEdit = () => {
           >
             Cancel
           </motion.button>
-          <motion.button
-            className="footer-button save-button"
-            onClick={handleSaveChanges}
-            disabled={isSaving}
-            whileHover={{ scale: 1.02, boxShadow: "0 8px 20px rgba(32, 178, 170, 0.3)" }}
-            whileTap={{ scale: 0.98 }}
-          >
-            {isSaving ? 'Saving...' : 'Save Changes'}
-          </motion.button>
+          <div className="save-button-wrapper">
+            <motion.button
+              className="footer-button save-button"
+              onClick={handleSaveChanges}
+              disabled={isSaving || !zipValidation || !zipValidation.allValid}
+              whileHover={{ scale: 1.02, boxShadow: "0 8px 20px rgba(32, 178, 170, 0.3)" }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </motion.button>
+            {(!zipValidation || !zipValidation.allValid) && (
+              <p className="save-button-help">Please validate all ZIP codes before saving</p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -611,6 +746,197 @@ const CampaignEdit = () => {
           cursor: not-allowed;
         }
 
+        .save-button-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 8px;
+        }
+
+        .save-button-help {
+          font-size: 12px;
+          color: #DC2626;
+          margin: 0;
+          font-weight: 500;
+        }
+
+        /* Validation UI Styles */
+        .validate-button-wrapper {
+          margin-top: 16px;
+        }
+
+        .validate-zips-button {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 20px;
+          font-size: 14px;
+          font-weight: 600;
+          color: white;
+          background: #20B2AA;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .validate-zips-button:hover:not(:disabled) {
+          background: #17a097;
+          box-shadow: 0 4px 12px rgba(32, 178, 170, 0.3);
+        }
+
+        .validate-zips-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .button-spinner {
+          width: 16px;
+          height: 16px;
+          border: 2px solid #ffffff40;
+          border-top-color: #ffffff;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        .validation-results {
+          margin-top: 20px;
+          padding: 20px;
+          background: #F7FAFC;
+          border: 1px solid #E2E8F0;
+          border-radius: 12px;
+          overflow: hidden;
+        }
+
+        .validation-summary {
+          display: flex;
+          gap: 12px;
+          margin-bottom: 16px;
+        }
+
+        .summary-stat {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 16px;
+          background: white;
+          border: 2px solid #E2E8F0;
+          border-radius: 10px;
+          transition: all 0.2s ease;
+        }
+
+        .summary-stat.success {
+          border-color: #10B981;
+          background: #ECFDF5;
+        }
+
+        .summary-stat.success .stat-icon {
+          color: #10B981;
+        }
+
+        .summary-stat.warning {
+          border-color: #F59E0B;
+          background: #FFFBEB;
+        }
+
+        .summary-stat.warning .stat-icon {
+          color: #F59E0B;
+        }
+
+        .summary-stat.error {
+          border-color: #EF4444;
+          background: #FEF2F2;
+        }
+
+        .summary-stat.error .stat-icon {
+          color: #EF4444;
+        }
+
+        .stat-icon {
+          flex-shrink: 0;
+        }
+
+        .stat-content {
+          flex: 1;
+        }
+
+        .stat-label {
+          font-size: 12px;
+          color: #6B7280;
+          font-weight: 500;
+          margin-bottom: 4px;
+        }
+
+        .stat-value {
+          font-size: 18px;
+          color: #1F2937;
+          font-weight: 700;
+        }
+
+        .invalid-zips-list {
+          margin-top: 16px;
+          padding: 16px;
+          background: #FEF2F2;
+          border: 1px solid #FCA5A5;
+          border-radius: 8px;
+        }
+
+        .invalid-zips-title {
+          font-size: 13px;
+          color: #991B1B;
+          font-weight: 600;
+          margin: 0 0 12px 0;
+        }
+
+        .invalid-zips-items {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-bottom: 12px;
+        }
+
+        .invalid-zip-badge {
+          display: inline-block;
+          padding: 6px 12px;
+          font-size: 13px;
+          font-weight: 600;
+          color: #991B1B;
+          background: white;
+          border: 1px solid #FCA5A5;
+          border-radius: 6px;
+        }
+
+        .invalid-zips-help {
+          font-size: 12px;
+          color: #DC2626;
+          margin: 0;
+          font-weight: 500;
+        }
+
+        .validation-success-message {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 16px;
+          background: #ECFDF5;
+          border: 1px solid #10B981;
+          border-radius: 8px;
+          color: #047857;
+          font-size: 13px;
+          font-weight: 600;
+          margin-top: 16px;
+        }
+
+        .validation-success-message svg {
+          flex-shrink: 0;
+          color: #10B981;
+        }
+
         @media (max-width: 768px) {
           .campaign-edit-page {
             padding: 16px;
@@ -625,12 +951,29 @@ const CampaignEdit = () => {
             gap: 16px;
           }
 
+          .validation-summary {
+            flex-direction: column;
+          }
+
+          .summary-stat {
+            width: 100%;
+          }
+
           .edit-footer {
             flex-direction: column-reverse;
           }
 
           .footer-button {
             width: 100%;
+          }
+
+          .save-button-wrapper {
+            width: 100%;
+            align-items: stretch;
+          }
+
+          .save-button-help {
+            text-align: center;
           }
         }
       `}</style>

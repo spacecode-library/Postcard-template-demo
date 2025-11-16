@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Calendar, LayoutGrid, CheckCircle, Mail, DollarSign } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Table from '../components/common/Table';
 import StatusBadge from '../components/common/StatusBadge';
@@ -13,9 +14,11 @@ import './History.css';
 
 const History = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
   const [campaigns, setCampaigns] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   // Load campaigns on mount
   useEffect(() => {
@@ -49,12 +52,6 @@ const History = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleCreateNewBlast = () => {
-    // Clear any existing blast data
-    sessionStorage.removeItem('blastData');
-    navigate('/blast/step1');
   };
 
   const handleEditCampaign = (campaignId) => {
@@ -104,13 +101,52 @@ const History = () => {
     }
   };
 
+  // Filter campaigns based on status and date range
+  const filteredCampaigns = useMemo(() => {
+    let filtered = campaigns;
 
-  // Filter campaigns based on search query
-  const filteredCampaigns = campaigns.filter(campaign => 
-    campaign.blastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    campaign.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    campaign.recipients.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    // Filter by status
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(campaign =>
+        campaign.status.toLowerCase() === statusFilter.toLowerCase()
+      );
+    }
+
+    // Filter by date range
+    if (dateFrom) {
+      filtered = filtered.filter(campaign =>
+        new Date(campaign.createdAt) >= new Date(dateFrom)
+      );
+    }
+    if (dateTo) {
+      filtered = filtered.filter(campaign =>
+        new Date(campaign.createdAt) <= new Date(dateTo)
+      );
+    }
+
+    return filtered;
+  }, [campaigns, statusFilter, dateFrom, dateTo]);
+
+  // Calculate summary statistics
+  const stats = useMemo(() => {
+    const totalCampaigns = campaigns.length;
+    const activeCampaigns = campaigns.filter(c => c.status.toLowerCase() === 'active').length;
+    const totalPostcards = campaigns.reduce((sum, c) => {
+      const count = parseInt(c.recipients) || 0;
+      return sum + count;
+    }, 0);
+    const totalSpent = campaigns.reduce((sum, c) => {
+      const cost = parseFloat(c.cost?.replace('$', '').replace(',', '')) || 0;
+      return sum + cost;
+    }, 0);
+
+    return {
+      totalCampaigns,
+      activeCampaigns,
+      totalPostcards,
+      totalSpent
+    };
+  }, [campaigns]);
 
   const columns = [
     {
@@ -179,44 +215,105 @@ const History = () => {
           {/* Header */}
           <div className="history-header">
             <h1 className="history-title">New Mover</h1>
-            <div className="header-actions">
-              <Button 
-                variant="secondary"
-                onClick={() => navigate('/settings')}
-              >
-                Settings
-              </Button>
-              <Button
-                variant="primary"
-                onClick={handleCreateNewBlast}
-                icon={
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M8 1V15M1 8H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                }
-              >
-                New Blast
-              </Button>
-            </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="history-search-section">
-            <div className="history-search-input-container">
-              <svg className="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M11 11l4 4" stroke="currentColor" strokeWidth="1.5"/>
-              </svg>
-              <input 
-                type="text" 
-                placeholder="Search" 
-                className="history-search-input"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <span className="search-shortcut">⌘K</span>
+          {/* Summary Statistics */}
+          {!isLoading && campaigns.length > 0 && (
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-icon">
+                  <LayoutGrid size={24} />
+                </div>
+                <div className="stat-content">
+                  <div className="stat-value">{stats.totalCampaigns}</div>
+                  <div className="stat-label">Total Campaigns</div>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">
+                  <CheckCircle size={24} />
+                </div>
+                <div className="stat-content">
+                  <div className="stat-value">{stats.activeCampaigns}</div>
+                  <div className="stat-label">Active Campaigns</div>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">
+                  <Mail size={24} />
+                </div>
+                <div className="stat-content">
+                  <div className="stat-value">{stats.totalPostcards.toLocaleString()}</div>
+                  <div className="stat-label">Postcards Sent</div>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">
+                  <DollarSign size={24} />
+                </div>
+                <div className="stat-content">
+                  <div className="stat-value">${stats.totalSpent.toLocaleString()}</div>
+                  <div className="stat-label">Total Spent</div>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Filters */}
+          {!isLoading && campaigns.length > 0 && (
+            <div className="filters-section">
+              <div className="filter-group">
+                <label className="filter-label">Status</label>
+                <select
+                  className="filter-select"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="all">All Campaigns</option>
+                  <option value="active">Active</option>
+                  <option value="paused">Paused</option>
+                  <option value="draft">Draft</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+              <div className="filter-group">
+                <label className="filter-label">Date From</label>
+                <div className="date-input-wrapper">
+                  <Calendar size={16} className="date-icon" />
+                  <input
+                    type="date"
+                    className="filter-date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="filter-group">
+                <label className="filter-label">Date To</label>
+                <div className="date-input-wrapper">
+                  <Calendar size={16} className="date-icon" />
+                  <input
+                    type="date"
+                    className="filter-date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                  />
+                </div>
+              </div>
+              {(statusFilter !== 'all' || dateFrom || dateTo) && (
+                <button
+                  className="clear-filters-btn"
+                  onClick={() => {
+                    setStatusFilter('all');
+                    setDateFrom('');
+                    setDateTo('');
+                  }}
+                >
+                  Clear Filters
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Data Table */}
           {isLoading ? (
@@ -249,6 +346,141 @@ const History = () => {
       </div>
 
       <style>{`
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 20px;
+          margin: 24px 0;
+        }
+
+        .stat-card {
+          background: white;
+          border: 1px solid #E2E8F0;
+          border-radius: 12px;
+          padding: 20px;
+          display: flex;
+          gap: 16px;
+          align-items: center;
+          transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+          border-color: #20B2AA;
+          box-shadow: 0 4px 12px rgba(32, 178, 170, 0.1);
+        }
+
+        .stat-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 10px;
+          background: linear-gradient(135deg, #20B2AA 0%, #17a2a2 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+        }
+
+        .stat-content {
+          flex: 1;
+        }
+
+        .stat-value {
+          font-size: 28px;
+          font-weight: 700;
+          color: #1A202C;
+          line-height: 1.2;
+        }
+
+        .stat-label {
+          font-size: 13px;
+          color: #718096;
+          margin-top: 4px;
+          font-weight: 500;
+        }
+
+        .filters-section {
+          display: flex;
+          gap: 16px;
+          align-items: flex-end;
+          margin: 24px 0;
+          padding: 20px;
+          background: white;
+          border: 1px solid #E2E8F0;
+          border-radius: 12px;
+        }
+
+        .filter-group {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          flex: 1;
+          max-width: 200px;
+        }
+
+        .filter-label {
+          font-size: 13px;
+          font-weight: 600;
+          color: #4A5568;
+        }
+
+        .filter-select,
+        .filter-date {
+          padding: 10px 12px;
+          border: 1.5px solid #E2E8F0;
+          border-radius: 8px;
+          font-size: 14px;
+          color: #2D3748;
+          background: white;
+          transition: all 0.2s;
+        }
+
+        .filter-select:hover,
+        .filter-date:hover {
+          border-color: #CBD5E0;
+        }
+
+        .filter-select:focus,
+        .filter-date:focus {
+          outline: none;
+          border-color: #20B2AA;
+          box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.1);
+        }
+
+        .date-input-wrapper {
+          position: relative;
+        }
+
+        .date-icon {
+          position: absolute;
+          left: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #A0AEC0;
+          pointer-events: none;
+        }
+
+        .filter-date {
+          padding-left: 36px;
+        }
+
+        .clear-filters-btn {
+          padding: 10px 20px;
+          background: #EDF2F7;
+          border: 1.5px solid #E2E8F0;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          color: #4A5568;
+          cursor: pointer;
+          transition: all 0.2s;
+          white-space: nowrap;
+        }
+
+        .clear-filters-btn:hover {
+          background: #E2E8F0;
+          border-color: #CBD5E0;
+        }
+
         .loading-container {
           display: flex;
           align-items: center;

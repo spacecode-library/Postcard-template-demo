@@ -108,7 +108,7 @@ const CampaignStep4 = () => {
 
   const handleContinue = async () => {
     if (!canContinue()) {
-      toast.error('Please validate ZIP codes with available data');
+      toast.error('All ZIP codes must be valid before continuing. Please remove or fix invalid ZIP codes.');
       return;
     }
 
@@ -117,14 +117,15 @@ const CampaignStep4 = () => {
   };
 
   const canContinue = () => {
-    return zipValidation && zipValidation.zipsWithData > 0;
+    // ALL zip codes must be valid (no invalid zips allowed)
+    return zipValidation && zipValidation.allValid === true && zipValidation.validZips > 0;
   };
 
   return (
     <ProcessLayout
       currentStep={4}
       totalSteps={totalSteps}
-      footerMessage="Please validate ZIP codes with available data before continuing"
+      footerMessage="All ZIP codes must be valid before continuing. Invalid ZIP codes will block progress."
       onContinue={handleContinue}
       continueDisabled={!canContinue() || loading}
       continueText={loading ? 'Processing...' : 'Continue'}

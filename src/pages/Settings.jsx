@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Tabs from '../components/common/Tabs';
 import ProfileTab from '../components/settings/ProfileTab';
@@ -28,13 +27,6 @@ const Settings = () => {
         {/* Header */}
         <div className="settings-header">
           <h1 className="settings-title">Settings</h1>
-          <div className="settings-search">
-            <div className="search-wrapper">
-              <Search className="search-icon" size={20} />
-              <input type="text" placeholder="Search" className="search-input" />
-              <kbd className="search-shortcut">⌘K</kbd>
-            </div>
-          </div>
         </div>
 
         {/* Settings Content */}

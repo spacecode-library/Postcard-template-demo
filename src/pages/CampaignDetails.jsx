@@ -16,7 +16,6 @@ import {
   MapPin
 } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import AnalyticsChart from '../components/dashboard/AnalyticsChart';
 import campaignService from '../supabase/api/campaignService';
 import newMoverService from '../supabase/api/newMoverService';
 import toast from 'react-hot-toast';
@@ -28,7 +27,6 @@ const CampaignDetails = () => {
   const [campaign, setCampaign] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [performanceData, setPerformanceData] = useState([]);
   const [newMovers, setNewMovers] = useState([]);
   const [newMoversLoading, setNewMoversLoading] = useState(false);
   const [newMoversTotalCount, setNewMoversTotalCount] = useState(0);
@@ -46,10 +44,6 @@ const CampaignDetails = () => {
 
       if (result.success) {
         setCampaign(result.campaign);
-
-        // Generate mock performance data
-        // In production, this would come from campaign_analytics table
-        generatePerformanceData(result.campaign);
 
         // Load new movers data
         await loadNewMoversData(result.campaign);
@@ -87,27 +81,6 @@ const CampaignDetails = () => {
     } finally {
       setNewMoversLoading(false);
     }
-  };
-
-  const generatePerformanceData = (campaignData) => {
-    if (campaignData.status === 'draft') {
-      setPerformanceData([]);
-      return;
-    }
-
-    // Generate mock daily data for last 7 days
-    const data = [];
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      data.push({
-        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        sent: Math.floor(Math.random() * 100) + 20,
-        delivered: Math.floor(Math.random() * 90) + 15,
-        responses: Math.floor(Math.random() * 10) + 1
-      });
-    }
-    setPerformanceData(data);
   };
 
   const handleBack = () => {
@@ -394,19 +367,6 @@ const CampaignDetails = () => {
               </div>
             </motion.div>
 
-            {/* Performance Chart */}
-            {performanceData.length > 0 && (
-              <motion.div
-                className="campaign-analytics-card"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.3 }}
-              >
-                <h3>Performance (Last 7 Days)</h3>
-                <AnalyticsChart data={performanceData} />
-              </motion.div>
-            )}
-
             {/* Target ZIP Codes */}
             {campaign.target_zip_codes && campaign.target_zip_codes.length > 0 && (
               <motion.div
@@ -465,7 +425,7 @@ const CampaignDetails = () => {
                           <th>Address</th>
                           <th>City, State ZIP</th>
                           <th>Move Date</th>
-                          <th>Sent</th>
+                          <th>Sent Postcards</th>
                         </tr>
                       </thead>
                       <tbody>

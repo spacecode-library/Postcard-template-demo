@@ -8,10 +8,6 @@ import campaignService from '../../supabase/api/campaignService';
 import toast from 'react-hot-toast';
 import './onboarding-step2-redesign.css';
 
-// Import preview generators for browser console access
-import '../../utils/browserPreviewGenerator';
-import '../../utils/realPreviewGenerator';
-
 const OnboardingStep2Enhanced = () => {
   const navigate = useNavigate();
   const [selectedTemplate, setSelectedTemplate] = useState(null);

@@ -36,7 +36,6 @@ const campaignService = {
         // Step 1 Data - Business Information
         website_url: campaignData.website_url || null,
         business_category: campaignData.business_category || null,
-        brandfetch_data: campaignData.brandfetch_data || null,
 
         // Template & Design
         template_id: campaignData.template_id || null,

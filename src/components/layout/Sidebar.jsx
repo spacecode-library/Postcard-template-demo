@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, Clock, Settings, Search, ChevronDown, LogOut } from 'lucide-react';
+import { Home, Clock, Settings, ChevronDown, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import Avatar from '../ui/Avatar';
 import { cn } from '../../utils/cn';
@@ -46,15 +46,6 @@ const Sidebar = () => {
             <h1 className="text-lg font-bold text-gray-900">MovePost</h1>
             <p className="text-xs text-gray-500 font-medium">Postcard Platform</p>
           </div>
-        </div>
-      </div>
-
-      {/* Search Section */}
-      <div className="search-section">
-        <div className="search-input-wrapper">
-          <Search className="search-icon" size={20} />
-          <input type="text" placeholder="Search" className="search-input" />
-          <kbd className="search-shortcut">⌘K</kbd>
         </div>
       </div>
 

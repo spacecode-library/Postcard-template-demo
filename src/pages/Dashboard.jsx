@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LayoutGrid, CheckCircle, Mail, DollarSign, Plus, Calendar, SlidersHorizontal, Clock, AlertTriangle } from 'lucide-react';
+import { LayoutGrid, CheckCircle, Mail, DollarSign, Plus, Clock, AlertTriangle } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import EmptyState from '../components/dashboard/EmptyState';
 import CampaignCard from '../components/dashboard/CampaignCard';
-import AnalyticsChart from '../components/dashboard/AnalyticsChart';
 import campaignService from '../supabase/api/campaignService';
 import { mockCampaignService } from '../services/mockDataService';
 import toast from 'react-hot-toast';
@@ -17,12 +16,9 @@ const USE_MOCK_DATA = false;
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [selectedPeriod, setSelectedPeriod] = useState('12 months');
   const [campaigns, setCampaigns] = useState([]);
   const [campaignStats, setCampaignStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  const periods = ['12 months', '30 days', '7 days', '24 hours'];
 
   // Load campaigns and stats on mount
   useEffect(() => {
@@ -331,47 +327,6 @@ const Dashboard = () => {
               </motion.div>
             </div>
           )}
-
-          {/* Time Period Filters */}
-          <div className="filters-section">
-            <div className="period-filters">
-              {periods.map((period) => (
-                <motion.button
-                  key={period}
-                  className={`period-button ${selectedPeriod === period ? 'active' : ''}`}
-                  onClick={() => setSelectedPeriod(period)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  {period}
-                </motion.button>
-              ))}
-            </div>
-            <div className="filter-controls">
-              <motion.button
-                className="date-select-button"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Calendar size={16} />
-                Select dates
-              </motion.button>
-              <motion.button
-                className="filters-button"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <SlidersHorizontal size={16} />
-                Filters
-              </motion.button>
-            </div>
-          </div>
-
-          {/* Analytics Chart */}
-          <AnalyticsChart
-            data={[]}
-            total={campaignStats?.total_postcards_sent || 0}
-          />
 
           {/* Campaigns Grid */}
           <div className="campaigns-grid">

@@ -102,14 +102,15 @@ const CampaignStep2 = () => {
         const allTemplates = await response.json();
         console.log('Loaded templates:', allTemplates);
 
-        // Filter only available templates with PSD files
+        // Filter only available templates with PSD files and exclude 2-sided templates
         const availableTemplates = allTemplates.filter(template =>
           template.available &&
           template.psdFile &&
-          template.psdFile.endsWith('.psd')
+          template.psdFile.endsWith('.psd') &&
+          template.sides !== 2  // Only show 1-sided templates
         );
 
-        console.log(`Found ${availableTemplates.length} available PSD templates`);
+        console.log(`Found ${availableTemplates.length} available 1-sided PSD templates`);
 
         if (availableTemplates.length === 0) {
           throw new Error('No available PSD templates found');
@@ -473,11 +474,6 @@ const CampaignStep2 = () => {
                 />
                 <div className="step2-template-info">
                   <h3 className="step2-template-name">{template.name}</h3>
-                  <div className="step2-template-meta">
-                    {template.sides === 2 && (
-                      <span className="double-sided-badge">2-Sided</span>
-                    )}
-                  </div>
                   <button className="step2-template-button">
                     {selectedTemplate?.id === template.id ? 'Selected' : 'Select'}
                   </button>
@@ -708,17 +704,13 @@ const CampaignStep2 = () => {
           color: #718096;
         }
 
-        .quality-badge, .double-sided-badge {
+        .quality-badge {
           background: #20B2AA;
           color: white;
           padding: 2px 6px;
           border-radius: 3px;
           font-size: 10px;
           font-weight: 600;
-        }
-
-        .double-sided-badge {
-          background: #ed8936;
         }
       `}</style>
     </ProcessLayout>

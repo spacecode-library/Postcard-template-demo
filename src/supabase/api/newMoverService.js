@@ -442,9 +442,9 @@ export const newMoverService = {
   },
 
   /**
-   * Validate ZIP codes and check data availability
-   * Does NOT fetch full data, just checks if data exists
-   * @param {Array} zipCodes - Array of ZIP codes to validate
+   * Validate ZIP codes using cache-first approach with Melissa API
+   * Checks validated_zipcodes cache first, then calls Melissa API if needed
+   * @param {Array|String} zipCodes - Array of ZIP codes or comma-separated string
    * @returns {Promise<Object>} Validation results with status per ZIP
    */
   async validateZipCodes(zipCodes) {
@@ -466,36 +466,137 @@ export const newMoverService = {
 
       console.log(`Validating ${processedZipCodes.length} ZIP codes...`);
 
-      // Check each ZIP code for data availability in Supabase
+      // Check each ZIP code using cache-first approach
       const validationResults = await Promise.all(
         processedZipCodes.map(async (zipCode) => {
-          const { count, error } = await supabase
-            .from('newmover')
-            .select('*', { count: 'exact', head: true })
-            .eq('zip_code', zipCode);
+          // Step 1: Check cache first
+          const { data: cachedData, error: cacheError } = await supabase
+            .from('validated_zipcodes')
+            .select('*')
+            .eq('zip_code', zipCode)
+            .single();
 
-          return {
-            zipCode,
-            isValid: true,
-            hasData: !error && count > 0,
-            dataCount: count || 0
-          };
+          // If cached and less than 30 days old, use cached result
+          if (cachedData && !cacheError) {
+            const validatedAt = new Date(cachedData.validated_at);
+            const daysSinceValidation = (Date.now() - validatedAt.getTime()) / (1000 * 60 * 60 * 24);
+
+            if (daysSinceValidation < 30) {
+              console.log(`✓ Using cached validation for ${zipCode}`);
+              return {
+                zipCode,
+                isValid: cachedData.is_valid,
+                hasData: cachedData.is_valid, // Assume valid zips have data
+                source: 'cache',
+                validatedAt: cachedData.validated_at
+              };
+            }
+          }
+
+          // Step 2: Not in cache or expired, validate with Melissa API
+          console.log(`Validating ${zipCode} with Melissa API...`);
+
+          try {
+            // Call Melissa API to validate ZIP code
+            const melissaResult = await this.validateZipWithMelissa(zipCode);
+
+            // Step 3: Store result in cache
+            await supabase
+              .from('validated_zipcodes')
+              .upsert({
+                zip_code: zipCode,
+                is_valid: melissaResult.isValid,
+                validated_at: new Date().toISOString(),
+                melissa_data: melissaResult.data || null
+              }, {
+                onConflict: 'zip_code'
+              });
+
+            return {
+              zipCode,
+              isValid: melissaResult.isValid,
+              hasData: melissaResult.isValid,
+              source: 'melissa',
+              validatedAt: new Date().toISOString()
+            };
+          } catch (apiError) {
+            console.error(`Error validating ${zipCode} with Melissa:`, apiError);
+
+            // If Melissa API fails, fall back to Supabase data check
+            const { count, error } = await supabase
+              .from('newmover')
+              .select('*', { count: 'exact', head: true })
+              .eq('zip_code', zipCode);
+
+            return {
+              zipCode,
+              isValid: !error && count > 0,
+              hasData: !error && count > 0,
+              dataCount: count || 0,
+              source: 'fallback',
+              error: 'Melissa API unavailable'
+            };
+          }
         })
       );
 
-      const zipsWithData = validationResults.filter(r => r.hasData);
-      const zipsWithoutData = validationResults.filter(r => !r.hasData);
+      const validZips = validationResults.filter(r => r.isValid);
+      const invalidZips = validationResults.filter(r => !r.isValid);
 
       return {
         success: true,
         totalZipCodes: processedZipCodes.length,
-        zipsWithData: zipsWithData.length,
-        zipsWithoutData: zipsWithoutData.length,
+        validZips: validZips.length,
+        invalidZips: invalidZips.length,
+        allValid: invalidZips.length === 0,
         results: validationResults,
         flatRate: 3.00 // Current flat rate per postcard
       };
     } catch (error) {
       console.error('Error validating ZIP codes:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Validate a single ZIP code with Melissa API
+   * @param {String} zipCode - ZIP code to validate
+   * @returns {Promise<Object>} Validation result from Melissa
+   */
+  async validateZipWithMelissa(zipCode) {
+    try {
+      // Call Melissa ZIP validation endpoint
+      // Note: This uses the Melissa Address Verification API
+      const response = await fetch(MELISSA_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          customerid: MELISSA_CUSTOMER_ID,
+          postalcode: zipCode,
+          country: 'USA'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Melissa API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // Check if Melissa returned a valid result
+      // Melissa returns specific status codes for validation
+      const isValid = data && data.Results && data.Results.length > 0 &&
+                     data.Results[0].AddressKey &&
+                     data.Results[0].AddressKey.length > 0;
+
+      return {
+        isValid,
+        data: data.Results ? data.Results[0] : null
+      };
+    } catch (error) {
+      console.error('Melissa API validation error:', error);
       throw error;
     }
   },
