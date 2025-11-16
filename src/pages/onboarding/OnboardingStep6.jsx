@@ -105,8 +105,6 @@ const OnboardingStep6 = () => {
         status: 'active', // Set to active since payment exists
         targeting_type: targetingData.option || 'zip_codes',
         target_zip_codes: targetingData.zipCodes || [],
-        validated_zips: targetingData.validatedZips || [],
-        zips_with_data: targetingData.zipsWithData || 0,
         postcards_sent: 0,
         price_per_postcard: targetingData.flatRate || 3.00,
         payment_status: 'paid' // Mark as paid since payment method exists

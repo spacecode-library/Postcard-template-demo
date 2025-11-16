@@ -33,10 +33,6 @@ const campaignService = {
         campaign_name: campaignData.campaign_name || campaignData.name || 'Untitled Campaign',
         status: campaignData.status || 'draft',
 
-        // Step 1 Data - Business Information
-        website_url: campaignData.website_url || null,
-        business_category: campaignData.business_category || null,
-
         // Template & Design
         template_id: campaignData.template_id || null,
         template_name: campaignData.template_name || null,
@@ -46,8 +42,6 @@ const campaignService = {
         // Targeting
         targeting_type: campaignData.targeting_type || 'zip_codes',
         target_zip_codes: campaignData.target_zip_codes || [],
-        validated_zips: campaignData.validated_zips || [],
-        zips_with_data: campaignData.zips_with_data || 0,
         target_location: campaignData.target_location || null,
         target_radius: campaignData.target_radius || null,
 

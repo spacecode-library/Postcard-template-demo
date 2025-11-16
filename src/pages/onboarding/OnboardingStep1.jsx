@@ -143,10 +143,6 @@ const OnboardingStep1 = () => {
         company_id: saveResult.company.id,
         status: 'draft',
         payment_status: 'pending',
-        // Step 1 data - Save to campaign
-        website_url: formData.website,
-        business_category: formData.businessCategory,
-        brandfetch_data: brandData,
         // Template & Design (will be added in later steps)
         template_id: null,
         template_name: null,
