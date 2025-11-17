@@ -559,45 +559,48 @@ export const newMoverService = {
   },
 
   /**
-   * Validate a single ZIP code with Melissa API
+   * Validate a single ZIP code using format validation
+   * Note: We use format validation instead of calling Melissa's address API
+   * because the New Movers API endpoint doesn't provide ZIP validation.
+   * Valid ZIPs without new movers would incorrectly fail validation.
+   *
    * @param {String} zipCode - ZIP code to validate
-   * @returns {Promise<Object>} Validation result from Melissa
+   * @returns {Promise<Object>} Validation result
    */
   async validateZipWithMelissa(zipCode) {
     try {
-      // Call Melissa ZIP validation endpoint
-      // Note: This uses the Melissa Address Verification API
-      const response = await fetch(MELISSA_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          customerid: MELISSA_CUSTOMER_ID,
-          postalcode: zipCode,
-          country: 'USA'
-        })
-      });
+      // Basic US ZIP code format validation (5 digits or 5+4 format)
+      const zipRegex = /^\d{5}(-\d{4})?$/;
+      const isValidFormat = zipRegex.test(zipCode);
 
-      if (!response.ok) {
-        throw new Error(`Melissa API error: ${response.statusText}`);
+      if (!isValidFormat) {
+        console.log(`❌ Invalid ZIP format: ${zipCode}`);
+        return {
+          isValid: false,
+          data: null,
+          error: 'Invalid ZIP code format'
+        };
       }
 
-      const data = await response.json();
-
-      // Check if Melissa returned a valid result
-      // Melissa returns specific status codes for validation
-      const isValid = data && data.Results && data.Results.length > 0 &&
-                     data.Results[0].AddressKey &&
-                     data.Results[0].AddressKey.length > 0;
-
+      // ZIP code has valid format - consider it valid
+      // The actual data availability check happens when fetching new movers
+      console.log(`✓ Valid ZIP format: ${zipCode}`);
       return {
-        isValid,
-        data: data.Results ? data.Results[0] : null
+        isValid: true,
+        data: {
+          zipCode,
+          validatedAt: new Date().toISOString(),
+          method: 'format_validation'
+        }
       };
     } catch (error) {
-      console.error('Melissa API validation error:', error);
-      throw error;
+      console.error('ZIP validation error:', error);
+      // On error, assume valid to not block users with network issues
+      return {
+        isValid: true,
+        data: null,
+        error: error.message
+      };
     }
   },
 

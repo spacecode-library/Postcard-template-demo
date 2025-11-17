@@ -124,14 +124,15 @@ const OnboardingStep2Enhanced = () => {
         console.log('Loaded templates:', allTemplates);
         console.log('Template preview paths:', allTemplates.map(t => ({ name: t.name, preview: t.preview })));
         
-        // Filter only available templates with PSD files
-        const availableTemplates = allTemplates.filter(template => 
-          template.available && 
-          template.psdFile && 
-          template.psdFile.endsWith('.psd')
+        // Filter only available templates with PSD files (exclude 2-sided)
+        const availableTemplates = allTemplates.filter(template =>
+          template.available &&
+          template.psdFile &&
+          template.psdFile.endsWith('.psd') &&
+          template.sides !== 2  // Only show 1-sided templates
         );
-        
-        console.log(`Found ${availableTemplates.length} available PSD templates`);
+
+        console.log(`Found ${availableTemplates.length} available 1-sided PSD templates`);
         
         if (availableTemplates.length === 0) {
           throw new Error('No available PSD templates found');

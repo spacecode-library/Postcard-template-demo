@@ -22,24 +22,24 @@ ON validated_zipcodes(validated_at);
 -- Add RLS policies
 ALTER TABLE validated_zipcodes ENABLE ROW LEVEL SECURITY;
 
--- Policy: Allow all authenticated users to read validated zip codes
-CREATE POLICY "Allow authenticated users to read validated zip codes"
+-- Policy: Allow all users to read validated zip codes
+CREATE POLICY "Allow all users to read validated zip codes"
 ON validated_zipcodes
 FOR SELECT
-TO authenticated
+TO public
 USING (true);
 
--- Policy: Allow all authenticated users to insert/update validated zip codes
-CREATE POLICY "Allow authenticated users to insert validated zip codes"
+-- Policy: Allow all users to insert/update validated zip codes
+CREATE POLICY "Allow all users to insert validated zip codes"
 ON validated_zipcodes
 FOR INSERT
-TO authenticated
+TO public
 WITH CHECK (true);
 
-CREATE POLICY "Allow authenticated users to update validated zip codes"
+CREATE POLICY "Allow all users to update validated zip codes"
 ON validated_zipcodes
 FOR UPDATE
-TO authenticated
+TO public
 USING (true);
 
 -- Create function to auto-update updated_at timestamp
