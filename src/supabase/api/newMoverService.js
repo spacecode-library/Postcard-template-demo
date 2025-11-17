@@ -542,12 +542,16 @@ export const newMoverService = {
 
       const validZips = validationResults.filter(r => r.isValid);
       const invalidZips = validationResults.filter(r => !r.isValid);
+      const zipsWithData = validationResults.filter(r => r.hasData);
+      const zipsWithoutData = validationResults.filter(r => !r.hasData);
 
       return {
         success: true,
         totalZipCodes: processedZipCodes.length,
         validZips: validZips.length,
         invalidZips: invalidZips.length,
+        zipsWithData: zipsWithData.length,
+        zipsWithoutData: zipsWithoutData.length,
         allValid: invalidZips.length === 0,
         results: validationResults,
         flatRate: 3.00 // Current flat rate per postcard
@@ -559,17 +563,16 @@ export const newMoverService = {
   },
 
   /**
-   * Validate a single ZIP code using format validation
-   * Note: We use format validation instead of calling Melissa's address API
-   * because the New Movers API endpoint doesn't provide ZIP validation.
-   * Valid ZIPs without new movers would incorrectly fail validation.
+   * Validate a single ZIP code by checking Melissa API for new movers data
+   * A ZIP is only valid if it has actual new movers data available
+   * This ensures users only target ZIPs with new movers
    *
    * @param {String} zipCode - ZIP code to validate
-   * @returns {Promise<Object>} Validation result
+   * @returns {Promise<Object>} Validation result with hasData and dataCount
    */
   async validateZipWithMelissa(zipCode) {
     try {
-      // Basic US ZIP code format validation (5 digits or 5+4 format)
+      // First check format
       const zipRegex = /^\d{5}(-\d{4})?$/;
       const isValidFormat = zipRegex.test(zipCode);
 
@@ -577,30 +580,93 @@ export const newMoverService = {
         console.log(`❌ Invalid ZIP format: ${zipCode}`);
         return {
           isValid: false,
+          hasData: false,
+          dataCount: 0,
           data: null,
           error: 'Invalid ZIP code format'
         };
       }
 
-      // ZIP code has valid format - consider it valid
-      // The actual data availability check happens when fetching new movers
-      console.log(`✓ Valid ZIP format: ${zipCode}`);
+      console.log(`Checking Melissa API for new movers in ${zipCode}...`);
+
+      // Call Melissa New Movers API to check if data exists
+      const response = await fetch(MELISSA_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          customerid: MELISSA_CUSTOMER_ID,
+          includes: {
+            zips: [{ zip: zipCode }]
+          },
+          columns: ['melissaaddresskey'], // Minimal column to check existence
+          pagination: {
+            page: 1,
+            recordsPerPage: 1 // Just need to know if data exists
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Melissa API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const hasData = data.Results && data.Results.length > 0;
+      const dataCount = data.TotalRecords || 0;
+
+      if (hasData) {
+        console.log(`✓ ${zipCode} has ${dataCount} new movers`);
+      } else {
+        console.log(`❌ ${zipCode} has no new movers data`);
+      }
+
       return {
-        isValid: true,
+        isValid: hasData, // Only valid if new movers data exists
+        hasData: hasData,
+        dataCount: dataCount,
         data: {
           zipCode,
           validatedAt: new Date().toISOString(),
-          method: 'format_validation'
+          totalRecords: dataCount,
+          method: 'melissa_api'
         }
       };
     } catch (error) {
       console.error('ZIP validation error:', error);
-      // On error, assume valid to not block users with network issues
-      return {
-        isValid: true,
-        data: null,
-        error: error.message
-      };
+
+      // On API error, fall back to checking Supabase cache
+      try {
+        const { count, error: dbError } = await supabase
+          .from('newmover')
+          .select('*', { count: 'exact', head: true })
+          .eq('zip_code', zipCode);
+
+        const hasData = !dbError && count > 0;
+
+        console.log(`⚠️ Melissa API unavailable, using cached data: ${zipCode} has ${count || 0} records`);
+
+        return {
+          isValid: hasData,
+          hasData: hasData,
+          dataCount: count || 0,
+          data: null,
+          error: error.message,
+          fallback: true
+        };
+      } catch (fallbackError) {
+        console.error('Fallback check failed:', fallbackError);
+        // If both Melissa and Supabase fail, assume no data
+        return {
+          isValid: false,
+          hasData: false,
+          dataCount: 0,
+          data: null,
+          error: error.message
+        };
+      }
     }
   },
 
