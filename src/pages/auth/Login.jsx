@@ -85,35 +85,32 @@ const Login = () => {
       const response = await login(formData.email, formData.password);
 
       // Smart redirect logic based on user status
-      // Wait a moment for auth state and onboarding status to load
-      setTimeout(async () => {
-        try {
-          // Refresh onboarding status to get latest data
-          const onboardingStatus = await checkOnboardingStatus();
+      try {
+        // Refresh onboarding status to get latest data
+        const onboardingStatus = await checkOnboardingStatus();
 
-          // Check if email is verified (if confirmation is enabled)
-          if (response && response.user && !response.user.email_confirmed_at) {
-            toast('Please verify your email to continue');
-            navigate('/verify-email');
-            return;
-          }
+        // Check if email is verified (if confirmation is enabled)
+        if (response && response.user && !response.user.email_confirmed_at) {
+          toast('Please verify your email to continue');
+          navigate('/verify-email');
+          return;
+        }
 
-          // Check onboarding completion
-          if (onboardingStatus && !onboardingStatus.onboardingCompleted) {
-            // User hasn't completed onboarding - redirect to their current step
-            const step = onboardingStatus.currentStep || 1;
-            toast(`Continuing your onboarding from Step ${step}`);
-            navigate(`/onboarding/step${step}`);
-          } else {
-            // User has completed onboarding - go to dashboard
-            navigate('/dashboard');
-          }
-        } catch (error) {
-          console.error('Error during redirect logic:', error);
-          // Fallback to dashboard if there's an error
+        // Check onboarding completion
+        if (onboardingStatus && !onboardingStatus.onboardingCompleted) {
+          // User hasn't completed onboarding - redirect to their current step
+          const step = onboardingStatus.currentStep || 1;
+          toast(`Continuing your onboarding from Step ${step}`);
+          navigate(`/onboarding/step${step}`);
+        } else {
+          // User has completed onboarding - go to dashboard
           navigate('/dashboard');
         }
-      }, 500);
+      } catch (error) {
+        console.error('Error during redirect logic:', error);
+        // Fallback to dashboard if there's an error
+        navigate('/dashboard');
+      }
 
     } catch (error) {
       console.error('Login error:', error);

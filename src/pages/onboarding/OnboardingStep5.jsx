@@ -11,6 +11,7 @@ import {
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 import toast from 'react-hot-toast';
 import { paymentService } from '../../supabase/api/paymentService';
+import onboardingService from '../../supabase/api/onboardingService';
 import './onboarding-step5.css';
 
 // Initialize Stripe - make sure this is outside the component
@@ -295,12 +296,16 @@ const OnboardingStep5 = () => {
     navigate('/onboarding/step4');
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = async () => {
+    // Mark step 5 as complete
+    await onboardingService.markStepComplete(5);
     navigate('/onboarding/step6');
   };
 
-  const handleSkipPayment = () => {
+  const handleSkipPayment = async () => {
     toast.success('Payment setup skipped. You can add payment details later.');
+    // Mark step 5 as complete
+    await onboardingService.markStepComplete(5);
     navigate('/onboarding/step6');
   };
 

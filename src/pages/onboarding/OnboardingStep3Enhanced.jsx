@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 import FabricEditor from '../../components/PostcardEditor/FabricEditor';
 import campaignService from '../../supabase/api/campaignService';
+import onboardingService from '../../supabase/api/onboardingService';
 import toast from 'react-hot-toast';
 
 const OnboardingStep3Enhanced = () => {
@@ -112,6 +113,8 @@ const OnboardingStep3Enhanced = () => {
     // Save design before continuing
     const saved = await handleSave();
     if (saved) {
+      // Mark step 3 as complete
+      await onboardingService.markStepComplete(3);
       navigate('/onboarding/step4');
     }
   };

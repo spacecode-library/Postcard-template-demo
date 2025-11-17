@@ -44,6 +44,55 @@ const supabaseOnboardingService = {
         }
       }
 
+      // Check if user has existing campaigns (legacy user detection)
+      // If no progress record or onboarding not completed, check for campaigns
+      if (!progress || !progress.onboarding_completed) {
+        try {
+          const { data: campaigns, error: campaignError } = await supabase
+            .from('campaigns')
+            .select('id, created_at')
+            .eq('user_id', user.id)
+            .limit(1)
+
+          // If user has campaigns but no progress, auto-complete onboarding
+          if (!campaignError && campaigns && campaigns.length > 0) {
+            console.log('✅ Legacy user detected - has campaigns, auto-completing onboarding')
+
+            // Auto-create onboarding_progress record for legacy user
+            const { error: upsertError } = await supabase
+              .from('onboarding_progress')
+              .upsert({
+                user_id: user.id,
+                onboarding_completed: true,
+                current_step: 6,
+                completed_steps: [1, 2, 3, 4, 5, 6],
+                updated_at: new Date().toISOString()
+              }, {
+                onConflict: 'user_id'
+              })
+
+            if (upsertError) {
+              console.error('Error creating onboarding progress for legacy user:', upsertError)
+            } else {
+              console.log('✅ Onboarding progress auto-created for legacy user')
+            }
+
+            return {
+              userId: user.id,
+              onboardingCompleted: true,
+              currentStep: 6,
+              completedAt: campaigns[0].created_at,
+              progress: null,
+              hasFirstCampaign: true,
+              firstCampaignId: campaigns[0].id
+            }
+          }
+        } catch (campaignCheckError) {
+          console.warn('Error checking campaigns for legacy user:', campaignCheckError)
+          // Continue with normal flow if campaign check fails
+        }
+      }
+
       // Map schema columns to expected format
       return {
         userId: user.id,

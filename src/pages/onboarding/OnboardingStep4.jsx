@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, MapPin, CheckSquare, Trash2, CheckCircle, AlertCircle, DollarSign, XCircle } from 'lucide-react';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 import newMoverService from '../../supabase/api/newMoverService';
+import onboardingService from '../../supabase/api/onboardingService';
 import { parseMultipleZipCodes } from '../../utils/zipCode';
 import { calculatePostcardCost, formatPrice } from '../../utils/pricing';
 import toast from 'react-hot-toast'
@@ -126,6 +127,9 @@ const OnboardingStep4 = () => {
       toast.error('Please validate ZIP codes with available data');
       return;
     }
+
+    // Mark step 4 as complete
+    await onboardingService.markStepComplete(4);
 
     navigate('/onboarding/step5');
   };

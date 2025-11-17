@@ -5,6 +5,7 @@ import LoadingScreen from '../../components/onboarding/LoadingScreen';
 import TemplateCardSkeleton from '../../components/common/TemplateCardSkeleton';
 import supabaseCompanyService from '../../supabase/api/companyService';
 import campaignService from '../../supabase/api/campaignService';
+import onboardingService from '../../supabase/api/onboardingService';
 import toast from 'react-hot-toast';
 import './onboarding-step2-redesign.css';
 
@@ -193,6 +194,10 @@ const OnboardingStep2Enhanced = () => {
 
         // Store the enhanced template data for Step 3
         localStorage.setItem('selectedTemplate', JSON.stringify(selectedTemplate));
+
+        // Mark step 2 as complete
+        await onboardingService.markStepComplete(2);
+
         navigate('/onboarding/step3');
       } catch (error) {
         console.error('Error saving template:', error);

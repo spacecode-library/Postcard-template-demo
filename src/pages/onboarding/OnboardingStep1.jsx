@@ -6,6 +6,7 @@ import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
 import brandfetchService from '../../supabase/api/brandFetchService';
 import supabaseCompanyService from '../../supabase/api/companyService';
 import campaignService from '../../supabase/api/campaignService';
+import onboardingService from '../../supabase/api/onboardingService';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -169,7 +170,10 @@ const OnboardingStep1 = () => {
 
       console.log('✅ Campaign created with ID:', draftCampaign.id);
 
-      // Step 5: Navigate to next step
+      // Step 5: Mark step 1 as complete
+      await onboardingService.markStepComplete(1);
+
+      // Step 6: Navigate to next step
       navigate('/onboarding/step2');
       
     } catch (error) {
