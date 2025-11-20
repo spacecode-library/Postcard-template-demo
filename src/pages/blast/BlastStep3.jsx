@@ -76,6 +76,62 @@ const BlastStep3 = () => {
             id: 'validate-zips',
             duration: 3000
           });
+
+          // Fetch and save new movers from Melissa API
+          toast.loading('Fetching new movers from Melissa API...', { id: 'fetch-movers' });
+
+          try {
+            const fetchResult = await newMoverService.fetchAndSave(parsed.zipCodes);
+
+            let newMoverIds = [];
+            let totalRecipients = 0;
+
+            if (fetchResult.success && fetchResult.data && fetchResult.data.length > 0) {
+              newMoverIds = fetchResult.data.map(mover => mover.id);
+              totalRecipients = fetchResult.data.length;
+
+              toast.success(`Fetched ${fetchResult.data.length} new mover${fetchResult.data.length !== 1 ? 's' : ''}!`, { id: 'fetch-movers' });
+            } else {
+              toast.warning('ZIP codes validated but no new movers found', { id: 'fetch-movers' });
+            }
+
+            // Update blast data in sessionStorage immediately with new mover data
+            const updatedBlastDataWithMovers = {
+              ...blastData,
+              zipCodes: parsed.zipCodes,
+              validatedZips: result.results,
+              zipsWithData: result.zipsWithData,
+              totalZipCodes: result.totalZipCodes,
+              flatRate: result.flatRate,
+              newMoverIds: newMoverIds,
+              totalRecipients: totalRecipients
+            };
+
+            sessionStorage.setItem('blastData', JSON.stringify(updatedBlastDataWithMovers));
+            setBlastData(updatedBlastDataWithMovers);
+
+          } catch (fetchError) {
+            console.error('Error fetching new movers:', fetchError);
+            toast.error(`Failed to fetch new movers: ${fetchError.message || 'Please try again'}`, {
+              id: 'fetch-movers',
+              duration: 4000
+            });
+
+            // Store data without new movers so user can continue
+            const updatedBlastDataNoMovers = {
+              ...blastData,
+              zipCodes: parsed.zipCodes,
+              validatedZips: result.results,
+              zipsWithData: result.zipsWithData,
+              totalZipCodes: result.totalZipCodes,
+              flatRate: result.flatRate,
+              newMoverIds: [],
+              totalRecipients: 0
+            };
+
+            sessionStorage.setItem('blastData', JSON.stringify(updatedBlastDataNoMovers));
+            setBlastData(updatedBlastDataNoMovers);
+          }
         } else {
           toast.error('No new movers found in these ZIP codes', { id: 'validate-zips' });
         }
@@ -104,15 +160,11 @@ const BlastStep3 = () => {
       return;
     }
 
-    // Save targeting data
+    // Save targeting data (including new mover data already set during validation)
     const updatedBlastData = {
       ...blastData,
-      step: 3,
-      zipCodes,
-      validatedZips,
-      zipsWithData: zipValidation.zipsWithData,
-      totalZipCodes: zipValidation.totalZipCodes,
-      flatRate: zipValidation.flatRate
+      step: 3
+      // newMoverIds and totalRecipients are already in blastData from validation step
     };
 
     sessionStorage.setItem('blastData', JSON.stringify(updatedBlastData));

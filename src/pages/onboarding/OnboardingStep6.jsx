@@ -105,6 +105,8 @@ const OnboardingStep6 = () => {
         status: 'active', // Set to active since payment exists
         targeting_type: targetingData.option || 'zip_codes',
         target_zip_codes: targetingData.zipCodes || [],
+        new_mover_ids: targetingData.newMoverIds || [],
+        total_recipients: targetingData.totalRecipients || 0,
         postcards_sent: 0,
         price_per_postcard: targetingData.flatRate || 3.00,
         payment_status: 'paid' // Mark as paid since payment method exists
@@ -166,6 +168,8 @@ const OnboardingStep6 = () => {
         status: 'draft', // Keep as draft until payment added
         targeting_type: targetingData.option || 'zip_codes',
         target_zip_codes: targetingData.zipCodes || [],
+        new_mover_ids: targetingData.newMoverIds || [],
+        total_recipients: targetingData.totalRecipients || 0,
         postcards_sent: 0,
         price_per_postcard: targetingData.flatRate || 3.00,
         payment_status: 'pending'

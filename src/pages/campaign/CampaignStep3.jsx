@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import ProcessLayout from '../../components/process/ProcessLayout';
 import FabricEditor from '../../components/PostcardEditor/FabricEditor';
 
 const CampaignStep3 = () => {
   const navigate = useNavigate();
+  const editorRef = useRef(null);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -73,9 +75,37 @@ const CampaignStep3 = () => {
     navigate('/campaign/step2');
   };
 
-  const handleContinue = () => {
-    localStorage.setItem('currentCampaignStep', '4');
-    navigate('/campaign/step4');
+  const handleContinue = async () => {
+    try {
+      setIsSaving(true);
+      toast.loading('Saving your design...', { id: 'save-design' });
+
+      // Call FabricEditor's save method via ref
+      if (editorRef.current && editorRef.current.saveDesign) {
+        const saveResult = await editorRef.current.saveDesign();
+
+        if (saveResult && saveResult.designUrl) {
+          toast.success('Design saved successfully!', { id: 'save-design' });
+
+          // Store URLs in localStorage for later steps
+          localStorage.setItem('campaignDesignUrl', saveResult.designUrl);
+          localStorage.setItem('campaignPreviewUrl', saveResult.previewUrl);
+
+          // Navigate to next step
+          localStorage.setItem('currentCampaignStep', '4');
+          navigate('/campaign/step4');
+        } else {
+          throw new Error('Failed to save design - no design URL returned');
+        }
+      } else {
+        throw new Error('Editor is not ready. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error saving design before continue:', error);
+      toast.error(error.message || 'Failed to save design. Please try again.', { id: 'save-design' });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleSaveDesign = async (designData) => {
@@ -170,9 +200,9 @@ const CampaignStep3 = () => {
     <ProcessLayout
       currentStep={3}
       totalSteps={totalSteps}
-      footerMessage="Complete your postcard design and continue to targeting"
+      footerMessage={isSaving ? "Saving your design..." : "Complete your postcard design and continue to targeting"}
       onContinue={handleContinue}
-      continueDisabled={false}
+      continueDisabled={isSaving}
       onSkip={() => navigate('/dashboard')}
       skipText="Cancel"
       // Editor controls integrated into topbar
@@ -187,6 +217,7 @@ const CampaignStep3 = () => {
     >
       <div className="step3-editor-container">
         <FabricEditor
+          ref={editorRef}
           selectedTemplate={selectedTemplate}
           onSave={handleSaveDesign}
           campaignId={campaignId}

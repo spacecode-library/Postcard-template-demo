@@ -68,11 +68,14 @@ const FabricEditor = forwardRef(({ selectedTemplate, onBack, onSave, campaignId,
   useImperativeHandle(ref, () => ({
     saveDesign: async () => {
       try {
-        await handleSaveDesign();
-        return { success: true };
+        const result = await handleSaveDesign();
+        if (result && result.designUrl) {
+          return result;
+        }
+        throw new Error('Failed to save design');
       } catch (error) {
         console.error('Save design error:', error);
-        return { success: false, error: error.message };
+        throw error; // Re-throw for parent to handle
       }
     }
   }));
@@ -238,12 +241,12 @@ const FabricEditor = forwardRef(({ selectedTemplate, onBack, onSave, campaignId,
   const handleSaveDesign = async () => {
     if (!fabricCanvasRef.current) {
       toast.error('Editor not ready. Please try again.');
-      return;
+      return null;
     }
 
     if (!campaignId) {
       toast.error('No campaign ID provided.');
-      return;
+      return null;
     }
 
     setIsSaving(true);
@@ -292,9 +295,16 @@ const FabricEditor = forwardRef(({ selectedTemplate, onBack, onSave, campaignId,
         });
       }
 
+      // Return the URLs for ref-based calls
+      return {
+        designUrl: result.designUrl,
+        previewUrl: result.previewUrl
+      };
+
     } catch (error) {
       console.error('[Save] Error saving design:', error);
       toast.error(error.message || 'Failed to save design', { id: saveToast });
+      throw error; // Re-throw for ref-based calls to handle
     } finally {
       setIsSaving(false);
     }

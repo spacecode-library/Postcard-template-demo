@@ -1,14 +1,26 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import Stripe from 'https://esm.sh/stripe@11.1.0?target=deno'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-  apiVersion: '2022-11-15',
+const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
+console.log('[create-customer-portal-session] Stripe key configured:', !!stripeSecretKey)
+
+if (!stripeSecretKey) {
+  console.error('[create-customer-portal-session] CRITICAL: STRIPE_SECRET_KEY is not set!')
+}
+
+const stripe = new Stripe(stripeSecretKey || '', {
+  apiVersion: '2023-10-16',
 })
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
+
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -16,23 +28,63 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  try {
-    const { customerId, returnUrl } = await req.json()
+  console.log('[create-customer-portal-session] Request received')
 
-    // Validate input
-    if (!customerId) {
-      throw new Error('Customer ID is required')
+  try {
+    // Get the JWT token from the request
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      console.error('[create-customer-portal-session] Missing Authorization header')
+      throw new Error('Unauthorized: Missing authorization header')
     }
 
+    // Create Supabase client with service role
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    // Verify the JWT and get user
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+
+    if (authError || !user) {
+      console.error('[create-customer-portal-session] Auth error:', authError)
+      throw new Error('Unauthorized: Invalid token')
+    }
+
+    console.log('[create-customer-portal-session] Authenticated user:', user.id)
+
+    // Parse request body
+    const { returnUrl } = await req.json()
+
+    // Validate input
     if (!returnUrl) {
+      console.error('[create-customer-portal-session] Missing return URL')
       throw new Error('Return URL is required')
     }
 
+    console.log('[create-customer-portal-session] Return URL:', returnUrl)
+
+    // Get customer from Supabase database (security check)
+    const { data: customer, error: customerError } = await supabase
+      .from('customers')
+      .select('stripe_customer_id')
+      .eq('user_id', user.id)
+      .single()
+
+    if (customerError || !customer) {
+      console.error('[create-customer-portal-session] Customer not found:', customerError)
+      throw new Error('No customer found for this user. Please add a payment method first.')
+    }
+
+    console.log('[create-customer-portal-session] Found customer:', customer.stripe_customer_id)
+
     // Create Stripe Customer Portal session
+    console.log('[create-customer-portal-session] Creating billing portal session')
     const session = await stripe.billingPortal.sessions.create({
-      customer: customerId,
+      customer: customer.stripe_customer_id,
       return_url: returnUrl,
     })
+
+    console.log('[create-customer-portal-session] Session created:', session.id)
 
     return new Response(
       JSON.stringify({
@@ -45,12 +97,22 @@ serve(async (req) => {
       },
     )
   } catch (error) {
-    console.error('Error creating customer portal session:', error)
+    console.error('[create-customer-portal-session] Error:', error)
+    console.error('[create-customer-portal-session] Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    })
+
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({
+        error: error.message || 'Internal server error',
+        details: error.toString()
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: error.message?.includes('Unauthorized') ? 401 :
+               error.message?.includes('No customer found') ? 404 : 500,
       },
     )
   }

@@ -127,37 +127,77 @@ export const paymentService = {
       throw new Error('Not authenticated');
     }
 
-    const { data: response, error: error } = await supabase.functions.invoke('smart-action', {
-      body: { setupIntentId: setupIntentId },
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    })
+    try {
+      const { data: response, error } = await supabase.functions.invoke('confirm-setup-intent', {
+        body: { setupIntentId: setupIntentId },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      })
 
-    return await response;
+      if (error) {
+        console.error('Error confirming setup intent:', error);
+        throw error;
+      }
+
+      // Check if the response contains an error
+      if (response?.error) {
+        throw new Error(response.error);
+      }
+
+      // Validate response
+      if (!response || !response.success) {
+        throw new Error('Invalid response from payment confirmation service');
+      }
+
+      return response;
+    } catch (error) {
+      console.error('Failed to confirm setup intent:', error);
+      throw error;
+    }
   },
 
   async getPaymentMethods() {
-    const { data: { user } } = await supabase.auth.getUser();
+    // Use getSession() to ensure we have a valid JWT token
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-    if (!user) {
+    if (sessionError || !session) {
+      console.error('[paymentService] No valid session found:', sessionError);
       throw new Error('Not authenticated');
     }
 
+    const user = session.user;
+    console.log('[paymentService] Querying with user ID:', user.id);
+
     try {
       // Try to get customer from customers table
+      // Use maybeSingle() instead of single() to handle case where customer doesn't exist
       const { data: customer, error: customerError } = await supabase
         .from('customers')
         .select('id')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      // If customers table doesn't exist or customer not found, return empty array
-      if (customerError || !customer) {
-        console.log('No customer found or customers table does not exist');
+      // Handle errors (but not "no rows" which is expected if customer doesn't exist)
+      if (customerError) {
+        console.error('[paymentService] Error querying customers table:', customerError);
+
+        // 406 errors indicate RLS policy issues
+        if (customerError.code === 'PGRST116' || customerError.message?.includes('406')) {
+          console.error('[paymentService] 406 Error: RLS policies may be blocking access');
+          throw new Error('Database access denied. Please contact support.');
+        }
+
+        throw customerError;
+      }
+
+      // If no customer record exists, return empty array (valid scenario)
+      if (!customer) {
+        console.log('[paymentService] No customer record found for user');
         return [];
       }
 
+      // Query payment methods for this customer
       const { data, error } = await supabase
         .from('payment_methods')
         .select('*')
@@ -165,23 +205,42 @@ export const paymentService = {
         .order('is_default', { ascending: false });
 
       if (error) {
-        console.error('Error fetching payment methods:', error);
-        return [];
+        console.error('[paymentService] Error fetching payment methods:', error);
+
+        // Handle 406 errors for payment_methods table
+        if (error.code === 'PGRST116' || error.message?.includes('406')) {
+          console.error('[paymentService] 406 Error: RLS policies may be blocking access to payment_methods table');
+          throw new Error('Database access denied. Please contact support.');
+        }
+
+        throw error;
       }
 
+      console.log('[paymentService] Found payment methods:', data?.length || 0);
       return data || [];
     } catch (error) {
-      console.error('Error in getPaymentMethods:', error);
+      console.error('[paymentService] Error in getPaymentMethods:', error);
+
+      // Re-throw authentication and permission errors
+      if (error.message?.includes('406') || error.message?.includes('Database access denied')) {
+        throw error;
+      }
+
+      // For other errors, return empty array to avoid breaking the UI
       return [];
     }
   },
 
   async updateOnboardingProgress(step, data) {
-    const { data: { user } } = await supabase.auth.getUser();
+    // Use getSession() to ensure we have a valid JWT token
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-    if (!user) {
+    if (sessionError || !session) {
+      console.error('[paymentService] No valid session found:', sessionError);
       throw new Error('Not authenticated');
     }
+
+    const user = session.user;
 
     const updateData = {
       current_step: step,
@@ -200,6 +259,7 @@ export const paymentService = {
       });
 
     if (error) {
+      console.error('[paymentService] Error updating onboarding progress:', error);
       throw error;
     }
   },
@@ -210,11 +270,15 @@ export const paymentService = {
    * @returns {Promise<Object>} Created payment method
    */
   async addPaymentMethod(setupIntent) {
-    const { data: { user } } = await supabase.auth.getUser();
+    // Use getSession() to ensure we have a valid JWT token
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-    if (!user) {
+    if (sessionError || !session) {
+      console.error('[paymentService] No valid session found:', sessionError);
       throw new Error('Not authenticated');
     }
+
+    const user = session.user;
 
     try {
       // Get or create customer
@@ -222,9 +286,14 @@ export const paymentService = {
         .from('customers')
         .select('id, stripe_customer_id')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (customerError || !customer) {
+      if (customerError) {
+        console.error('[paymentService] Error getting customer:', customerError);
+        throw customerError;
+      }
+
+      if (!customer) {
         throw new Error('Customer not found. Please complete onboarding first.');
       }
 
@@ -254,12 +323,13 @@ export const paymentService = {
         .single();
 
       if (error) {
+        console.error('[paymentService] Error inserting payment method:', error);
         throw error;
       }
 
       return paymentMethod;
     } catch (error) {
-      console.error('Error adding payment method:', error);
+      console.error('[paymentService] Error adding payment method:', error);
       throw error;
     }
   },
@@ -269,19 +339,28 @@ export const paymentService = {
    * @param {string} paymentMethodId - Payment method ID
    */
   async setDefaultPaymentMethod(paymentMethodId) {
-    const { data: { user } } = await supabase.auth.getUser();
+    // Use getSession() to ensure we have a valid JWT token
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-    if (!user) {
+    if (sessionError || !session) {
+      console.error('[paymentService] No valid session found:', sessionError);
       throw new Error('Not authenticated');
     }
 
+    const user = session.user;
+
     try {
       // Get customer
-      const { data: customer } = await supabase
+      const { data: customer, error: customerError } = await supabase
         .from('customers')
         .select('id')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
+
+      if (customerError) {
+        console.error('[paymentService] Error getting customer:', customerError);
+        throw customerError;
+      }
 
       if (!customer) {
         throw new Error('Customer not found');
@@ -304,10 +383,11 @@ export const paymentService = {
         .eq('customer_id', customer.id);
 
       if (error) {
+        console.error('[paymentService] Error setting default payment method:', error);
         throw error;
       }
     } catch (error) {
-      console.error('Error setting default payment method:', error);
+      console.error('[paymentService] Error setting default payment method:', error);
       throw error;
     }
   },
@@ -317,19 +397,28 @@ export const paymentService = {
    * @param {string} paymentMethodId - Payment method ID
    */
   async removePaymentMethod(paymentMethodId) {
-    const { data: { user } } = await supabase.auth.getUser();
+    // Use getSession() to ensure we have a valid JWT token
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-    if (!user) {
+    if (sessionError || !session) {
+      console.error('[paymentService] No valid session found:', sessionError);
       throw new Error('Not authenticated');
     }
 
+    const user = session.user;
+
     try {
       // Get customer
-      const { data: customer } = await supabase
+      const { data: customer, error: customerError } = await supabase
         .from('customers')
         .select('id')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
+
+      if (customerError) {
+        console.error('[paymentService] Error getting customer:', customerError);
+        throw customerError;
+      }
 
       if (!customer) {
         throw new Error('Customer not found');
@@ -343,6 +432,7 @@ export const paymentService = {
         .eq('customer_id', customer.id);
 
       if (error) {
+        console.error('[paymentService] Error deleting payment method:', error);
         throw error;
       }
 
@@ -357,7 +447,7 @@ export const paymentService = {
         await this.setDefaultPaymentMethod(remainingMethods[0].id);
       }
     } catch (error) {
-      console.error('Error removing payment method:', error);
+      console.error('[paymentService] Error removing payment method:', error);
       throw error;
     }
   },
@@ -368,35 +458,20 @@ export const paymentService = {
    * @returns {Promise<Object>} Portal session URL
    */
   async createCustomerPortalSession(returnUrl) {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // Use getSession() to ensure we have a valid JWT token
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-    if (userError || !user) {
+    if (sessionError || !session) {
+      console.error('[paymentService] No valid session found:', sessionError);
       throw new Error('Not authenticated');
     }
 
     try {
-      // Get customer's Stripe ID
-      const { data: customer, error: customerError } = await supabase
-        .from('customers')
-        .select('stripe_customer_id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (customerError || !customer || !customer.stripe_customer_id) {
-        throw new Error('Customer not found. Please complete onboarding first.');
-      }
-
-      // Get current session for authorization
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session) {
-        throw new Error('No active session');
-      }
 
       // Call Edge Function to create portal session
+      // Note: Edge Function will securely look up customer from database using authenticated user
       const { data: response, error } = await supabase.functions.invoke('create-customer-portal-session', {
         body: {
-          customerId: customer.stripe_customer_id,
           returnUrl: returnUrl || window.location.href
         },
         headers: {
@@ -405,12 +480,44 @@ export const paymentService = {
       });
 
       if (error) {
+        // Handle 406 errors specifically
+        if (error.message?.includes('406') || error.status === 406) {
+          console.error('[paymentService] 406 Error creating portal session - RLS policy issue');
+          throw new Error('Unable to access billing portal. Database permissions need to be configured. Please run the RLS migration or contact support.');
+        }
+
         throw error;
+      }
+
+      // Check if the response contains an error (Edge Function returned error in body)
+      if (response?.error) {
+        // Check for customer not found errors
+        if (response.error.includes('No customer found') || response.error.includes('Customer not found')) {
+          console.error('[paymentService] No customer record found for user');
+          throw new Error('No billing account found. Please add a payment method first or complete onboarding.');
+        }
+
+        throw new Error(response.error);
+      }
+
+      // Validate that we got a URL back
+      if (!response || !response.url) {
+        throw new Error('Invalid response from billing portal service. Please ensure you have added a payment method.');
       }
 
       return response;
     } catch (error) {
-      console.error('Error creating customer portal session:', error);
+      console.error('[paymentService] Error creating customer portal session:', error);
+
+      // Provide more helpful error messages
+      if (error.message?.includes('406')) {
+        throw new Error('Database access denied. Please run RLS migration or contact support.');
+      }
+
+      if (error.message?.includes('No customer found') || error.message?.includes('Customer not found')) {
+        throw new Error('No billing account found. Please add a payment method first.');
+      }
+
       throw error;
     }
   },

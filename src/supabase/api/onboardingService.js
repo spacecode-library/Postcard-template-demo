@@ -220,6 +220,8 @@ const supabaseOnboardingService = {
           current_step: 6,
           completed_steps: [1, 2, 3, 4, 5, 6],
           updated_at: completedAt
+        }, {
+          onConflict: 'user_id'
         })
 
       if (progressError) {

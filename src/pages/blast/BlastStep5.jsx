@@ -48,6 +48,8 @@ const BlastStep5 = () => {
         postcard_preview_url: blastData.postcardPreviewUrl,
         targeting_type: 'zip_codes',
         target_zip_codes: blastData.zipCodes,
+        new_mover_ids: blastData.newMoverIds || [],
+        total_recipients: blastData.totalRecipients || 0,
         postcards_sent: 0,
         price_per_postcard: blastData.flatRate,
         payment_status: 'pending',

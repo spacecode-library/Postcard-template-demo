@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, Check, ExternalLink, MapPin, DollarSign, Send } from 'lucide-react';
+import { Layers, Check, ExternalLink, MapPin, DollarSign, Send, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { paymentService } from '../../supabase/api/paymentService';
 import campaignService from '../../supabase/api/campaignService';
@@ -10,10 +10,28 @@ const BillingTab = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
   const [zipAggregation, setZipAggregation] = useState(null);
+  const [hasPaymentMethod, setHasPaymentMethod] = useState(false);
+  const [isCheckingPayment, setIsCheckingPayment] = useState(true);
 
   useEffect(() => {
     loadZipCodeAggregation();
+    checkPaymentMethodStatus();
   }, []);
+
+  const checkPaymentMethodStatus = async () => {
+    try {
+      setIsCheckingPayment(true);
+
+      // Try to get payment methods
+      const methods = await paymentService.getPaymentMethods();
+      setHasPaymentMethod(methods && methods.length > 0);
+    } catch (error) {
+      console.error('[BillingTab] Failed to check payment methods:', error);
+      setHasPaymentMethod(false);
+    } finally {
+      setIsCheckingPayment(false);
+    }
+  };
 
   const loadZipCodeAggregation = async () => {
     try {
@@ -76,13 +94,27 @@ const BillingTab = () => {
   };
 
   const handleOpenBillingPortal = async () => {
+    // Check if user has payment method before opening portal
+    if (!hasPaymentMethod) {
+      toast.error('Please add a payment method before accessing the billing portal', {
+        duration: 5000
+      });
+      return;
+    }
+
     try {
       setIsLoadingPortal(true);
       toast.loading('Opening billing portal...', { id: 'billing-portal' });
 
-      // Create customer portal session
-      const returnUrl = window.location.href;
-      const { url } = await paymentService.createCustomerPortalSession(returnUrl);
+      // Add timeout to prevent infinite hang
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timed out. Please try again.')), 30000)
+      );
+
+      const portalPromise = paymentService.createCustomerPortalSession(window.location.href);
+
+      // Race between portal creation and timeout
+      const { url } = await Promise.race([portalPromise, timeoutPromise]);
 
       // Redirect to Stripe Customer Portal
       window.location.href = url;
@@ -91,6 +123,9 @@ const BillingTab = () => {
     } catch (error) {
       console.error('Error opening billing portal:', error);
       toast.error(error.message || 'Failed to open billing portal', { id: 'billing-portal' });
+    } finally {
+      // Only clear loading state if we're still on this page (redirect failed or errored)
+      // If redirect succeeded, page will navigate away before this runs
       setIsLoadingPortal(false);
     }
   };
@@ -133,14 +168,45 @@ const BillingTab = () => {
             Update payment methods, view invoices, and manage your billing information through our secure Stripe portal.
           </p>
         </div>
+
+        {/* Warning if no payment method */}
+        {!isCheckingPayment && !hasPaymentMethod && (
+          <div className="warning-banner" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '16px',
+            background: '#FEF3C7',
+            border: '1px solid #F59E0B',
+            borderRadius: '8px',
+            marginBottom: '16px',
+            color: '#92400E'
+          }}>
+            <AlertCircle size={20} color="#F59E0B" />
+            <div>
+              <strong>No payment method on file.</strong>
+              <p style={{ margin: 0, fontSize: '14px' }}>Please complete onboarding to add a payment method before accessing the billing portal.</p>
+            </div>
+          </div>
+        )}
+
         <motion.button
           className="billing-portal-button"
           onClick={handleOpenBillingPortal}
-          disabled={isLoadingPortal}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          disabled={isLoadingPortal || isCheckingPayment || !hasPaymentMethod}
+          whileHover={hasPaymentMethod ? { scale: 1.02 } : {}}
+          whileTap={hasPaymentMethod ? { scale: 0.98 } : {}}
+          style={{
+            opacity: (!hasPaymentMethod || isCheckingPayment) ? 0.5 : 1,
+            cursor: (!hasPaymentMethod || isCheckingPayment) ? 'not-allowed' : 'pointer'
+          }}
         >
-          {isLoadingPortal ? (
+          {isCheckingPayment ? (
+            <>
+              <div className="button-spinner"></div>
+              Checking...
+            </>
+          ) : isLoadingPortal ? (
             <>
               <div className="button-spinner"></div>
               Opening Portal...
@@ -148,7 +214,7 @@ const BillingTab = () => {
           ) : (
             <>
               <ExternalLink size={18} />
-              Edit Billing Details
+              {hasPaymentMethod ? 'Manage Billing' : 'Add Payment Method'}
             </>
           )}
         </motion.button>
@@ -302,6 +368,7 @@ const BillingTab = () => {
           justify-content: space-between;
           align-items: center;
           gap: 24px;
+          flex-wrap: wrap;
         }
 
         .portal-description h3 {
@@ -533,6 +600,31 @@ const BillingTab = () => {
         .pricing-note svg {
           flex-shrink: 0;
           color: #F59E0B;
+        }
+
+        /* Tablet/Medium screens - make button full width earlier to prevent squeezing */
+        @media (max-width: 1024px) {
+          .billing-portal-section {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .portal-description {
+            text-align: center;
+          }
+
+          .billing-portal-button {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+
+        /* Fine-tune button on mid-size screens */
+        @media (max-width: 900px) and (min-width: 769px) {
+          .billing-portal-button {
+            padding: 12px 20px;
+            font-size: 13px;
+          }
         }
 
         @media (max-width: 768px) {

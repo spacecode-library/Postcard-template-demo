@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Edit3, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
+import ProcessLayout from '../components/process/ProcessLayout';
 import Breadcrumb from '../components/common/Breadcrumb';
 import FabricEditor from '../components/PostcardEditor/FabricEditor';
 import campaignService from '../supabase/api/campaignService';
@@ -205,8 +206,8 @@ const CampaignEdit = () => {
     };
 
     return (
-      <DashboardLayout>
-        <div className="campaign-edit-page-editor">
+      <ProcessLayout currentStep={0} totalSteps={0}>
+        <div className="edit-campaign-editor-container">
           <FabricEditor
             selectedTemplate={templateData}
             onBack={handleCloseEditor}
@@ -214,7 +215,7 @@ const CampaignEdit = () => {
             campaignId={campaignId}
           />
         </div>
-      </DashboardLayout>
+      </ProcessLayout>
     );
   }
 
@@ -493,13 +494,12 @@ const CampaignEdit = () => {
           padding: 24px;
         }
 
-        .campaign-edit-page-editor {
+        .edit-campaign-editor-container {
           width: 100%;
           height: 100%;
           position: relative;
           overflow: hidden;
           display: flex;
-          min-height: calc(100vh - 80px);
         }
 
         .edit-header {

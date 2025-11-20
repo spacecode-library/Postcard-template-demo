@@ -155,42 +155,42 @@ const CampaignStep2 = () => {
   const handleContinue = async () => {
     if (selectedTemplate) {
       try {
-        toast.loading('Creating campaign...', { id: 'create-campaign' });
+        toast.loading('Saving template selection...', { id: 'save-template' });
 
-        // Get campaign data from Step 1
+        // Get campaign data and ID from Step 1
         const campaignData = localStorage.getItem('newCampaignData');
         const parsedCampaignData = campaignData ? JSON.parse(campaignData) : {};
 
-        // Create draft campaign in database
-        const draftCampaignData = {
-          name: `${parsedCampaignData.brandData?.name || 'Business'} Campaign - ${new Date().toLocaleDateString()}`,
-          status: 'draft',
-          template_id: selectedTemplate.id,
-          template_name: selectedTemplate.name,
-          // Design URLs will be saved later in Step 3
-          postcard_design_url: null,
-          postcard_preview_url: null
-        };
+        const campaignId = parsedCampaignData.campaignId;
 
-        const result = await campaignService.createCampaign(draftCampaignData);
-
-        if (!result.success) {
-          throw new Error('Failed to create campaign');
+        if (!campaignId) {
+          throw new Error('Campaign ID not found. Please restart from Step 1.');
         }
 
-        const campaignId = result.campaign.id;
-        console.log('Draft campaign created with ID:', campaignId);
+        // Update existing campaign with template information
+        const updateData = {
+          template_id: selectedTemplate.id,
+          template_name: selectedTemplate.name
+        };
+
+        const result = await campaignService.updateCampaign(campaignId, updateData);
+
+        if (!result.success) {
+          throw new Error('Failed to update campaign with template');
+        }
+
+        console.log('Campaign updated with template:', campaignId);
 
         // Store campaign ID and template data for Step 3
         localStorage.setItem('currentCampaignId', campaignId);
         localStorage.setItem('campaignSelectedTemplate', JSON.stringify(selectedTemplate));
         localStorage.setItem('currentCampaignStep', '3');
 
-        toast.success('Campaign created!', { id: 'create-campaign' });
+        toast.success('Template saved!', { id: 'save-template' });
         navigate('/campaign/step3');
       } catch (error) {
-        console.error('Error creating campaign:', error);
-        toast.error('Failed to create campaign. Please try again.', { id: 'create-campaign' });
+        console.error('Error updating campaign:', error);
+        toast.error('Failed to save template. Please try again.', { id: 'save-template' });
       }
     }
   };

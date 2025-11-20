@@ -6,6 +6,7 @@ import ProcessLayout from '../../components/process/ProcessLayout';
 import { FormInput, FormSelect } from '../../components/ui';
 import brandfetchService from '../../supabase/api/brandFetchService';
 import supabaseCompanyService from '../../supabase/api/companyService';
+import campaignService from '../../supabase/api/campaignService';
 import toast from 'react-hot-toast';
 import '../onboarding/onboarding.css';
 
@@ -136,24 +137,57 @@ const CampaignStep1 = () => {
             rawData: brandData
           };
 
-          await supabaseCompanyService.saveCompanyInfo(companyDataToSave);
+          const companyResult = await supabaseCompanyService.saveCompanyInfo(companyDataToSave);
           toast.success('Brand information saved!', { id: 'save-brand' });
+
+          // Create draft campaign immediately after company save
+          toast.loading('Creating campaign...', { id: 'create-campaign' });
+
+          const draftCampaign = await campaignService.createCampaign({
+            campaign_name: `${brandData.name || 'Business'} Campaign`,
+            company_id: companyResult.company.id,
+            status: 'draft',
+            payment_status: 'pending',
+            template_id: null,
+            template_name: null,
+            postcard_design_url: null,
+            postcard_preview_url: null
+          });
+
+          if (!draftCampaign || !draftCampaign.success || !draftCampaign.campaign || !draftCampaign.campaign.id) {
+            throw new Error('Failed to create campaign. Please try again.');
+          }
+
+          toast.success('Campaign created!', { id: 'create-campaign' });
+
+          // Store campaign data with campaign ID in localStorage
+          const campaignData = {
+            website: formData.website,
+            businessCategory: formData.businessCategory,
+            brandData: brandData,
+            companyId: companyResult.company.id,
+            campaignId: draftCampaign.campaign.id
+          };
+
+          localStorage.setItem('newCampaignData', JSON.stringify(campaignData));
+          localStorage.setItem('currentCampaignStep', '2');
+
         } catch (saveError) {
-          console.warn('Failed to save brand info to Supabase:', saveError);
-          // Don't block the user - they can continue anyway
-          toast.dismiss('save-brand');
+          console.warn('Failed to save brand info or create campaign:', saveError);
+          toast.error('Failed to save data. Please try again.', { id: 'save-brand' });
+          return; // Don't proceed if save failed
         }
+      } else {
+        // No brand data, store minimal campaign data
+        const campaignData = {
+          website: formData.website,
+          businessCategory: formData.businessCategory,
+          brandData: null
+        };
+
+        localStorage.setItem('newCampaignData', JSON.stringify(campaignData));
+        localStorage.setItem('currentCampaignStep', '2');
       }
-
-      // Store campaign data in localStorage
-      const campaignData = {
-        website: formData.website,
-        businessCategory: formData.businessCategory,
-        brandData: brandData
-      };
-
-      localStorage.setItem('newCampaignData', JSON.stringify(campaignData));
-      localStorage.setItem('currentCampaignStep', '2');
 
       // Navigate to next step
       setTimeout(() => {

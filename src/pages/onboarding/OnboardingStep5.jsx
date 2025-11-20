@@ -9,6 +9,7 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 import OnboardingLayout from '../../components/onboarding/OnboardingLayout';
+import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { paymentService } from '../../supabase/api/paymentService';
 import onboardingService from '../../supabase/api/onboardingService';
@@ -263,7 +264,7 @@ const PaymentForm = ({ onSuccess, email }) => {
 
 const OnboardingStep5 = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const { user } = useAuth();
   const [savedPaymentMethods, setSavedPaymentMethods] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -303,17 +304,38 @@ const OnboardingStep5 = () => {
   };
 
   const handleSkipPayment = async () => {
-    toast.success('Payment setup skipped. You can add payment details later.');
-    // Mark step 5 as complete
-    await onboardingService.markStepComplete(5);
-    navigate('/onboarding/step6');
+    try {
+      // Ensure customer record exists even when payment is skipped
+      // This prevents 406 errors when accessing billing later
+      if (user?.email) {
+        try {
+          console.log('[OnboardingStep5] Creating customer record for skipped payment');
+          await paymentService.createSetupIntent(user.email);
+          console.log('[OnboardingStep5] Customer record created successfully');
+        } catch (customerError) {
+          // Don't block onboarding if customer creation fails
+          // They can add payment later from billing page
+          console.warn('[OnboardingStep5] Could not create customer record:', customerError);
+        }
+      }
+
+      toast.success('Payment setup skipped. You can add payment details later.');
+      // Mark step 5 as complete
+      await onboardingService.markStepComplete(5);
+      navigate('/onboarding/step6');
+    } catch (error) {
+      console.error('[OnboardingStep5] Error in handleSkipPayment:', error);
+      // Still navigate - don't block user
+      toast.success('Payment setup skipped. You can add payment details later.');
+      navigate('/onboarding/step6');
+    }
   };
 
   return (
     <OnboardingLayout
       steps={steps}
       currentStep={5}
-      footerMessage="Enter your email address above to add payment details, or click 'Skip for Now' to continue"
+      footerMessage="Add your payment details below to set up billing, or click 'Skip for Now' to continue"
       onContinue={handleSkipPayment}
       continueText="Skip for Now"
       continueDisabled={false}
@@ -330,20 +352,21 @@ const OnboardingStep5 = () => {
         </p>
 
         <div className="payment-form">
-          {/* Billing Information */}
+          {/* Billing Information Display */}
           <div className="payment-section">
-            <h3 className="section-title">Billing Information (Optional)</h3>
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                placeholder="Input your email address (optional)"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-              />
-            </div>
+            <h3 className="section-title">Billing Information</h3>
+            {user?.email && (
+              <div style={{
+                padding: '12px 16px',
+                background: '#F9FAFB',
+                border: '1px solid #E5E7EB',
+                borderRadius: '8px',
+                fontSize: '14px',
+                color: '#6B7280'
+              }}>
+                Billing email: <strong style={{ color: '#111827' }}>{user.email}</strong>
+              </div>
+            )}
           </div>
 
           {/* Saved Payment Methods */}
@@ -370,16 +393,14 @@ const OnboardingStep5 = () => {
           )}
 
           {/* Stripe Elements Form */}
-          {email && (
+          {user?.email ? (
             <Elements stripe={stripePromise}>
-              <PaymentForm onSuccess={handlePaymentSuccess} email={email} />
+              <PaymentForm onSuccess={handlePaymentSuccess} email={user.email} />
             </Elements>
-          )}
-
-          {!email && (
+          ) : (
             <div className="payment-section">
-              <p style={{ color: '#6B7280', textAlign: 'center', padding: '2rem' }}>
-                Enter your email address above to add payment details, or click "Skip for Now" to continue
+              <p style={{ color: '#DC2626', textAlign: 'center', padding: '2rem', background: '#FEE2E2', borderRadius: '8px' }}>
+                Unable to load payment form. Please ensure you are logged in.
               </p>
             </div>
           )}
